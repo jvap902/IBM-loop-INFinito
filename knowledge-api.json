@@ -1,0 +1,267 @@
+{
+  "system_context": {
+    "project": "Plataforma de Inteligência em Telecomunicações e Infraestrutura",
+    "spatial_index_standard": "Uber H3",
+    "recommended_resolutions": [8, 9],
+    "target_objectives": [
+      "1_manutencao_e_criticidade",
+      "2_novos_negocios_e_expansao",
+      "3_regioes_propicias_para_promocoes"
+    ]
+  },
+  "sources": [
+    {
+      "id": "cloudflare_radar",
+      "canonical_name": "Cloudflare Radar API v4",
+      "category": "telemetry_traffic_outages",
+      "documentation_url": "https://developers.cloudflare.com/radar/",
+      "base_url": "https://api.cloudflare.com/client/v4/radar",
+      "access_type": "freemium_rest_api",
+      "auth_method": "Bearer Token (Header: Authorization: Bearer <API_TOKEN>)",
+      "data_formats": ["JSON"],
+      "update_frequency": "near_real_time",
+      "key_endpoints": [
+        {
+          "name": "outages",
+          "path": "/annotations/outages",
+          "method": "GET",
+          "params": ["limit", "offset", "dateRange", "asn", "location"],
+          "description": "Lista interrupções de conectividade globais, regionais e por ASN com causa provável."
+        },
+        {
+          "name": "traffic_anomalies",
+          "path": "/traffic_anomalies",
+          "method": "GET",
+          "params": ["limit", "offset", "dateRange", "asn", "location"],
+          "description": "Identifica desvios estatísticos operacionais de tráfego web em tempo real."
+        },
+        {
+          "name": "netflows_timeseries",
+          "path": "/netflows/timeseries",
+          "method": "GET",
+          "params": ["name", "product", "dateRange", "asn", "location"],
+          "description": "Séries temporais de volume de pacotes e bytes roteados na camada 3/4."
+        },
+        {
+          "name": "http_adoption_summary",
+          "path": "/http/summary/ip_version",
+          "method": "GET",
+          "params": ["dateRange", "asn", "botClass"],
+          "description": "Taxa de adoção de protocolos IPv4/IPv6 e proporção de tráfego humano vs automatizado."
+        },
+        {
+          "name": "layer7_attacks",
+          "path": "/attacks/layer7/summary",
+          "method": "GET",
+          "params": ["dateRange", "asn", "location"],
+          "description": "Sumário de ataques DDoS mitigados e segurança de borda."
+        }
+      ],
+      "ml_role": "Identificação de anomalias upstream para isolamento de causa-raiz no Eixo 1."
+    },
+    {
+      "id": "ookla_speedtest",
+      "canonical_name": "Ookla Speedtest Open Data Network Performance Maps",
+      "category": "crowdsourced_performance",
+      "documentation_url": "https://github.com/teamookla/ookla-open-data",
+      "registry_url": "https://registry.opendata.aws/speedtest-global-performance/",
+      "base_path": "s3://ookla-open-data/parquet/performance/",
+      "access_type": "open_data_s3",
+      "auth_method": "None (AWS CLI com flag --no-sign-request)",
+      "data_formats": ["Apache Parquet", "Shapefile"],
+      "update_frequency": "quarterly",
+      "spatial_indexing": "Web Mercator Zoom Level 16 (~610m) indexado por Quadkey",
+      "storage_paths": [
+        "s3://ookla-open-data/parquet/performance/type=fixed/",
+        "s3://ookla-open-data/parquet/performance/type=mobile/"
+      ],
+      "schema_fields": [
+        {"name": "quadkey", "type": "string", "description": "Chave hierárquica espacial da célula"},
+        {"name": "avg_d_kbps", "type": "integer", "description": "Velocidade média de download em kbps"},
+        {"name": "avg_u_kbps", "type": "integer", "description": "Velocidade média de upload em kbps"},
+        {"name": "avg_lat_ms", "type": "integer", "description": "Latência média de ida e volta (RTT) em ms"},
+        {"name": "tests", "type": "integer", "description": "Quantidade total de testes executados na célula"},
+        {"name": "devices", "type": "integer", "description": "Quantidade de dispositivos únicos testados"}
+      ],
+      "ml_role": "Features de latência e vazão no Isolation Forest (Eixo 1), HDBSCAN (Eixo 2) e K-Means (Eixo 3)."
+    },
+    {
+      "id": "opencellid",
+      "canonical_name": "OpenCelliD Project (Unwired Labs)",
+      "category": "cellular_infrastructure",
+      "documentation_url": "https://opencellid.org/",
+      "base_url": "https://opencellid.org",
+      "access_type": "freemium_daily_dump_and_rest",
+      "auth_method": "API Key via Query Parameter",
+      "data_formats": ["CSV (gzip)", "JSON"],
+      "update_frequency": "daily",
+      "download_endpoint": "https://download.unwiredlabs.com/ocid/downloads?token={API_KEY}&file=cell_towers.csv.gz",
+      "rest_endpoints": [
+        {
+          "name": "get_cell",
+          "path": "/cell/get",
+          "method": "GET",
+          "params": ["key", "mcc", "mnc", "lac", "cellid", "format"],
+          "description": "Retorna coordenadas e raio estimado de uma estação rádio base específica."
+        }
+      ],
+      "schema_fields": [
+        {"name": "radio", "type": "string", "description": "Tecnologia de rádio: GSM, UMTS, LTE, NR"},
+        {"name": "mcc", "type": "integer", "description": "Mobile Country Code (724 para Brasil)"},
+        {"name": "mnc", "type": "integer", "description": "Mobile Network Code (código da operadora)"},
+        {"name": "lac", "type": "integer", "description": "Location Area Code"},
+        {"name": "cellid", "type": "integer", "description": "Identificador único da célula"},
+        {"name": "lat", "type": "float", "description": "Latitude da torre"},
+        {"name": "lon", "type": "float", "description": "Longitude da torre"},
+        {"name": "range", "type": "integer", "description": "Raio de cobertura estimado em metros"},
+        {"name": "nbSamples", "type": "integer", "description": "Número de medições registradas"},
+        {"name": "average_signal", "type": "integer", "description": "Potência média do sinal reportado"}
+      ],
+      "ml_role": "Identificação de sombras de cobertura celular no HDBSCAN e análise relativa no LOF."
+    },
+    {
+      "id": "mlab_ndt",
+      "canonical_name": "Measurement Lab Network Diagnostic Tool (NDT)",
+      "category": "transport_layer_telemetry",
+      "documentation_url": "https://www.measurementlab.net/data/",
+      "access_type": "open_bigquery_and_gcs",
+      "auth_method": "Google Cloud IAM / BigQuery Standard Credentials",
+      "data_formats": ["BigQuery Tables", "GCS Tar/CSV"],
+      "update_frequency": "continuous",
+      "bigquery_tables": [
+        "measurement-lab.ndt.unified_downloads",
+        "measurement-lab.ndt.unified_uploads"
+      ],
+      "gcs_raw_storage": "gs://archive-measurement-lab/",
+      "schema_fields": [
+        {"name": "a.MeanThroughputMbps", "type": "float", "description": "Vazão média medida via TCP"},
+        {"name": "a.MinRTT", "type": "float", "description": "RTT mínimo observado em milissegundos"},
+        {"name": "a.LossRate", "type": "float", "description": "Taxa de retransmissão e perda de pacotes TCP"},
+        {"name": "client.Geo.Latitude", "type": "float", "description": "Latitude aproximada do cliente"},
+        {"name": "client.Geo.Longitude", "type": "float", "description": "Longitude aproximada do cliente"},
+        {"name": "client.Network.ASNumber", "type": "integer", "description": "ASN de origem do cliente"}
+      ],
+      "ml_role": "Detecção de degradação da camada de transporte e bufferbloat no Isolation Forest."
+    },
+    {
+      "id": "anatel_dados",
+      "canonical_name": "Portal de Dados Abertos e Painéis de Inteligência da Anatel",
+      "category": "regulatory_telecom_data",
+      "documentation_url": "https://dados.gov.br/swagger-ui/index.html",
+      "base_portals": [
+        "https://informacoes.anatel.gov.br/paineis/acessos",
+        "https://informacoes.anatel.gov.br/paineis/consumidor/reclamacoes",
+        "https://dados.anatel.gov.br"
+      ],
+      "access_type": "open_government_data",
+      "auth_method": "None",
+      "data_formats": ["CSV", "JSON", "Shapefile", "PowerBI Web"],
+      "update_frequency": "monthly_to_semiannual",
+      "datasets": [
+        {
+          "name": "acessos_banda_larga_fixa_scm",
+          "url": "https://informacoes.anatel.gov.br/paineis/acessos/banda-larga-fixa",
+          "variables": ["Ano", "Mes", "UF", "Municipio", "Prestadora", "Meio de Acesso (FTTH, HFC, DSL)", "Velocidade Contratada"]
+        },
+        {
+          "name": "acessos_telefonia_movel_smp",
+          "url": "https://informacoes.anatel.gov.br/paineis/acessos/telefonia-movel",
+          "variables": ["Ano", "Mes", "UF", "Municipio", "Prestadora", "Tecnologia (2G, 3G, 4G, 5G)", "Modalidade (Pre-pago, Pos-pago)"]
+        },
+        {
+          "name": "reclamacoes_consumidores",
+          "url": "https://informacoes.anatel.gov.br/paineis/consumidor/reclamacoes",
+          "variables": ["Ano", "Mes", "UF", "Municipio", "Prestadora", "Servico", "Motivo/Reclamacao (Queda, Indisponibilidade, Cobranca)"]
+        },
+        {
+          "name": "mosaico_estacoes_outorgadas",
+          "url": "https://dados.anatel.gov.br",
+          "variables": ["Latitude", "Longitude", "Num_Estacao", "Prestadora", "Frequencia_Transmissao", "Tecnologia", "Potencia_Transmissor"]
+        }
+      ],
+      "ml_role": "Cálculo de concentração de mercado (HHI), share do ISP e volume de queixas por habitante."
+    },
+    {
+      "id": "ibge_geodados",
+      "canonical_name": "IBGE API de Serviços de Dados e CNEFE Censo 2022",
+      "category": "socioeconomic_and_geocoding",
+      "documentation_url": "https://servicodados.ibge.gov.br/api/docs",
+      "downloads_portal": "https://censo2022.ibge.gov.br/panorama/downloads.html",
+      "access_type": "open_rest_and_bulk_downloads",
+      "auth_method": "None",
+      "data_formats": ["JSON", "Apache Parquet", "Geopackage", "ESRI Shapefile"],
+      "update_frequency": "static_decennial_censo_2022",
+      "key_endpoints_and_microdata": [
+        {
+          "name": "api_malhas_territoriais",
+          "url": "https://servicodados.ibge.gov.br/api/v3/malhas",
+          "method": "GET",
+          "description": "Retorna malhas poligonais de municípios, distritos e setores censitários em GeoJSON."
+        },
+        {
+          "name": "api_sidra_agregados",
+          "url": "https://servicodados.ibge.gov.br/api/v3/agregados",
+          "method": "GET",
+          "description": "Consultas a agregados censitários (renda média, população, domicílios) por município/setor."
+        },
+        {
+          "name": "cnefe_censo_2022_microdados",
+          "url": "https://censo2022.ibge.gov.br/panorama/downloads.html",
+          "format": "Parquet / CSV",
+          "variables": [
+            "COD_UF", "COD_MUN", "COD_SETOR", "LATITUDE", "LONGITUDE",
+            "COD_ESPECI (1=Domicilio particular, 2=Comercial, 3=Agropecuario, 4=Ensino, 5=Saude)"
+          ],
+          "description": "Coordenadas exatas de cada ponto de endereço de todo o território brasileiro."
+        }
+      ],
+      "ml_role": "Mapeamento de densidade de lares/empresas (HDBSCAN) e segmentação de renda per capita (K-Means)."
+    }
+  ],
+  "agent_pipeline_specification": {
+    "h3_feature_vector": {
+      "definition": "x_hi = [d_down, d_up, lat, vol_test, n_dom, n_com, ren_med, n_erb, HHI, vol_reclam]",
+      "keys": {
+        "d_down": "Velocidade média de download ponderada (Ookla)",
+        "d_up": "Velocidade média de upload ponderada (Ookla)",
+        "lat": "Latência média de ida e volta (Ookla/M-Lab)",
+        "vol_test": "Total de testes normalizados por dispositivos (Ookla)",
+        "n_dom": "Total de domicílios particulares no hexágono (IBGE CNEFE)",
+        "n_com": "Total de estabelecimentos comerciais no hexágono (IBGE CNEFE)",
+        "ren_med": "Renda média domiciliar per capita interpolada (IBGE Setores Censitários)",
+        "n_erb": "Densidade de estações de rádio base (Anatel Mosaico + OpenCelliD)",
+        "HHI": "Índice Herfindahl-Hirschman de concentração municipal de telecomunicações (Anatel SCM)",
+        "vol_reclam": "Reclamações normalizadas por 1.000 acessos (Anatel Consumidor)"
+      }
+    },
+    "analytical_modules": [
+      {
+        "axis": "1_manutencao_e_criticidade",
+        "primary_model": "Isolation Forest (iForest)",
+        "secondary_model": "Local Outlier Factor (LOF)",
+        "anomaly_score_threshold": "s(x, n) >= 0.65",
+        "input_features": ["lat", "vol_reclam", "d_down_drop_ratio"],
+        "cross_validation_tool": "Cloudflare Radar /radar/annotations/outages",
+        "llm_action": "Receber hexágonos anômalos, verificar falhas em ASNs vizinhos e despachar laudo de causa-raiz técnico."
+      },
+      {
+        "axis": "2_novos_negocios_e_expansao",
+        "primary_model": "HDBSCAN (Hierarchical Density-Based Spatial Clustering of Applications with Noise)",
+        "clustering_criteria": "Alta densidade predial (n_dom + n_com) com baixa velocidade (d_down < 30Mbps) e HHI > 3500",
+        "input_features": ["n_dom", "n_com", "d_down", "n_erb", "HHI"],
+        "llm_action": "Quantificar mercado endereçável (TAM) do cluster, calcular densidade de demanda corporativa e gerar relatório de viabilidade de CAPEX."
+      },
+      {
+        "axis": "3_regioes_propicias_para_promocoes",
+        "primary_model": "K-Means++ Clustering",
+        "cluster_profiles": [
+          "Cluster Premium: Alta renda, alta velocidade, penetração FTTH consolidada",
+          "Cluster Alta Vulnerabilidade Concorrência: Média renda, alto HHI, alta latência/reclamações",
+          "Cluster Conectividade Essencial: Baixa/média renda, alto tráfego móvel, demanda por planos econômicos"
+        ],
+        "input_features": ["ren_med", "n_dom", "vol_reclam", "HHI", "d_up"],
+        "llm_action": "Formular réguas de comunicação de marketing hiperlocais, argumentos de portabilidade e delimitação de públicos em mídia programática."
+      }
+    ]
+  }
+}
