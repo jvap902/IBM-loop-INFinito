@@ -66,7 +66,7 @@ Establish the ETL pipelines that pull from every external source defined in `kno
 
 ## Sub-Task 2 — Exploratory Data Analysis & Algorithm Validation
 
-**Status:** `[ ] pending`
+**Status:** `[x] complete`
 
 ### Intent
 Before committing to the production model architecture, perform a structured EDA and baseline comparison to confirm (or adjust) the algorithm choices in `knowledge-api.json`. This is a time-boxed discovery phase — its output is a brief findings document that either validates the spec or proposes amendments.
