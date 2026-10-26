@@ -1,0 +1,61 @@
+# ── Telecom AI Platform — Docker Compose ──────────────────────────────────
+#
+# Services:
+#   tool-api   : FastAPI application (Sub-Task 4)
+#
+# Start:
+#   docker compose up -d
+#
+# Required environment variables — copy .env.example to .env and fill in:
+#   TOOL_API_KEYS or TOOL_API_KEY
+#   CLOUDFLARE_API_TOKEN (optional, for crossvalidate endpoint)
+#
+# Data volume: mount your Gold Parquet directory to /data/gold
+
+version: "3.9"
+
+services:
+  tool-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: telecom-tool-api:latest
+    container_name: telecom_tool_api
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      # ── Required ─────────────────────────────────────────────────────────
+      TOOL_API_KEYS: "${TOOL_API_KEYS:-}"
+      TOOL_API_KEY: "${TOOL_API_KEY:-}"
+      # ── Optional overrides ───────────────────────────────────────────────
+      GOLD_PARQUET_PATH: "/data/gold/features.parquet"
+      CLOUDFLARE_API_TOKEN: "${CLOUDFLARE_API_TOKEN:-}"
+      LOG_LEVEL: "${LOG_LEVEL:-INFO}"
+      API_VERSION: "${API_VERSION:-1.0.0}"
+      CORS_ORIGINS: "${CORS_ORIGINS:-*}"
+    volumes:
+      # Mount the host data directory that contains the Gold Parquet file.
+      # Adjust the left-hand path to match your local layout.
+      - "${GOLD_DATA_DIR:-./data}:/data:ro"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+  # ── Optional: MLflow tracking server (uncomment to enable) ────────────────
+  # mlflow:
+  #   image: ghcr.io/mlflow/mlflow:v2.10.0
+  #   container_name: telecom_mlflow
+  #   ports:
+  #     - "5000:5000"
+  #   command: mlflow server --host 0.0.0.0 --port 5000 --backend-store-uri sqlite:///mlflow.db
+  #   volumes:
+  #     - mlflow_data:/mlruns
+  #     - mlflow_data:/mlflow.db
+
+volumes:
+  mlflow_data:
+    driver: local

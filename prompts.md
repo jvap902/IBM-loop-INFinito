@@ -211,3 +211,82 @@ A implementação deve ser estritamente **modular**, adaptando-se e estendendo a
 - Criar o módulo `ml/drift_detector.py`:
   - Calcular o Índice de Estabilidade da População (PSI - Population Stability Index) sobre as colunas da tabela Gold mês a mês.
   - Disparar um alerta ou flag para re-treinamento quando PSI > 0.2 para
+
+
+# AGENTE EXECUTOR: IMPLEMENTAÇÃO DA SUB-TASK 4 (CAMADA DE API E TOOL-CALLING)
+
+## 1. PAPEL E ESCOPO EXCLUSIVO
+Você é um Agente Executor Especialista em Desenvolvimento Backend e Arquitetura de APIs. Sua única responsabilidade nesta etapa é implementar a **Sub-Task 4 (Internal Tool API Layer — Tool-Calling Interface)**, conforme especificado no documento `telecom-ai-platform-plan.md` e na arquitetura do sistema.
+
+⚠️ **RESTRIÇÃO DE ESCOPO:** As Sub-tasks 1, 2 e 3 já foram concluídas. Você **NÃO** deve alterar a lógica interna dos modelos de ML ou construir o fluxo do agente operacional (Sub-task 6). Seu objetivo é encapsular as pipelines de Machine Learning existentes em uma aplicação FastAPI robusta, segura, documentada e pronta para invocação por agentes autônomos.
+
+---
+
+## 2. CONTEXTO DE ENTRADA E ARQUITETURA
+Os três eixos analíticos de Machine Learning já estão implementados no diretório `ml/` (Sub-task 3).
+
+De acordo com o diagrama de arquitetura do sistema, a Sub-task 4 atua como a ponte de comunicação entre os pipelines de ML e os consumidores externos (Agente Operacional e futuros dashboards de BI). Ela deve expor endpoints REST parametrizáveis e gerar a especificação OpenAPI que servirá de catálogo para o registrador de ferramentas do agente:
+
+1. **API REST FastAPI (`api/main.py`):** Servidor HTTP de alta performance.
+2. **Endpoints das Ferramentas (`POST /tools/axis1/run`, `POST /tools/axis2/run`, `POST /tools/axis3/run`):** Interfaces de execução das análises.
+3. **Descoberta de Capacidades (`GET /tools`):** Endpoint de consulta do catálogo de ferramentas.
+4. **Contrato OpenAPI (`openapi.yaml`):** Especificação autogerada e exportada para o repositório.
+
+---
+
+## 3. TAREFAS E MÓDULOS A DESENVOLVER
+
+A implementação deve ser estritamente **modular**, adaptando-se e organizando-se dentro do diretório `api/` do repositório existente:
+
+### 3.1. Estrutura e Aplicação Principal (`api/main.py`)
+- Scaffold da aplicação FastAPI configurado com logs estruturados em formato JSON (incluindo `run_id`, `axis`, `region_filter` e `timestamp`).
+- Endpoint de verificação de saúde (`GET /health`).
+- Middleware de Autenticação (`api/auth.py`): Validação via cabeçalho `X-API-Key` apontando para variáveis de ambiente (nunca *hardcoded*).
+
+### 3.2. Modelos Pydantic (`api/schemas.py`)
+- Definir contratos estritos de requisição e resposta para cada eixo analítico.
+- Incluir parâmetros configuráveis comuns:
+  - `region_filter`: Filtro opcional por lista de células pai H3 (res 5/6).
+  - `h3_resolution`: Resolução alvo (8 ou 9).
+  - `feature_weights`: Pesos customizados de variáveis.
+  - Parâmetros específicos por eixo (`anomaly_threshold` no Eixo 1; `min_cluster_size` no Eixo 2; `n_clusters` no Eixo 3).
+- Garantir que os payloads de resposta contenham campos geométricos compatíveis com GeoJSON (`h3_id`, `lat_centroid`, `lon_centroid`).
+
+### 3.3. Endpoints das Ferramentas (`api/routes/tools.py`)
+- **`POST /tools/axis1/run`**: Valida a requisição, carrega a Gold Feature Store, executa `pipeline_axis1` e retorna a lista de hexágonos críticos/anômalos.
+- **`POST /tools/axis1/crossvalidate`**: Recebe um intervalo de datas e cruza os alertas do Eixo 1 com dados de indisponibilidade do Cloudflare Radar (`/annotations/outages`).
+- **`POST /tools/axis2/run`**: Executa `pipeline_axis2` e retorna o sumário dos clusters de expansão (tamanho, coordenadas centrais, médias das variáveis e estimativa de TAM).
+- **`POST /tools/axis3/run`**: Executa `pipeline_axis3` e retorna a tabela de segmentação de mercado e perfis de clientes.
+
+### 3.4. Catálogo de Descoberta e Exportação de Contrato
+- Implementar **`GET /tools`**: Endpoint público/autenticado que retorna a lista legível por máquina de todas as ferramentas disponíveis, seus parâmetros, tipos e descrições para o Agente Operacional.
+- Script de exportação do esquema **OpenAPI 3.1** salvando diretamente no arquivo `openapi.yaml` na raiz do projeto.
+
+### 3.5. Testes de Integração API
+- Escrever testes em `tests/test_api.py` utilizando `pytest` e `httpx`:
+  - Requisições válidas e inválidas para cada endpoint.
+  - Testes de autenticação (API Key válida vs. ausente/inválida).
+  - Validação de respostas vazias ou filtros fora do escopo.
+
+---
+
+## 4. REQUISITOS DE MODULARIDADE E PADRÕES DE CÓDIGO
+- **Desacoplamento:** A API deve apenas importar e invocar as funções/classes expostas pelos módulos de `ml/`, sem reescrever regras de negócio do modelo.
+- **Resiliência:** Tratar exceções de execução dos modelos e retornar códigos HTTP apropriados (`400 Bad Request`, `422 Unprocessable Entity`, `500 Internal Server Error`) com mensagens descritivas.
+- **Conteinerização:** Disponibilizar ou atualizar o arquivo `Docker Compose` / `Dockerfile` para execução do serviço de API via `uvicorn`.
+
+---
+
+## 5. INSTRUÇÕES DE FINALIZAÇÃO E REPORT
+
+Ao finalizar a implementação da Sub-task 4, forneça um **Relatório de Status Final**:
+
+- **Em caso de Sucesso:**
+  - Lista de arquivos criados/modificados no diretório `api/`.
+  - Confirmação do funcionamento dos endpoints expostos e do arquivo `openapi.yaml` gerado.
+  - Resumo dos testes de integração executados em `tests/test_api.py`.
+  - Exemplo do payload de resposta retornado pelo endpoint `GET /tools`.
+
+- **Em caso de Erro ou Impasse:**
+  - Descrição detalhada da falha (ex.: erro de importação dos módulos de ML, incompatibilidade nos schemas Pydantic ou falha no middleware de autenticação).
+  - Diagnóstico do impacto e ações necessárias para correção.

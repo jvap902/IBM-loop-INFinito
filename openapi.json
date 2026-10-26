@@ -1,0 +1,1240 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Telecom AI Platform — Tool API",
+    "description": "Internal REST API that exposes the three ML analytical pipelines (Axis 1: Maintenance & Criticality, Axis 2: Expansion Opportunities, Axis 3: Promotional Targeting) as versioned tools for autonomous invocation by the Operational Agent and BI dashboards.\n\nAuthentication: supply a valid ``X-API-Key`` header for all ``/run`` and ``/crossvalidate`` endpoints. The ``GET /tools`` catalogue endpoint is publicly accessible.",
+    "license": {
+      "name": "Internal — Not for public distribution"
+    },
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/health": {
+      "get": {
+        "tags": [
+          "Meta"
+        ],
+        "summary": "Health check",
+        "description": "Returns ``{status: ok}`` when the API is running. No authentication required.",
+        "operationId": "health_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/tools": {
+      "get": {
+        "tags": [
+          "Discovery"
+        ],
+        "summary": "Tool Catalogue — list all available analytical tools",
+        "description": "Returns a machine-readable catalogue of every tool exposed by this API, including endpoint paths, HTTP methods, parameter types, and output schema references. This endpoint is the agent's tool registry source and does not require authentication.",
+        "operationId": "get_tool_catalogue_v1_tools_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ToolCatalogueResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/tools/axis1/run": {
+      "post": {
+        "tags": [
+          "Tools"
+        ],
+        "summary": "Axis 1 — Run Maintenance & Criticality pipeline",
+        "description": "Loads the Gold Feature Store, executes the IsolationForest + LOF anomaly detection ensemble, and returns the top-N critical hexagons with their anomaly scores and GeoJSON-compatible coordinates. Requires ``X-API-Key`` header.",
+        "operationId": "run_axis1_v1_tools_axis1_run_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Axis1RunRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Axis1RunResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ]
+      }
+    },
+    "/v1/tools/axis1/crossvalidate": {
+      "post": {
+        "tags": [
+          "Tools"
+        ],
+        "summary": "Axis 1 — Cross-validate critical hexagons against Cloudflare outages",
+        "description": "Runs Axis 1 anomaly detection then calls the Cloudflare Radar ``/annotations/outages`` endpoint for the supplied date range. Returns an agreement rate and a per-event hexagon-overlap summary. Requires ``X-API-Key`` header.",
+        "operationId": "crossvalidate_axis1_v1_tools_axis1_crossvalidate_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Axis1CrossValidateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Axis1CrossValidateResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ]
+      }
+    },
+    "/v1/tools/axis2/run": {
+      "post": {
+        "tags": [
+          "Tools"
+        ],
+        "summary": "Axis 2 — Run Expansion Opportunities pipeline",
+        "description": "Executes the UMAP + HDBSCAN expansion clustering pipeline and returns a cluster summary with centroid coordinates, mean feature values, and a TAM estimate per cluster. Requires ``X-API-Key`` header.",
+        "operationId": "run_axis2_v1_tools_axis2_run_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Axis2RunRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Axis2RunResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ]
+      }
+    },
+    "/v1/tools/axis3/run": {
+      "post": {
+        "tags": [
+          "Tools"
+        ],
+        "summary": "Axis 3 — Run Promotional Targeting segmentation",
+        "description": "Executes the K-Means++ promotional segmentation pipeline and returns the full hexagon-level segment assignment table together with segment profile metadata. Requires ``X-API-Key`` header.",
+        "operationId": "run_axis3_v1_tools_axis3_run_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Axis3RunRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Axis3RunResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Axis1CrossValidateRequest": {
+        "properties": {
+          "date_start": {
+            "type": "string",
+            "title": "Date Start",
+            "description": "ISO-8601 start date (inclusive), e.g. '2024-01-01'."
+          },
+          "date_end": {
+            "type": "string",
+            "title": "Date End",
+            "description": "ISO-8601 end date (inclusive), e.g. '2024-01-31'."
+          },
+          "region_filter": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Region Filter",
+            "description": "Optional list of H3 parent cell IDs at resolution 5 or 6 used to spatially restrict the analysis. Hexagons outside these parent cells are excluded before the pipeline runs.",
+            "examples": [
+              [
+                "85283473fffffff",
+                "8528347bfffffff"
+              ]
+            ]
+          },
+          "anomaly_threshold": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Anomaly Threshold",
+            "default": 0.65
+          },
+          "top_n": {
+            "type": "integer",
+            "maximum": 5000.0,
+            "minimum": 1.0,
+            "title": "Top N",
+            "default": 50
+          }
+        },
+        "type": "object",
+        "required": [
+          "date_start",
+          "date_end"
+        ],
+        "title": "Axis1CrossValidateRequest",
+        "description": "Request body for ``POST /tools/axis1/crossvalidate``."
+      },
+      "Axis1CrossValidateResponse": {
+        "properties": {
+          "run_id": {
+            "type": "string",
+            "title": "Run Id"
+          },
+          "axis": {
+            "type": "string",
+            "title": "Axis",
+            "default": "axis1_crossvalidate"
+          },
+          "duration_seconds": {
+            "type": "number",
+            "title": "Duration Seconds"
+          },
+          "date_range": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Date Range"
+          },
+          "n_critical_hexagons": {
+            "type": "integer",
+            "title": "N Critical Hexagons"
+          },
+          "n_cloudflare_outages_fetched": {
+            "type": "integer",
+            "title": "N Cloudflare Outages Fetched"
+          },
+          "agreement_rate": {
+            "type": "number",
+            "title": "Agreement Rate",
+            "description": "Fraction of Cloudflare outage cells also flagged as critical."
+          },
+          "overlapping_events": {
+            "items": {
+              "$ref": "#/components/schemas/OutageOverlapEntry"
+            },
+            "type": "array",
+            "title": "Overlapping Events"
+          }
+        },
+        "type": "object",
+        "required": [
+          "run_id",
+          "duration_seconds",
+          "date_range",
+          "n_critical_hexagons",
+          "n_cloudflare_outages_fetched",
+          "agreement_rate",
+          "overlapping_events"
+        ],
+        "title": "Axis1CrossValidateResponse",
+        "description": "Response body for ``POST /tools/axis1/crossvalidate``."
+      },
+      "Axis1HexagonResult": {
+        "properties": {
+          "h3_id": {
+            "type": "string",
+            "title": "H3 Id",
+            "description": "Uber H3 cell identifier (any resolution)."
+          },
+          "lat_centroid": {
+            "type": "number",
+            "title": "Lat Centroid",
+            "description": "Latitude of the H3 cell centroid."
+          },
+          "lon_centroid": {
+            "type": "number",
+            "title": "Lon Centroid",
+            "description": "Longitude of the H3 cell centroid."
+          },
+          "anomaly_score": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Anomaly Score",
+            "description": "Normalised anomaly score [0, 1]. Higher = more anomalous."
+          },
+          "is_critical": {
+            "type": "integer",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Is Critical",
+            "description": "1 if the hexagon is flagged as critical, 0 otherwise."
+          },
+          "lof_score": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Lof Score",
+            "description": "Normalised Local Outlier Factor score [0, 1]."
+          },
+          "cloudflare_outage_overlap": {
+            "type": "integer",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Cloudflare Outage Overlap",
+            "description": "1 if this hexagon overlaps a known Cloudflare outage event."
+          }
+        },
+        "type": "object",
+        "required": [
+          "h3_id",
+          "lat_centroid",
+          "lon_centroid",
+          "anomaly_score",
+          "is_critical",
+          "lof_score",
+          "cloudflare_outage_overlap"
+        ],
+        "title": "Axis1HexagonResult",
+        "description": "Single hexagon row in the Axis 1 response."
+      },
+      "Axis1RunRequest": {
+        "properties": {
+          "region_filter": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Region Filter",
+            "description": "Optional list of H3 parent cell IDs at resolution 5 or 6 used to spatially restrict the analysis. Hexagons outside these parent cells are excluded before the pipeline runs.",
+            "examples": [
+              [
+                "85283473fffffff",
+                "8528347bfffffff"
+              ]
+            ]
+          },
+          "h3_resolution": {
+            "type": "integer",
+            "maximum": 9.0,
+            "minimum": 8.0,
+            "title": "H3 Resolution",
+            "description": "Target H3 resolution (8 or 9).",
+            "default": 8
+          },
+          "feature_weights": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "type": "number"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Feature Weights",
+            "description": "Optional override of equal feature weights. Keys must match feature names in the Gold Feature Store (e.g. 'd_down', 'vol_reclam'). Values are multiplied against the standardised feature vector.",
+            "examples": [
+              {
+                "d_down": 1.5,
+                "vol_reclam": 2.0
+              }
+            ]
+          },
+          "anomaly_threshold": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Anomaly Threshold",
+            "description": "IsolationForest normalised score threshold above which a hexagon is flagged as critical. Defaults to 0.65 (EDA-confirmed).",
+            "default": 0.65
+          },
+          "top_n": {
+            "type": "integer",
+            "maximum": 5000.0,
+            "minimum": 1.0,
+            "title": "Top N",
+            "description": "Maximum number of anomalous hexagons to return.",
+            "default": 50
+          },
+          "contamination": {
+            "type": "number",
+            "maximum": 0.5,
+            "minimum": 0.01,
+            "title": "Contamination",
+            "description": "IsolationForest contamination fraction (expected anomaly rate).",
+            "default": 0.05
+          }
+        },
+        "type": "object",
+        "title": "Axis1RunRequest",
+        "description": "Request body for ``POST /tools/axis1/run``."
+      },
+      "Axis1RunResponse": {
+        "properties": {
+          "run_id": {
+            "type": "string",
+            "title": "Run Id",
+            "description": "Unique identifier for this pipeline run."
+          },
+          "axis": {
+            "type": "string",
+            "title": "Axis",
+            "description": "Axis identifier.",
+            "default": "axis1"
+          },
+          "duration_seconds": {
+            "type": "number",
+            "title": "Duration Seconds",
+            "description": "Wall-clock execution time in seconds."
+          },
+          "total_hexagons_scored": {
+            "type": "integer",
+            "title": "Total Hexagons Scored",
+            "description": "Total number of hexagons processed."
+          },
+          "n_critical": {
+            "type": "integer",
+            "title": "N Critical",
+            "description": "Number of hexagons flagged as critical."
+          },
+          "anomaly_rate": {
+            "type": "number",
+            "title": "Anomaly Rate",
+            "description": "Fraction of hexagons that are critical."
+          },
+          "results": {
+            "items": {
+              "$ref": "#/components/schemas/Axis1HexagonResult"
+            },
+            "type": "array",
+            "title": "Results"
+          }
+        },
+        "type": "object",
+        "required": [
+          "run_id",
+          "duration_seconds",
+          "total_hexagons_scored",
+          "n_critical",
+          "anomaly_rate",
+          "results"
+        ],
+        "title": "Axis1RunResponse",
+        "description": "Response body for ``POST /tools/axis1/run``."
+      },
+      "Axis2ClusterSummary": {
+        "properties": {
+          "cluster_id": {
+            "type": "integer",
+            "title": "Cluster Id",
+            "description": "HDBSCAN cluster label (-1 for noise)."
+          },
+          "cluster_size": {
+            "type": "integer",
+            "title": "Cluster Size",
+            "description": "Number of hexagons in the cluster."
+          },
+          "lat_centroid": {
+            "type": "number",
+            "title": "Lat Centroid",
+            "description": "Mean latitude of hexagons in this cluster."
+          },
+          "lon_centroid": {
+            "type": "number",
+            "title": "Lon Centroid",
+            "description": "Mean longitude of hexagons in this cluster."
+          },
+          "avg_d_down": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Avg D Down",
+            "description": "Mean download speed (Mbps) in the cluster."
+          },
+          "avg_n_dom": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Avg N Dom",
+            "description": "Mean number of residential addresses in the cluster."
+          },
+          "avg_HHI": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Avg Hhi",
+            "description": "Mean Herfindahl–Hirschman Index (market concentration) in the cluster."
+          },
+          "tam_estimate": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tam Estimate",
+            "description": "Estimated Total Addressable Market proxy (avg_n_dom × cluster_size)."
+          },
+          "is_noise": {
+            "type": "integer",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Is Noise",
+            "description": "1 if this is the noise cluster (-1 label).",
+            "default": 0
+          }
+        },
+        "type": "object",
+        "required": [
+          "cluster_id",
+          "cluster_size",
+          "lat_centroid",
+          "lon_centroid"
+        ],
+        "title": "Axis2ClusterSummary",
+        "description": "Summary row for a single expansion cluster."
+      },
+      "Axis2RunRequest": {
+        "properties": {
+          "region_filter": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Region Filter",
+            "description": "Optional list of H3 parent cell IDs at resolution 5 or 6 used to spatially restrict the analysis. Hexagons outside these parent cells are excluded before the pipeline runs.",
+            "examples": [
+              [
+                "85283473fffffff",
+                "8528347bfffffff"
+              ]
+            ]
+          },
+          "h3_resolution": {
+            "type": "integer",
+            "maximum": 9.0,
+            "minimum": 8.0,
+            "title": "H3 Resolution",
+            "description": "Target H3 resolution (8 or 9).",
+            "default": 8
+          },
+          "feature_weights": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "type": "number"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Feature Weights",
+            "description": "Optional override of equal feature weights. Keys must match feature names in the Gold Feature Store (e.g. 'd_down', 'vol_reclam'). Values are multiplied against the standardised feature vector.",
+            "examples": [
+              {
+                "d_down": 1.5,
+                "vol_reclam": 2.0
+              }
+            ]
+          },
+          "min_cluster_size": {
+            "type": "integer",
+            "maximum": 2000.0,
+            "minimum": 2.0,
+            "title": "Min Cluster Size",
+            "description": "HDBSCAN minimum cluster size parameter.",
+            "default": 50
+          },
+          "skip_umap": {
+            "type": "boolean",
+            "title": "Skip Umap",
+            "description": "If True, skip UMAP pre-reduction and feed scaled features directly into HDBSCAN.",
+            "default": false
+          }
+        },
+        "type": "object",
+        "title": "Axis2RunRequest",
+        "description": "Request body for ``POST /tools/axis2/run``."
+      },
+      "Axis2RunResponse": {
+        "properties": {
+          "run_id": {
+            "type": "string",
+            "title": "Run Id"
+          },
+          "axis": {
+            "type": "string",
+            "title": "Axis",
+            "default": "axis2"
+          },
+          "duration_seconds": {
+            "type": "number",
+            "title": "Duration Seconds"
+          },
+          "total_hexagons_processed": {
+            "type": "integer",
+            "title": "Total Hexagons Processed"
+          },
+          "n_clusters": {
+            "type": "integer",
+            "title": "N Clusters"
+          },
+          "noise_rate": {
+            "type": "number",
+            "title": "Noise Rate"
+          },
+          "clusters": {
+            "items": {
+              "$ref": "#/components/schemas/Axis2ClusterSummary"
+            },
+            "type": "array",
+            "title": "Clusters"
+          }
+        },
+        "type": "object",
+        "required": [
+          "run_id",
+          "duration_seconds",
+          "total_hexagons_processed",
+          "n_clusters",
+          "noise_rate",
+          "clusters"
+        ],
+        "title": "Axis2RunResponse",
+        "description": "Response body for ``POST /tools/axis2/run``."
+      },
+      "Axis3HexagonResult": {
+        "properties": {
+          "h3_id": {
+            "type": "string",
+            "title": "H3 Id",
+            "description": "Uber H3 cell identifier (any resolution)."
+          },
+          "lat_centroid": {
+            "type": "number",
+            "title": "Lat Centroid"
+          },
+          "lon_centroid": {
+            "type": "number",
+            "title": "Lon Centroid"
+          },
+          "segment_id": {
+            "type": "integer",
+            "title": "Segment Id"
+          },
+          "segment_name": {
+            "type": "string",
+            "title": "Segment Name"
+          },
+          "centroid_distance": {
+            "type": "number",
+            "title": "Centroid Distance"
+          },
+          "silhouette_score_local": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Silhouette Score Local"
+          }
+        },
+        "type": "object",
+        "required": [
+          "h3_id",
+          "lat_centroid",
+          "lon_centroid",
+          "segment_id",
+          "segment_name",
+          "centroid_distance"
+        ],
+        "title": "Axis3HexagonResult",
+        "description": "Single hexagon row in the Axis 3 response."
+      },
+      "Axis3RunRequest": {
+        "properties": {
+          "region_filter": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Region Filter",
+            "description": "Optional list of H3 parent cell IDs at resolution 5 or 6 used to spatially restrict the analysis. Hexagons outside these parent cells are excluded before the pipeline runs.",
+            "examples": [
+              [
+                "85283473fffffff",
+                "8528347bfffffff"
+              ]
+            ]
+          },
+          "h3_resolution": {
+            "type": "integer",
+            "maximum": 9.0,
+            "minimum": 8.0,
+            "title": "H3 Resolution",
+            "description": "Target H3 resolution (8 or 9).",
+            "default": 8
+          },
+          "feature_weights": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "type": "number"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Feature Weights",
+            "description": "Optional override of equal feature weights. Keys must match feature names in the Gold Feature Store (e.g. 'd_down', 'vol_reclam'). Values are multiplied against the standardised feature vector.",
+            "examples": [
+              {
+                "d_down": 1.5,
+                "vol_reclam": 2.0
+              }
+            ]
+          },
+          "n_clusters": {
+            "type": "integer",
+            "maximum": 10.0,
+            "minimum": 2.0,
+            "title": "N Clusters",
+            "description": "Number of K-Means clusters (k). Defaults to 3, EDA-confirmed.",
+            "default": 3
+          },
+          "sweep_if_low_silhouette": {
+            "type": "boolean",
+            "title": "Sweep If Low Silhouette",
+            "description": "If True, sweep k ∈ [3, 6] when silhouette < 0.30 and pick the best k.",
+            "default": true
+          }
+        },
+        "type": "object",
+        "title": "Axis3RunRequest",
+        "description": "Request body for ``POST /tools/axis3/run``."
+      },
+      "Axis3RunResponse": {
+        "properties": {
+          "run_id": {
+            "type": "string",
+            "title": "Run Id"
+          },
+          "axis": {
+            "type": "string",
+            "title": "Axis",
+            "default": "axis3"
+          },
+          "duration_seconds": {
+            "type": "number",
+            "title": "Duration Seconds"
+          },
+          "total_hexagons_segmented": {
+            "type": "integer",
+            "title": "Total Hexagons Segmented"
+          },
+          "n_segments": {
+            "type": "integer",
+            "title": "N Segments"
+          },
+          "silhouette_score_global": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Silhouette Score Global"
+          },
+          "segment_profiles": {
+            "items": {
+              "$ref": "#/components/schemas/Axis3SegmentProfile"
+            },
+            "type": "array",
+            "title": "Segment Profiles"
+          },
+          "results": {
+            "items": {
+              "$ref": "#/components/schemas/Axis3HexagonResult"
+            },
+            "type": "array",
+            "title": "Results"
+          }
+        },
+        "type": "object",
+        "required": [
+          "run_id",
+          "duration_seconds",
+          "total_hexagons_segmented",
+          "n_segments",
+          "silhouette_score_global",
+          "segment_profiles",
+          "results"
+        ],
+        "title": "Axis3RunResponse",
+        "description": "Response body for ``POST /tools/axis3/run``."
+      },
+      "Axis3SegmentProfile": {
+        "properties": {
+          "segment_id": {
+            "type": "integer",
+            "title": "Segment Id"
+          },
+          "segment_name": {
+            "type": "string",
+            "title": "Segment Name",
+            "description": "Human-readable segment label."
+          },
+          "hexagon_count": {
+            "type": "integer",
+            "title": "Hexagon Count"
+          },
+          "hexagon_fraction": {
+            "type": "number",
+            "title": "Hexagon Fraction",
+            "description": "Fraction of all hexagons in this segment."
+          },
+          "avg_centroid_distance": {
+            "type": "number",
+            "title": "Avg Centroid Distance",
+            "description": "Mean distance from segment centroid (scaled space)."
+          },
+          "avg_silhouette": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Avg Silhouette",
+            "description": "Mean per-point silhouette score for this segment."
+          }
+        },
+        "type": "object",
+        "required": [
+          "segment_id",
+          "segment_name",
+          "hexagon_count",
+          "hexagon_fraction",
+          "avg_centroid_distance"
+        ],
+        "title": "Axis3SegmentProfile",
+        "description": "Metadata about a single market segment."
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "HealthResponse": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "default": "ok"
+          },
+          "version": {
+            "type": "string",
+            "title": "Version"
+          }
+        },
+        "type": "object",
+        "required": [
+          "version"
+        ],
+        "title": "HealthResponse",
+        "description": "Response body for ``GET /health``."
+      },
+      "OutageOverlapEntry": {
+        "properties": {
+          "outage_id": {
+            "type": "string",
+            "title": "Outage Id"
+          },
+          "outage_description": {
+            "type": "string",
+            "title": "Outage Description"
+          },
+          "outage_start": {
+            "type": "string",
+            "title": "Outage Start"
+          },
+          "outage_end": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Outage End"
+          },
+          "affected_location": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Affected Location"
+          },
+          "overlapping_critical_hexagons": {
+            "type": "integer",
+            "title": "Overlapping Critical Hexagons"
+          }
+        },
+        "type": "object",
+        "required": [
+          "outage_id",
+          "outage_description",
+          "outage_start",
+          "outage_end",
+          "affected_location",
+          "overlapping_critical_hexagons"
+        ],
+        "title": "OutageOverlapEntry",
+        "description": "Single outage event with the count of overlapping critical hexagons."
+      },
+      "ToolCatalogueResponse": {
+        "properties": {
+          "api_version": {
+            "type": "string",
+            "title": "Api Version",
+            "default": "v1"
+          },
+          "tool_count": {
+            "type": "integer",
+            "title": "Tool Count"
+          },
+          "tools": {
+            "items": {
+              "$ref": "#/components/schemas/ToolDefinition"
+            },
+            "type": "array",
+            "title": "Tools"
+          }
+        },
+        "type": "object",
+        "required": [
+          "tool_count",
+          "tools"
+        ],
+        "title": "ToolCatalogueResponse",
+        "description": "Response body for ``GET /tools``."
+      },
+      "ToolDefinition": {
+        "properties": {
+          "tool_id": {
+            "type": "string",
+            "title": "Tool Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "endpoint": {
+            "type": "string",
+            "title": "Endpoint"
+          },
+          "method": {
+            "type": "string",
+            "title": "Method"
+          },
+          "parameters": {
+            "items": {
+              "$ref": "#/components/schemas/ToolParameter"
+            },
+            "type": "array",
+            "title": "Parameters"
+          },
+          "output_schema_ref": {
+            "type": "string",
+            "title": "Output Schema Ref"
+          }
+        },
+        "type": "object",
+        "required": [
+          "tool_id",
+          "name",
+          "description",
+          "endpoint",
+          "method",
+          "parameters",
+          "output_schema_ref"
+        ],
+        "title": "ToolDefinition",
+        "description": "Machine-readable description of a single tool for the agent registry."
+      },
+      "ToolParameter": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "type": {
+            "type": "string",
+            "title": "Type"
+          },
+          "required": {
+            "type": "boolean",
+            "title": "Required"
+          },
+          "default": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Default"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "type",
+          "required",
+          "description"
+        ],
+        "title": "ToolParameter",
+        "description": "Description of a single tool parameter for the catalogue endpoint."
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    },
+    "securitySchemes": {
+      "APIKeyHeader": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-API-Key"
+      }
+    }
+  }
+}

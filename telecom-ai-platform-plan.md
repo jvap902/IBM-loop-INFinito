@@ -139,7 +139,7 @@ Implement the three production ML pipelines confirmed by Sub-Task 2. Each pipeli
 
 ## Sub-Task 4 — Internal Tool API Layer (Tool-Calling Interface)
 
-**Status:** `[ ] pending`
+**Status:** `[x] complete`
 
 ### Intent
 Wrap each ML pipeline behind a versioned REST API so that the Operational Agent can invoke them programmatically via tool-calling. Define strict input/output contracts, configurable parameters, and an OpenAPI schema that the agent's tool registry can consume. The API is designed to also serve a future BI dashboard as an additional consumer.
