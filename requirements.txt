@@ -1,0 +1,54 @@
+# Telecom AI Platform — Python dependencies
+# Sub-Task 1: Data Ingestion & Feature Store
+#
+# Install with:  pip install -r requirements.txt
+# Tested on Python 3.11+
+
+# ── Spatial ────────────────────────────────────────────────────────────────
+h3>=3.7.7
+mercantile>=1.2.1
+geopandas>=0.14.0
+shapely>=2.0.0
+
+# ── Data & storage ─────────────────────────────────────────────────────────
+pandas>=2.1.0
+pyarrow>=14.0.0
+fastparquet>=2023.10.1
+duckdb>=0.9.0
+
+# ── Connectors ─────────────────────────────────────────────────────────────
+requests>=2.31.0
+boto3>=1.33.0            # Ookla S3 access (anonymous)
+s3fs>=2023.12.0          # pyarrow S3 filesystem
+google-cloud-bigquery>=3.13.0   # M-Lab NDT
+google-cloud-bigquery-storage>=2.24.0  # faster BigQuery reads
+db-dtypes>=1.2.0         # BigQuery pandas type support
+
+# ── Validation ─────────────────────────────────────────────────────────────
+pydantic>=2.5.0
+
+# ── Orchestration ──────────────────────────────────────────────────────────
+apache-airflow>=2.8.0
+
+# ── Utilities ──────────────────────────────────────────────────────────────
+python-dotenv>=1.0.0
+tqdm>=4.66.0
+
+# ── Testing (Sub-Task 1 unit tests) ────────────────────────────────────────
+pytest>=7.4.0
+pytest-mock>=3.12.0
+
+# ── Sub-Tasks 2-6 (installed when needed) ──────────────────────────────────
+# scikit-learn>=1.4.0
+# hdbscan>=0.8.33
+# umap-learn>=0.5.5
+# mlflow>=2.10.0
+# shap>=0.44.0
+# nannyml>=0.11.0
+# fastapi>=0.110.0
+# uvicorn[standard]>=0.27.0
+# httpx>=0.26.0
+# langgraph>=0.0.30
+# langchain>=0.1.0
+# typer>=0.9.0
+# respx>=0.20.2          # HTTP mocking for integration tests
