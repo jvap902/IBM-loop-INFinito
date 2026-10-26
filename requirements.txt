@@ -61,9 +61,11 @@ anyio>=4.0.0             # async runtime for httpx test client
 # ── Sub-Task 5 (Transparency & Auditability Layer) ──────────────────────────
 shap>=0.44.0
 
-# ── Sub-Task 6 (installed when needed) ──────────────────────────────────────
-# nannyml>=0.11.0
-# langgraph>=0.0.30
-# langchain>=0.1.0
-# typer>=0.9.0
-# respx>=0.20.2          # HTTP mocking for integration tests
+# ── Sub-Task 6 (Operational Agent — LangGraph) ──────────────────────────────
+langgraph>=0.2.0         # LangGraph StateGraph orchestration
+langchain>=0.2.0         # LangChain base (LangGraph dependency)
+typer>=0.12.0            # CLI interface for agent/run.py
+respx>=0.21.0            # HTTP mocking for integration tests
+# nannyml>=0.11.0        # drift monitoring (optional)
+# ibm-watsonx-ai>=1.0.0  # IBM watsonx.ai SDK (WatsonxProvider)
+# openai>=1.0.0           # OpenAI SDK (OpenAIProvider)

@@ -376,3 +376,103 @@ Ao finalizar a implementação da Sub-task 5, forneça um **Relatório de Status
 - **Em caso de Erro ou Impasse:**
   - Diagnóstico detalhado da falha (ex.: lentidão no cálculo do SHAP, erro de escrita do logger ou problema de integração com os endpoints da FastAPI).
   - Sugestões de correção técnica e ajuste de arquitetura.
+
+
+# AGENTE EXECUTOR: IMPLEMENTAÇÃO DA SUB-TASK 6 (AGENTE OPERACIONAL DE INFRAESTRUTURA DE TELECOM)
+
+## 1. PAPEL E ESCOPO EXCLUSIVO
+Você é um Agente Executor Especialista em Arquitetura de Agentes Autônomos, LangGraph e LLM Orchestration. Sua única responsabilidade nesta etapa é implementar a **Sub-Task 6 (Operational Agent Implementation)**, conforme especificado no documento `telecom-ai-platform-plan.md` e no diagrama de arquitetura do sistema.
+
+⚠️ **RESTRIÇÃO DE ESCOPO:** As Sub-tasks 1 a 5 já estão concluídas (Feature Store, EDA, Pipelines de ML, API de Ferramentas e Camada de Auditoria/SHAP). Seu objetivo é construir o Agente Operacional Inteligente em LangGraph, integrando-o ao ecossistema existente para orquestrar as análises, interpretar os clusters e gerar relatórios prescritivos de expansão e reforma de infraestrutura.
+
+---
+
+## 2. CONTEXTO DE ENTRADA E ARQUITETURA
+O sistema possui a API REST FastAPI ativa no diretório `api/` (disponibilizando os endpoints `/tools/axis1/run`, `/tools/axis2/run`, `/tools/axis3/run`, `/tools` e `/audit/events`).
+
+De acordo com o diagrama de arquitetura do sistema, o Agente Operacional é estruturado como um **LangGraph StateGraph** composto pelos seguintes nós e camadas de abstração:
+
+1. **`gap_detector`**: Identifica regiões não analisadas ou execuções desatualizadas na Gold Feature Store.
+2. **`tool_selector`**: Nó de raciocínio orientado por LLM que decide quais eixos e parâmetros acionar com base nas lacunas e diretivas do usuário.
+3. **`axis_runners` (`axis1_runner`, `axis2_runner`, `axis3_runner`)**: Executores que realizam chamadas HTTP para os endpoints das ferramentas via registro abstrato.
+4. **`result_interpreter`**: Nó que realiza o cruzamento analítico entre os eixos (anomalias críticas x clusters de expansão x segmentos de churn) e calcula o TAM estimado.
+5. **`report_writer`**: Nó que sintetiza os achados e gera o relatório prescritivo estruturado em Markdown e JSON.
+6. **Camadas de Abstração Transversais**:
+   - `LLM Abstraction Layer` (`agent/llm_provider.py`): Suporte alternável a IBM watsonx.ai (padrão) e OpenAI GPT-4o.
+   - `Tool Registry Abstraction` (`agent/tool_registry.py`): Leitura e invocação dinâmica do catálogo `GET /tools`.
+   - `Audit Logger Injection`: Integração com o `AuditLogger` (Sub-task 5) para gravar cada nó e decisão na trilha de auditoria.
+
+---
+
+## 3. TAREFAS E MÓDULOS A DESENVOLVER
+
+A implementação deve ser estritamente **modular**, organizando-se no diretório `agent/` do repositório existente e integrando-se aos módulos anteriores:
+
+### 3.1. Estado do Agente (`agent/state.py`)
+- Definir a estrutura `AgentState` via `TypedDict`:
+  - `region_scope`: Escopo geográfico (lista de células H3 ou região).
+  - `axes_requested`: Eixos analíticos solicitados.
+  - `axis1_result`, `axis2_result`, `axis3_result`: Payloads retornados pelas ferramentas.
+  - `investment_hypotheses`: Hipóteses de investimento derivadas pelo interpretador.
+  - `report_markdown`: Texto final do relatório em Markdown.
+  - `audit_trail`: Histórico de eventos de auditoria da execução.
+
+### 3.2. Camadas de Abstração (`agent/llm_provider.py` e `agent/tool_registry.py`)
+- **Provedor de LLM Swappable (`agent/llm_provider.py`)**:
+  - Definir protocolo/interface `BaseLLMProvider` com métodos `chat()` e `tool_call()`.
+  - Implementar `WatsonxProvider` (padrão, IBM watsonx.ai) e `OpenAIProvider` (alternativo, GPT-4o), selecionável via variável de ambiente `LLM_PROVIDER`.
+- **Registro Dinâmico de Ferramentas (`agent/tool_registry.py`)**:
+  - Carregar o catálogo de ferramentas acessando o endpoint `GET /tools`.
+  - Implementar o método `invoke_tool(name, params)` com cliente assíncrono (`httpx`) e lógica de retry (máximo de 3 tentativas com backoff exponencial).
+
+### 3.3. Construção do Grafo LangGraph (`agent/graph.py`)
+Implementar o `StateGraph` contendo os nós:
+- **Nó `gap_detector`**: Consulta a Feature Store/API e identifica setores defasados. Se a cobertura for total, prossegue com a flag `force=True`.
+- **Nó `tool_selector`**: Avalia o relatório de lacunas e parâmetros de entrada para selecionar dinamicamente quais eixos acionar. Registra a justificativa no `AuditLogger`.
+- **Nós `axis1_runner`, `axis2_runner`, `axis3_runner`**: Invocam os endpoints HTTP correspondentes da FastAPI e gravam eventos de auditoria para cada chamada.
+- **Nó `result_interpreter`**:
+  - Cruza anomalias críticas do Eixo 1 com clusters de expansão do Eixo 2 (prioridade máxima de investimento).
+  - Cruza zonas de risco do Eixo 3 com clusters do Eixo 2 (zonas de expansão com risco de churn).
+  - Estima o TAM por cluster: $TAM = n\_dom \times ARPU\_estimado \times (1 - taxa\_penetracao\_atual)$.
+- **Nó `report_writer`**: Gera o relatório final com as 7 seções obrigatórias:
+  1. Sumário Executivo
+  2. Situação Atual da Infraestrutura (Eixo 1)
+  3. Oportunidades de Expansão Identificadas (Eixo 2)
+  4. Segmentação de Mercado para Promoções (Eixo 3)
+  5. Priorização de Investimentos (Matriz de Cruzamento)
+  6. Estimativa de Retorno (TAM / ARPU / CAPEX Proxy)
+  7. Próximas Ações Recomendadas
+  Apêndice: Metodologia e Auditabilidade
+
+### 3.4. Interface CLI e Executável (`agent/run.py`)
+- Implementar CLI usando `typer` aceitando os argumentos: `--region`, `--axes` e `--force`.
+- Construir o `AgentState`, disparar o workflow no LangGraph e salvar os relatórios finais em `reports/{region}_{date}.md` e `reports/{region}_{date}.json`.
+
+### 3.5. Testes de Integração Ponta a Ponta
+- Escrever testes em `tests/test_agent.py` utilizando `pytest` e `respx` (para mock das chamadas HTTP da API):
+  - Execução completa do workflow do agente.
+  - Validação da presença das 7 seções obrigatórias no relatório gerado.
+  - Verificação de gravação de no mínimo 5 eventos na trilha de auditoria.
+
+---
+
+## 4. REQUISITOS DE MODULARIDADE E ARQUITETURA
+- **Desacoplamento de Framework:** O uso da camada `tool_registry.py` deve permitir substituir o LangGraph por CrewAI ou AutoGen futuramente sem alterar os endpoints de ferramentas ou a lógica das ML pipelines.
+- **Transparência e Explicabilidade:** Todas as etapas de raciocínio (*Chain-of-Thought*) e decisão do agente devem invocar o `AuditLogger` (Sub-task 5).
+- **Sem Dados Pessoais:** O relatório e os logs do agente devem operar estritamente no nível territorial/agregado (H3 / setores censitários), garantindo conformidade contínua com a LGPD.
+
+---
+
+## 5. INSTRUÇÕES DE FINALIZAÇÃO E REPORT
+
+Ao finalizar a implementação da Sub-task 6, apresente um **Relatório de Conclusão**:
+
+- **Em caso de Sucesso:**
+  - Lista de arquivos criados no diretório `agent/`.
+  - Exemplo do relatório prescritivo Markdown gerado no teste e-to-e.
+  - Resumo dos testes de integração aprovados em `tests/test_agent.py`.
+  - Demonstração dos eventos gravados na trilha de auditoria durante a execução do agente.
+
+- **Em caso de Falha ou Impasse:**
+  - Diagnóstico técnico detalhado da falha (ex.: falha na orquestração dos nós no LangGraph, erro no contrato das ferramentas ou falha no provedor de LLM).
+  - Plano de ação corretivo para desbloqueio da etapa final.
