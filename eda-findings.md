@@ -154,6 +154,10 @@
 - [x] Axis 2: HDBSCAN confirmed — **add UMAP pre-reduction** in production pipeline
 - [x] Axis 3: K-Means++ k=3 confirmed — three named profiles empirically validated
 - [x] Reusable modules ready: `ml/eda_utils.py`, `ml/baseline_runners.py`
-- [ ] Sub-Task 3: implement `ml/pipelines/pipeline_axis1.py`, `pipeline_axis2.py`, `pipeline_axis3.py`
-- [ ] Sub-Task 3: integrate MLflow tracking per pipeline run
-- [ ] Sub-Task 3: implement `ml/drift_detector.py` (PSI monitoring)
+- [x] Sub-Task 3: `ml/pipelines/pipeline_axis1.py` — IsolationForest + LOF ensemble, `validate_output()`, MLflow tracking
+- [x] Sub-Task 3: `ml/pipelines/pipeline_axis2.py` — StandardScaler → UMAP → HDBSCAN, `validate_output()`, MLflow tracking
+- [x] Sub-Task 3: `ml/pipelines/pipeline_axis3.py` — StandardScaler → K-Means++, segment labelling, `validate_output()`, MLflow tracking
+- [x] Sub-Task 3: MLflow integrated in all three pipelines (params, metrics, joblib artefact)
+- [x] Sub-Task 3: `ml/drift_detector.py` — PSI monitoring, `detect_drift()` → `DriftReport`, retrain alerts (PSI > 0.20)
+- [x] Sub-Task 3: `tests/unit/test_pipelines.py` — 37 unit tests (13 Axis 1, 11 Axis 2, 13 Axis 3), all passing
+- [x] Sub-Task 3: `tests/unit/test_drift_detector.py` — 23 unit tests (`compute_psi`, `compute_psi_report`, `detect_drift`), all passing

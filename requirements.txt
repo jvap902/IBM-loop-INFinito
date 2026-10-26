@@ -46,8 +46,11 @@ matplotlib>=3.8.0
 seaborn>=0.13.0
 jupyter>=1.0.0
 
-# ── Sub-Tasks 3-6 (installed when needed) ──────────────────────────────────
-# mlflow>=2.10.0
+# ── Sub-Task 3 (ML Pipelines & MLOps) ──────────────────────────────────────
+mlflow>=2.10.0
+joblib>=1.3.0            # model serialisation (.pkl artefacts)
+
+# ── Sub-Tasks 4-6 (installed when needed) ──────────────────────────────────
 # shap>=0.44.0
 # nannyml>=0.11.0
 # fastapi>=0.110.0
