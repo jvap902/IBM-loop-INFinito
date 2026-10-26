@@ -46,6 +46,8 @@ from api.schemas import (
     ToolParameter,
 )
 from ml.pipelines import pipeline_axis1, pipeline_axis2, pipeline_axis3
+from audit.logger import get_audit_logger
+from audit import explainability as _xai
 
 logger = logging.getLogger(__name__)
 
@@ -254,6 +256,8 @@ async def run_axis1(
         run_id, body.region_filter, body.h3_resolution, body.anomaly_threshold,
     )
 
+    audit = get_audit_logger()
+
     try:
         gold_df = _load_gold(body.region_filter, body.h3_resolution)
     except HTTPException:
@@ -261,6 +265,21 @@ async def run_axis1(
     except Exception as exc:
         logger.exception("run_id=%s axis=axis1 error loading gold: %s", run_id, exc)
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(exc)) from exc
+
+    # ── Run pipeline (re-fit scaler + iforest to capture artefacts for SHAP) ─
+    from sklearn.preprocessing import StandardScaler
+    from sklearn.ensemble import IsolationForest
+
+    feature_cols = [c for c in pipeline_axis1.AXIS1_FEATURES if c in gold_df.columns]
+    work_df = gold_df[["h3_id"] + feature_cols].dropna(subset=feature_cols).copy()
+    scaler_ax1 = StandardScaler()
+    X_scaled_ax1 = scaler_ax1.fit_transform(work_df[feature_cols].values.astype(float))
+    iforest_ax1 = IsolationForest(
+        contamination=body.contamination,
+        random_state=42,
+        n_estimators=200,
+    )
+    iforest_ax1.fit(X_scaled_ax1)
 
     try:
         result_df = pipeline_axis1.run(
@@ -297,6 +316,36 @@ async def run_axis1(
     logger.info(
         "run_id=%s axis=axis1 total=%d critical=%d duration=%.3fs",
         run_id, total_scored, n_critical, duration,
+    )
+
+    # ── SHAP explainability ────────────────────────────────────────────────
+    is_critical_mask = result_df["is_critical"].values
+    explanation = _xai.explain_axis1(
+        X_scaled=X_scaled_ax1,
+        feature_names=feature_cols,
+        iforest=iforest_ax1,
+        is_critical_mask=is_critical_mask,
+    )
+
+    # ── Audit log ─────────────────────────────────────────────────────────
+    audit.log_tool_call(
+        run_id=run_id,
+        agent_id="operational",
+        tool_name="axis1_run",
+        tool_input={
+            "region_filter": body.region_filter,
+            "h3_resolution": body.h3_resolution,
+            "anomaly_threshold": body.anomaly_threshold,
+            "contamination": body.contamination,
+            "top_n": body.top_n,
+        },
+        tool_output_summary={
+            "total_hexagons_scored": total_scored,
+            "n_critical": n_critical,
+            "anomaly_rate": round(n_critical / total_scored, 6) if total_scored else 0.0,
+            "duration_seconds": duration,
+        },
+        explanation=explanation,
     )
 
     return Axis1RunResponse(
@@ -449,6 +498,8 @@ async def run_axis2(
         run_id, body.region_filter, body.min_cluster_size,
     )
 
+    audit = get_audit_logger()
+
     try:
         gold_df = _load_gold(body.region_filter, body.h3_resolution)
     except HTTPException:
@@ -514,6 +565,34 @@ async def run_axis2(
         run_id, n_real_clusters, noise_rate * 100, duration,
     )
 
+    # ── Z-score proxy explainability ──────────────────────────────────────
+    feature_cols_ax2 = [c for c in pipeline_axis2.AXIS2_FEATURES if c in gold_df.columns]
+    explanation_ax2 = _xai.explain_axis2_from_pipeline(
+        gold_df=gold_df,
+        result_df=result_df,
+        feature_cols=feature_cols_ax2,
+    )
+
+    # ── Audit log ─────────────────────────────────────────────────────────
+    audit.log_tool_call(
+        run_id=run_id,
+        agent_id="operational",
+        tool_name="axis2_run",
+        tool_input={
+            "region_filter": body.region_filter,
+            "h3_resolution": body.h3_resolution,
+            "min_cluster_size": body.min_cluster_size,
+            "skip_umap": body.skip_umap,
+        },
+        tool_output_summary={
+            "total_hexagons_processed": len(result_df),
+            "n_clusters": n_real_clusters,
+            "noise_rate": round(noise_rate, 6),
+            "duration_seconds": duration,
+        },
+        explanation=explanation_ax2,
+    )
+
     return Axis2RunResponse(
         run_id=run_id,
         duration_seconds=duration,
@@ -548,12 +627,25 @@ async def run_axis3(
         run_id, body.region_filter, body.n_clusters,
     )
 
+    audit = get_audit_logger()
+
     try:
         gold_df = _load_gold(body.region_filter, body.h3_resolution)
     except HTTPException:
         raise
     except Exception as exc:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(exc)) from exc
+
+    # ── Fit scaler + KMeans to retain centroids for SHAP ─────────────────
+    from sklearn.preprocessing import StandardScaler
+    from sklearn.cluster import KMeans
+
+    feature_cols_ax3 = [c for c in pipeline_axis3.AXIS3_FEATURES if c in gold_df.columns]
+    work_ax3 = gold_df[["h3_id"] + feature_cols_ax3].dropna(subset=feature_cols_ax3).copy()
+    scaler_ax3 = StandardScaler()
+    X_scaled_ax3 = scaler_ax3.fit_transform(work_ax3[feature_cols_ax3].values.astype(float))
+    km_ax3 = KMeans(n_clusters=body.n_clusters, init="k-means++", n_init=10, random_state=42)
+    km_ax3.fit(X_scaled_ax3)
 
     try:
         result_df = pipeline_axis3.run(
@@ -619,6 +711,42 @@ async def run_axis3(
     logger.info(
         "run_id=%s axis=axis3 segments=%d hexagons=%d sil_global=%s duration=%.3fs",
         run_id, n_segments, n_total, sil_global, duration,
+    )
+
+    # ── KernelExplainer explainability ────────────────────────────────────
+    label_map_ax3 = result_df.set_index("h3_id")["segment_id"].to_dict()
+    work_ax3_aligned = work_ax3[work_ax3["h3_id"].isin(result_df["h3_id"])].copy()
+    X_for_shap = scaler_ax3.transform(
+        work_ax3_aligned[feature_cols_ax3].values.astype(float)
+    )
+    labels_for_shap = np.array([
+        label_map_ax3.get(h3, 0) for h3 in work_ax3_aligned["h3_id"]
+    ])
+    explanation_ax3 = _xai.explain_axis3(
+        X_scaled=X_for_shap,
+        feature_names=feature_cols_ax3,
+        centroids=km_ax3.cluster_centers_,
+        segment_labels=labels_for_shap,
+    )
+
+    # ── Audit log ─────────────────────────────────────────────────────────
+    audit.log_tool_call(
+        run_id=run_id,
+        agent_id="operational",
+        tool_name="axis3_run",
+        tool_input={
+            "region_filter": body.region_filter,
+            "h3_resolution": body.h3_resolution,
+            "n_clusters": body.n_clusters,
+            "sweep_if_low_silhouette": body.sweep_if_low_silhouette,
+        },
+        tool_output_summary={
+            "total_hexagons_segmented": n_total,
+            "n_segments": int(n_segments),
+            "silhouette_score_global": sil_global,
+            "duration_seconds": duration,
+        },
+        explanation=explanation_ax3,
     )
 
     return Axis3RunResponse(

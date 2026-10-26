@@ -290,3 +290,89 @@ Ao finalizar a implementação da Sub-task 4, forneça um **Relatório de Status
 - **Em caso de Erro ou Impasse:**
   - Descrição detalhada da falha (ex.: erro de importação dos módulos de ML, incompatibilidade nos schemas Pydantic ou falha no middleware de autenticação).
   - Diagnóstico do impacto e ações necessárias para correção.
+
+
+# AGENTE EXECUTOR: IMPLEMENTAÇÃO DA SUB-TASK 5 (CAMADA DE TRANSPARÊNCIA E AUDITORIA)
+
+## 1. PAPEL E ESCOPO EXCLUSIVO
+Você é um Agente Executor Especialista em Governança de IA, Auditabilidade e IA Explicável (XAI). Sua única responsabilidade nesta etapa é implementar a **Sub-Task 5 (Transparency & Auditability Layer)**, conforme especificado no documento `telecom-ai-platform-plan.md` e no diagrama de arquitetura do sistema.
+
+⚠️ **RESTRIÇÃO DE ESCOPO:** As Sub-tasks 1 a 4 já foram concluídas (ingestão, EDA, pipelines de ML e API de ferramentas). Você **NÃO** deve implementar a lógica do agente orquestrador final (Sub-task 6). Seu objetivo é construir a infraestrutura transversal de logs de auditoria, explicabilidade de modelos (SHAP) e exposição de consulta de eventos auditáveis.
+
+---
+
+## 2. CONTEXTO DE ENTRADA E ARQUITETURA
+A aplicação conta com endpoints FastAPI em `api/` e pipelines de ML funcionais em `ml/`. 
+
+De acordo com a arquitetura do sistema, a Sub-task 5 intercepta as chamadas das ferramentas e modelos, registrando eventos estruturados e enriquecendo as respostas analíticas com explicabilidade local e global:
+
+1. **AuditLogger (`audit/logger.py`):** Sistema central de persistência de eventos em JSONL (desenvolvimento) ou PostgreSQL (produção).
+2. **Explicabilidade SHAP (`audit/explainability.py`):** Módulo para cálculo de importância de variáveis e explicações locais por ecomodelo.
+3. **Endpoint de Consulta (`GET /audit/events`):** Endpoint REST na API para auditoria por revisores humanos.
+4. **Documentação de Governança (`audit/README.md`):** Especificação do modelo de auditabilidade e política de retenção.
+
+---
+
+## 3. TAREFAS E MÓDULOS A DESENVOLVER
+
+A implementação deve ser estritamente **modular**, organizando-se dentro do diretório `audit/` e integrando-se de forma limpa aos módulos existentes em `api/` e `ml/`:
+
+### 3.1. Esquema de Eventos e Logger de Auditoria (`audit/schema.py` e `audit/logger.py`)
+- Definir o modelo de dados Pydantic `AuditEvent`:
+  - `event_id`: UUID único do evento.
+  - `timestamp`: ISO-8601 UTC.
+  - `agent_id`: Identificador do agente (`planner` ou `operational`).
+  - `event_type`: Tipo de evento (`tool_call`, `reasoning_step`, `report_generated`, `model_run`).
+  - `tool_name`, `tool_input`, `tool_output_summary`: Detalhes da invocação de ferramentas.
+  - `reasoning_text`: Texto da cadeia de raciocínio (Chain-of-Thought).
+  - `run_id`, `model_version`: Metadados da execução.
+- Criar a classe `AuditLogger` com os métodos:
+  - `log_tool_call()`
+  - `log_reasoning()`
+  - `log_model_run()`
+- Implementar persistência append-only em arquivo JSONL local com fallback/suporte a tabela PostgreSQL `audit_events`.
+
+### 3.2. Módulo de Explicabilidade de Modelos (`audit/explainability.py`)
+- **Eixo 1 (IsolationForest):** Utilizar `shap.TreeExplainer` para extrair as top-3 variáveis que mais contribuíram para o score de anomalia de cada hexágono crítico.
+- **Eixo 2 (HDBSCAN):** Calcular médias de features por cluster e Z-scores em relação à distribuição global como métrica de explicabilidade proxy.
+- **Eixo 3 (K-Means++):** Utilizar `shap.KernelExplainer` ou análise de distância dos centroides para indicar as top-3 variáveis explicativas de cada segmento promocional.
+
+### 3.3. Integração com a API FastAPI
+- Acoplar o `AuditLogger` nos endpoints existentes em `api/routes/tools.py`:
+  - Registrar requisição recebida, parâmetros, metadados do modelo e sumário dos resultados retornados.
+- Enriquecer as respostas dos endpoints `POST /tools/axis1/run`, `POST /tools/axis2/run` e `POST /tools/axis3/run` com os dados de explicabilidade/SHAP calculados.
+
+### 3.4. Endpoint de Consulta de Auditoria (`GET /audit/events`)
+- Criar a rota `GET /audit/events` na aplicação FastAPI.
+- Permitir filtragem parametrizada por:
+  - `agent_id`
+  - `event_type`
+  - `date_range` (data início e fim)
+  - `run_id`
+
+### 3.5. Documentação e Testes
+- Criar o arquivo `audit/README.md` detalhando o ciclo de vida dos logs, privacidade, conformidade com a LGPD e instruções de consulta para auditores.
+- Escrever testes unitários em `tests/test_audit.py` validando gravação de logs, formato do schema `AuditEvent` e geração das explicações SHAP.
+
+---
+
+## 4. REQUISITOS DE MODULARIDADE E PADRÕES DE CÓDIGO
+- **Baixo Acoplamento:** O `AuditLogger` e os explicadores SHAP devem ser desenvolvidos como componentes independentes que possam ser chamados sem alterar as regras de negócio centrais dos algoritmos de ML.
+- **Performance:** As explicações SHAP não devem inviabilizar o tempo de resposta da API (utilizar amostragens apropriadas ou aproximações otimizadas para calculo rápido).
+- **Sem Vazamento de PII:** Garantir que nenhum dado pessoal sensível seja registrado nos logs de auditoria, mantendo conformidade contínua com a LGPD.
+
+---
+
+## 5. INSTRUÇÕES DE FINALIZAÇÃO E REPORT
+
+Ao finalizar a implementação da Sub-task 5, forneça um **Relatório de Status Final**:
+
+- **Em caso de Sucesso:**
+  - Estrutura dos módulos criados no diretório `audit/`.
+  - Exemplo do JSON de um evento registrado (`AuditEvent`).
+  - Confirmação da integração do SHAP nos payloads dos endpoints de ferramentas.
+  - Resumo dos testes executados em `tests/test_audit.py`.
+
+- **Em caso de Erro ou Impasse:**
+  - Diagnóstico detalhado da falha (ex.: lentidão no cálculo do SHAP, erro de escrita do logger ou problema de integração com os endpoints da FastAPI).
+  - Sugestões de correção técnica e ajuste de arquitetura.

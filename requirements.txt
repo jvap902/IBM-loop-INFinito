@@ -58,8 +58,10 @@ PyYAML>=6.0.1            # openapi.yaml export
 pytest-asyncio>=0.23.0   # async test support
 anyio>=4.0.0             # async runtime for httpx test client
 
-# ── Sub-Tasks 5-6 (installed when needed) ──────────────────────────────────
-# shap>=0.44.0
+# ── Sub-Task 5 (Transparency & Auditability Layer) ──────────────────────────
+shap>=0.44.0
+
+# ── Sub-Task 6 (installed when needed) ──────────────────────────────────────
 # nannyml>=0.11.0
 # langgraph>=0.0.30
 # langchain>=0.1.0

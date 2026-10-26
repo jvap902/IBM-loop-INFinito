@@ -26,6 +26,7 @@ from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 
 from api.routes.tools import router as tools_router
+from api.routes.audit import router as audit_router
 from api.schemas import HealthResponse
 
 # ── Structured JSON logging ────────────────────────────────────────────────
@@ -138,6 +139,9 @@ def create_app() -> FastAPI:
 
     # ── Tool routes under /v1 prefix ───────────────────────────────────────
     app.include_router(tools_router, prefix="/v1")
+
+    # ── Audit routes under /v1 prefix ──────────────────────────────────────
+    app.include_router(audit_router, prefix="/v1")
 
     logger.info(
         '{"event": "startup", "api_version": "%s", "log_level": "%s"}',
