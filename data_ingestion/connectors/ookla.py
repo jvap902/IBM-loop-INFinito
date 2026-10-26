@@ -22,8 +22,8 @@ from typing import Literal
 
 import pandas as pd
 
-from ingestion.base import BaseConnector
-from processing.spatial import quadkey_to_h3
+from data_ingestion.connectors.base import BaseConnector
+from data_ingestion.processing.spatial import quadkey_to_h3
 
 logger = logging.getLogger(__name__)
 
@@ -70,12 +70,10 @@ class OoklaConnector(BaseConnector):
         logger.info("[ookla] Reading s3 path: %s (--no-sign-request)", s3_path)
 
         try:
-            # Use pyarrow/fsspec with anonymous S3 access
             import pyarrow.dataset as ds
             import pyarrow.fs as pafs
 
             s3fs = pafs.S3FileSystem(anonymous=True, region="us-west-2")
-            # strip the "s3://" prefix for pyarrow
             path_no_scheme = s3_path.replace("s3://", "")
             dataset = ds.dataset(path_no_scheme, filesystem=s3fs, format="parquet")
             df = dataset.to_table().to_pandas()
@@ -92,9 +90,7 @@ class OoklaConnector(BaseConnector):
         if df.empty:
             return df
 
-        # ------------------------------------------------------------------
         # Convert quadkey → tile centroid (lat/lon) then filter to Brazil bbox
-        # ------------------------------------------------------------------
         df = self._add_tile_centroid(df)
         pre_filter = len(df)
         df = df[

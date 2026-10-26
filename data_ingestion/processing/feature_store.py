@@ -25,7 +25,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from processing.sanitise import run_sanitisation
+from data_ingestion.processing.sanitise import run_sanitisation
 
 logger = logging.getLogger(__name__)
 
@@ -91,26 +91,21 @@ def build_silver(
             .apply(
                 lambda g: pd.Series(
                     {
-                        # Weighted average by test count
                         "d_down": (
                             (g["avg_d_mbps"] * g["tests"]).sum() / g["tests"].sum()
-                            if g["tests"].sum() > 0
-                            else None
+                            if g["tests"].sum() > 0 else None
                         ),
                         "d_up": (
                             (g["avg_u_mbps"] * g["tests"]).sum() / g["tests"].sum()
-                            if g["tests"].sum() > 0
-                            else None
+                            if g["tests"].sum() > 0 else None
                         ),
                         "lat": (
                             (g["avg_lat_ms"] * g["tests"]).sum() / g["tests"].sum()
-                            if g["tests"].sum() > 0
-                            else None
+                            if g["tests"].sum() > 0 else None
                         ),
                         "vol_test": (
                             g["tests"].sum() / g["devices"].sum()
-                            if g["devices"].sum() > 0
-                            else None
+                            if g["devices"].sum() > 0 else None
                         ),
                         "low_confidence": bool((g["tests"] < 3).all()),
                     }
@@ -122,7 +117,9 @@ def build_silver(
         logger.info("[silver] Ookla hexagons: %d", len(ookla_agg))
     else:
         logger.warning("[silver] Ookla DataFrame empty; d_down/d_up/lat/vol_test will be null.")
-        ookla_agg = pd.DataFrame(columns=[h3_col, "d_down", "d_up", "lat", "vol_test", "low_confidence"])
+        ookla_agg = pd.DataFrame(
+            columns=[h3_col, "d_down", "d_up", "lat", "vol_test", "low_confidence"]
+        )
         ookla_agg[h3_col] = ookla_agg[h3_col].astype(str)
 
     # ------------------------------------------------------------------
@@ -158,7 +155,6 @@ def build_silver(
             on=h3_col,
             how="left",
         )
-        # Fallback: if lat is null, use M-Lab MinRTT
         silver["lat"] = silver["lat"].combine_first(silver["mlab_min_rtt_ms"])
         silver = silver.drop(columns=["mlab_min_rtt_ms", "mlab_down_mbps"], errors="ignore")
     else:
@@ -191,7 +187,7 @@ def build_silver(
         silver["n_erb"] = None
 
     # ------------------------------------------------------------------
-    # 7.  Supplement n_erb with OpenCelliD (sum, floor at Anatel count)
+    # 7.  Supplement n_erb with OpenCelliD (max of both sources)
     # ------------------------------------------------------------------
     if not opencellid_df.empty and h3_col in opencellid_df.columns:
         silver = silver.merge(
@@ -199,7 +195,6 @@ def build_silver(
             on=h3_col,
             how="left",
         )
-        # Use the max of both sources as a conservative density estimate
         silver["n_erb"] = silver[["n_erb", "n_erb_ocid"]].max(axis=1)
         silver = silver.drop(columns=["n_erb_ocid"])
         logger.info(
@@ -209,14 +204,8 @@ def build_silver(
 
     # ------------------------------------------------------------------
     # 8.  Merge Anatel municipality-level HHI + vol_reclam
-    #     Municipality → hexagon join via municipality code embedded in
-    #     the IBGE sector hierarchy.  For cells without a direct match,
-    #     the value is left null and will be imputed by spatial median.
     # ------------------------------------------------------------------
     if not anatel_muni_df.empty:
-        # anatel_muni_df has columns [municipio, uf, HHI, vol_reclam]
-        # The silver layer does not have a municipality column at this point;
-        # if ibge_df carries a municipality code, use it — otherwise keep null.
         if "municipio" in silver.columns:
             silver = silver.merge(
                 anatel_muni_df[["municipio", "uf", "HHI", "vol_reclam"]],
@@ -236,8 +225,7 @@ def build_silver(
 
     logger.info(
         "[silver] Silver layer built: %d rows × %d columns",
-        len(silver),
-        len(silver.columns),
+        len(silver), len(silver.columns),
     )
     return silver
 
@@ -277,10 +265,8 @@ def build_gold(
 
     h3_col = f"h3_r{h3_resolution}"
 
-    # Run full sanitisation
     silver_san = run_sanitisation(silver, h3_col=h3_col)
 
-    # Ensure all x_hi columns exist (fill with NaN if missing)
     for col in X_HI_COLUMNS:
         if col not in silver_san.columns:
             logger.warning(
@@ -289,10 +275,8 @@ def build_gold(
             )
             silver_san[col] = float("nan")
 
-    # Build Gold table
     gold = silver_san[[h3_col] + X_HI_COLUMNS + ["low_confidence"]].copy()
 
-    # Add secondary H3 resolution column if available
     h3_col_alt = "h3_r9" if h3_resolution == 8 else "h3_r8"
     if h3_col_alt in silver_san.columns:
         gold[h3_col_alt] = silver_san[h3_col_alt]
@@ -300,11 +284,8 @@ def build_gold(
     gold["year"] = year
     gold["month"] = month
     gold["h3_res"] = h3_resolution
-
-    # Rename primary H3 col to generic "h3_id" for schema consistency
     gold = gold.rename(columns={h3_col: "h3_id"})
 
-    # Feature fill-rate audit
     for col in X_HI_COLUMNS:
         null_pct = 100.0 * gold[col].isna().sum() / max(len(gold), 1)
         logger.info("[gold] feature=%r null_pct=%.1f%%", col, null_pct)
@@ -312,11 +293,9 @@ def build_gold(
     coverage_ok = gold["h3_id"].notna().sum() / max(len(gold), 1)
     logger.info(
         "[gold] Gold table finalised: %d hexagons | H3 coverage=%.1f%%",
-        len(gold),
-        100.0 * coverage_ok,
+        len(gold), 100.0 * coverage_ok,
     )
 
-    # Persist to Parquet
     if output_dir is not None:
         partition_path = (
             Path(output_dir)

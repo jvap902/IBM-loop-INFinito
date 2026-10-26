@@ -2,8 +2,6 @@
 
 Schedules
 ---------
-Each source runs at its own cadence as specified in knowledge-api.json:
-
     Source          | Update frequency | Cron schedule
     --------------- | ---------------- | ----------------
     Ookla           | Quarterly        | 0 6 1 */3 *
@@ -13,23 +11,11 @@ Each source runs at its own cadence as specified in knowledge-api.json:
     M-Lab NDT       | Daily            | 0 4 * * *
     Cloudflare Radar| Near-real-time   | 0 * * * *  (hourly)
 
-A master DAG (``telecom_feature_store_daily``) runs daily and triggers the
-individual source DAGs that are due on that day.  A monthly ``gold_build``
-task is chained after the daily ingestion tasks.
+A master DAG (``telecom_feature_store_daily``) runs daily and chains all
+ingestion tasks followed by a monthly Gold build step.
 
-This file declares all individual source DAGs plus the orchestrating master.
-
-Usage
------
-Place this file in your Airflow ``dags/`` directory.  The following
-environment variables are expected (defined in ``.env.example``):
-
-    BRONZE_DIR          — local/mounted path for Bronze Parquet storage
-    GOLD_DIR            — local/mounted path for Gold Parquet storage
-    OPENCELLID_API_KEY  — OpenCelliD access token
-    CLOUDFLARE_API_TOKEN— Cloudflare Radar API bearer token
-    GCP_PROJECT         — GCP project for BigQuery (M-Lab)
-    GOOGLE_APPLICATION_CREDENTIALS — path to GCP service account JSON
+Place this file in your Airflow ``dags/`` directory.  Required environment
+variables are documented in ``.env.example`` at the project root.
 """
 from __future__ import annotations
 
@@ -57,13 +43,13 @@ _GOLD_DIR = Path(os.getenv("GOLD_DIR", "/data/gold"))
 
 
 # ---------------------------------------------------------------------------
-# Task callables (imported lazily to avoid Airflow DAG-parse overhead)
+# Task callables
 # ---------------------------------------------------------------------------
 
 def _ingest_ookla(**ctx):
-    from ingestion.connector_ookla import OoklaConnector
+    from data_ingestion.connectors.ookla import OoklaConnector
 
-    ds = ctx["ds"]  # YYYY-MM-DD execution date
+    ds = ctx["ds"]
     year, quarter = _date_to_ookla_quarter(ds)
     for ctype in ["fixed", "mobile"]:
         conn = OoklaConnector(connection_type=ctype, year=year, quarter=quarter)
@@ -71,31 +57,31 @@ def _ingest_ookla(**ctx):
 
 
 def _ingest_ibge(**ctx):
-    from ingestion.connector_ibge import IBGEConnector
+    from data_ingestion.connectors.ibge import IBGEConnector
 
     IBGEConnector().run(_BRONZE_DIR)
 
 
 def _ingest_anatel(**ctx):
-    from ingestion.connector_anatel import AnatelConnector
+    from data_ingestion.connectors.anatel import AnatelConnector
 
     AnatelConnector().run(_BRONZE_DIR)
 
 
 def _ingest_opencellid(**ctx):
-    from ingestion.connector_opencellid import OpenCelliDConnector
+    from data_ingestion.connectors.opencellid import OpenCelliDConnector
 
     OpenCelliDConnector().run(_BRONZE_DIR)
 
 
 def _ingest_mlab(**ctx):
-    from ingestion.connector_mlab import MLABConnector
+    from data_ingestion.connectors.mlab import MLABConnector
 
     MLABConnector().run(_BRONZE_DIR)
 
 
 def _ingest_cloudflare(**ctx):
-    from ingestion.connector_cloudflare import CloudflareRadarConnector
+    from data_ingestion.connectors.cloudflare import CloudflareRadarConnector
 
     CloudflareRadarConnector().run(_BRONZE_DIR)
 
@@ -103,22 +89,25 @@ def _ingest_cloudflare(**ctx):
 def _build_gold_layer(**ctx):
     """Assemble Silver → Gold after all ingestion tasks complete."""
     import pandas as pd
-    from processing.feature_store import build_silver, build_gold
-    from processing.quality import validate_gold
+    from data_ingestion.processing.feature_store import build_silver, build_gold
+    from data_ingestion.processing.quality import validate_gold
 
     ds = ctx["ds"]
     year, month = int(ds[:4]), int(ds[5:7])
 
-    # Load Bronze artefacts
     def _load(src_id: str, filename: str) -> pd.DataFrame:
         path = _BRONZE_DIR / src_id / filename
         if path.exists():
             return pd.read_parquet(path)
         return pd.DataFrame()
 
-    ookla_fixed = _load("ookla_speedtest_fixed", "data.parquet")
-    ookla_mobile = _load("ookla_speedtest_mobile", "data.parquet")
-    ookla_df = pd.concat([ookla_fixed, ookla_mobile], ignore_index=True)
+    ookla_df = pd.concat(
+        [
+            _load("ookla_speedtest_fixed", "data.parquet"),
+            _load("ookla_speedtest_mobile", "data.parquet"),
+        ],
+        ignore_index=True,
+    )
 
     ibge_df = _load("ibge_geodados", "data.parquet")
     anatel_muni = _load("anatel_dados", "municipality_metrics.parquet")
@@ -156,7 +145,6 @@ def _build_gold_layer(**ctx):
 def _date_to_ookla_quarter(ds: str) -> tuple[int, int]:
     """Convert YYYY-MM-DD execution date to (year, quarter) for Ookla."""
     month = int(ds[5:7])
-    # Ookla releases with ~1 quarter lag; fetch the previous quarter
     year = int(ds[:4])
     prev_month = month - 3
     if prev_month <= 0:
@@ -177,10 +165,7 @@ with DAG(
     default_args=_DEFAULT_ARGS,
     tags=["ingestion", "ookla", "sub-task-1"],
 ) as dag_ookla:
-    PythonOperator(
-        task_id="ingest_ookla",
-        python_callable=_ingest_ookla,
-    )
+    PythonOperator(task_id="ingest_ookla", python_callable=_ingest_ookla)
 
 # ---------------------------------------------------------------------------
 # DAG: IBGE (annual)
@@ -194,10 +179,7 @@ with DAG(
     default_args=_DEFAULT_ARGS,
     tags=["ingestion", "ibge", "sub-task-1"],
 ) as dag_ibge:
-    PythonOperator(
-        task_id="ingest_ibge",
-        python_callable=_ingest_ibge,
-    )
+    PythonOperator(task_id="ingest_ibge", python_callable=_ingest_ibge)
 
 # ---------------------------------------------------------------------------
 # DAG: Anatel (monthly)
@@ -211,10 +193,7 @@ with DAG(
     default_args=_DEFAULT_ARGS,
     tags=["ingestion", "anatel", "sub-task-1"],
 ) as dag_anatel:
-    PythonOperator(
-        task_id="ingest_anatel",
-        python_callable=_ingest_anatel,
-    )
+    PythonOperator(task_id="ingest_anatel", python_callable=_ingest_anatel)
 
 # ---------------------------------------------------------------------------
 # DAG: OpenCelliD (daily)
@@ -228,10 +207,7 @@ with DAG(
     default_args=_DEFAULT_ARGS,
     tags=["ingestion", "opencellid", "sub-task-1"],
 ) as dag_opencellid:
-    PythonOperator(
-        task_id="ingest_opencellid",
-        python_callable=_ingest_opencellid,
-    )
+    PythonOperator(task_id="ingest_opencellid", python_callable=_ingest_opencellid)
 
 # ---------------------------------------------------------------------------
 # DAG: M-Lab NDT (daily)
@@ -245,10 +221,7 @@ with DAG(
     default_args=_DEFAULT_ARGS,
     tags=["ingestion", "mlab", "sub-task-1"],
 ) as dag_mlab:
-    PythonOperator(
-        task_id="ingest_mlab",
-        python_callable=_ingest_mlab,
-    )
+    PythonOperator(task_id="ingest_mlab", python_callable=_ingest_mlab)
 
 # ---------------------------------------------------------------------------
 # DAG: Cloudflare Radar (hourly)
@@ -262,13 +235,10 @@ with DAG(
     default_args=_DEFAULT_ARGS,
     tags=["ingestion", "cloudflare", "sub-task-1"],
 ) as dag_cloudflare:
-    PythonOperator(
-        task_id="ingest_cloudflare",
-        python_callable=_ingest_cloudflare,
-    )
+    PythonOperator(task_id="ingest_cloudflare", python_callable=_ingest_cloudflare)
 
 # ---------------------------------------------------------------------------
-# Master DAG: daily orchestrator → Gold build (monthly)
+# Master DAG: daily orchestrator → Gold build
 # ---------------------------------------------------------------------------
 with DAG(
     dag_id="telecom_feature_store_daily",
@@ -279,21 +249,12 @@ with DAG(
     default_args=_DEFAULT_ARGS,
     tags=["orchestration", "feature-store", "sub-task-1"],
 ) as dag_master:
-
     t_ookla = PythonOperator(task_id="ingest_ookla", python_callable=_ingest_ookla)
     t_opencellid = PythonOperator(task_id="ingest_opencellid", python_callable=_ingest_opencellid)
     t_mlab = PythonOperator(task_id="ingest_mlab", python_callable=_ingest_mlab)
     t_cloudflare = PythonOperator(task_id="ingest_cloudflare", python_callable=_ingest_cloudflare)
     t_anatel = PythonOperator(task_id="ingest_anatel", python_callable=_ingest_anatel)
     t_ibge = PythonOperator(task_id="ingest_ibge", python_callable=_ingest_ibge)
+    t_gold = PythonOperator(task_id="build_gold", python_callable=_build_gold_layer)
 
-    t_gold = PythonOperator(
-        task_id="build_gold",
-        python_callable=_build_gold_layer,
-        # Only run on the 1st of each month
-        # (handled by downstream branching; all runs attempt but skip if
-        #  not the 1st — Airflow ShortCircuitOperator variant can be used)
-    )
-
-    # All ingestion tasks → Gold build
     [t_ookla, t_opencellid, t_mlab, t_cloudflare, t_anatel, t_ibge] >> t_gold

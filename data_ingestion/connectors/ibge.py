@@ -32,19 +32,17 @@ from pathlib import Path
 import pandas as pd
 import requests
 
-from ingestion.base import BaseConnector
-from processing.spatial import latlon_to_h3
+from data_ingestion.connectors.base import BaseConnector
+from data_ingestion.processing.spatial import latlon_to_h3
 
 logger = logging.getLogger(__name__)
 
-# Override via environment variables for different state/UF scope
-_UF_FILTER = os.getenv("IBGE_UF_FILTER", "")  # e.g. "35" for São Paulo; "" = all
+_UF_FILTER = os.getenv("IBGE_UF_FILTER", "")
 _CNEFE_PARQUET_URL = os.getenv(
     "IBGE_CNEFE_URL",
     "https://censo2022.ibge.gov.br/media/com_mediadirectory/arquivos/cnefe_brasil_parquet.zip",
 )
 _SIDRA_BASE = "https://servicodados.ibge.gov.br/api/v3/agregados"
-# Table 9927 → Renda média domiciliar per capita (Censo 2022, sector level)
 _SIDRA_TABLE = "9927"
 _SIDRA_VAR = "V009"
 
@@ -83,17 +81,13 @@ class IBGEConnector(BaseConnector):
 
         logger.info("[ibge] CNEFE raw points: %d", len(cnefe_raw))
 
-        # Filter by UF if requested
         if _UF_FILTER:
             pre = len(cnefe_raw)
             cnefe_raw = cnefe_raw[
                 cnefe_raw["COD_UF"].astype(str) == str(_UF_FILTER)
             ].copy()
-            self._log_discard(
-                f"UF != {_UF_FILTER}", pre - len(cnefe_raw), pre
-            )
+            self._log_discard(f"UF != {_UF_FILTER}", pre - len(cnefe_raw), pre)
 
-        # Add H3 indexes
         for res in self.h3_resolutions:
             col = f"h3_r{res}"
             cnefe_raw[col], failed = latlon_to_h3(
@@ -104,11 +98,6 @@ class IBGEConnector(BaseConnector):
                     "[ibge] %d points failed H3 assignment at res %d", failed, res
                 )
 
-        # ------------------------------------------------------------------
-        # Aggregate per hexagon (primary resolution = 8)
-        # COD_ESPECI: 1 = private household, 2 = commercial
-        # LGPD: after groupby the individual lat/lon columns are dropped.
-        # ------------------------------------------------------------------
         res_col = f"h3_r{self.h3_resolutions[0]}"
         agg = (
             cnefe_raw.groupby(res_col)
@@ -128,7 +117,6 @@ class IBGEConnector(BaseConnector):
         )
         logger.info("[ibge] Hexagons after CNEFE aggregation: %d", len(agg))
 
-        # Fetch SIDRA income and join
         income_df = self._fetch_sidra_income()
         if not income_df.empty:
             agg = agg.merge(
@@ -153,7 +141,6 @@ class IBGEConnector(BaseConnector):
 
     # ------------------------------------------------------------------
     def _load_cnefe(self) -> pd.DataFrame:
-        """Load CNEFE from local cache or download."""
         if self.cnefe_local_path and self.cnefe_local_path.exists():
             logger.info("[ibge] Loading CNEFE from local cache: %s", self.cnefe_local_path)
             return pd.read_parquet(self.cnefe_local_path)
@@ -162,7 +149,6 @@ class IBGEConnector(BaseConnector):
         try:
             resp = requests.get(_CNEFE_PARQUET_URL, timeout=300, stream=True)
             resp.raise_for_status()
-            # The download is a zip containing a Parquet; handle both cases
             content_type = resp.headers.get("Content-Type", "")
             raw_bytes = resp.content
             if "zip" in content_type or _CNEFE_PARQUET_URL.endswith(".zip"):
@@ -187,7 +173,6 @@ class IBGEConnector(BaseConnector):
             )
 
     def _fetch_sidra_income(self) -> pd.DataFrame:
-        """Fetch per-sector income from SIDRA aggregate table 9927."""
         url = f"{_SIDRA_BASE}/{_SIDRA_TABLE}/periodos/2022/variaveis/{_SIDRA_VAR}"
         params = {"localidades": "N10[all]", "formato": "us"}
         try:

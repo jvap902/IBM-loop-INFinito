@@ -28,12 +28,11 @@ from typing import Optional
 import pandas as pd
 import requests
 
-from ingestion.base import BaseConnector
-from processing.spatial import latlon_to_h3
+from data_ingestion.connectors.base import BaseConnector
+from data_ingestion.processing.spatial import latlon_to_h3
 
 logger = logging.getLogger(__name__)
 
-# Configurable URLs — override via environment variables
 _SCM_URL = os.getenv(
     "ANATEL_SCM_URL",
     "https://www.anatel.gov.br/dadosabertos/paineis_de_dados/acessos/scm/SCM_Accesses.csv",
@@ -82,20 +81,11 @@ class AnatelConnector(BaseConnector):
         reclam_df = self._compute_vol_reclam(reclam, scm, smp)
         erb_df = self._compute_n_erb(mosaico)
 
-        # Merge into a single result keyed by (municipio, uf) + H3 hex
-        result = hhi_df.merge(
-            reclam_df, on=["municipio", "uf"], how="outer"
-        )
-        # n_erb is at hexagon level; persist separately and merge via spatial join
-        # in the Silver layer.  Here we expose both the municipality table
-        # and the hexagon-level ERB table as separate DataFrames bundled via
-        # a dict-like column sentinel so load_to_bronze can split them.
+        result = hhi_df.merge(reclam_df, on=["municipio", "uf"], how="outer")
         self._erb_df = erb_df  # stash for custom bronze write
         logger.info(
             "[anatel] HHI records: %d | vol_reclam records: %d | ERB hexagons: %d",
-            len(hhi_df),
-            len(reclam_df),
-            len(erb_df),
+            len(hhi_df), len(reclam_df), len(erb_df),
         )
         return result
 
@@ -115,14 +105,10 @@ class AnatelConnector(BaseConnector):
         return muni_path
 
     # ------------------------------------------------------------------
-    # HHI computation
-    # ------------------------------------------------------------------
     def _compute_hhi(self, scm: pd.DataFrame) -> pd.DataFrame:
-        """Compute Herfindahl-Hirschman Index per municipality from SCM data."""
         if scm.empty:
             return pd.DataFrame(columns=["municipio", "uf", "HHI"])
 
-        # Normalise column names (Anatel CSV headers may vary)
         scm.columns = [c.strip().lower() for c in scm.columns]
         mun_col = _find_col(scm, ["municipio", "municipio_setor", "cod_municipio"])
         uf_col = _find_col(scm, ["uf", "estado", "sg_uf"])
@@ -148,25 +134,15 @@ class AnatelConnector(BaseConnector):
 
         hhi = (
             scm.groupby(["municipio", "uf"])["share_sq"]
-            .sum()
-            .mul(10000)
-            .round(2)
-            .rename("HHI")
-            .reset_index()
+            .sum().mul(10000).round(2).rename("HHI").reset_index()
         )
         logger.info("[anatel] HHI computed for %d municipalities.", len(hhi))
         return hhi
 
     # ------------------------------------------------------------------
-    # vol_reclam computation
-    # ------------------------------------------------------------------
     def _compute_vol_reclam(
-        self,
-        reclam: pd.DataFrame,
-        scm: pd.DataFrame,
-        smp: pd.DataFrame,
+        self, reclam: pd.DataFrame, scm: pd.DataFrame, smp: pd.DataFrame,
     ) -> pd.DataFrame:
-        """Compute complaints per 1,000 accesses per municipality."""
         if reclam.empty:
             return pd.DataFrame(columns=["municipio", "uf", "vol_reclam"])
 
@@ -179,14 +155,10 @@ class AnatelConnector(BaseConnector):
             return pd.DataFrame(columns=["municipio", "uf", "vol_reclam"])
 
         complaint_counts = (
-            reclam.groupby([mun_col, uf_col])
-            .size()
-            .rename("n_reclam")
-            .reset_index()
+            reclam.groupby([mun_col, uf_col]).size().rename("n_reclam").reset_index()
         )
         complaint_counts.columns = ["municipio", "uf", "n_reclam"]
 
-        # Total accesses (SCM + SMP)
         access_totals = []
         for src, label in [(scm, "SCM"), (smp, "SMP")]:
             if src.empty:
@@ -197,11 +169,7 @@ class AnatelConnector(BaseConnector):
             u = _find_col(src, ["uf", "sg_uf"])
             a = _find_col(src, ["acessos", "quantidade_acessos", "total_acessos"])
             if m and u and a:
-                grp = (
-                    src.groupby([m, u])[a]
-                    .sum()
-                    .reset_index()
-                )
+                grp = src.groupby([m, u])[a].sum().reset_index()
                 grp.columns = ["municipio", "uf", "acessos"]
                 access_totals.append(grp)
 
@@ -223,16 +191,14 @@ class AnatelConnector(BaseConnector):
                 "[anatel] %d municipalities with null vol_reclam (no access denominator).",
                 null_vol,
             )
-
         return merged[["municipio", "uf", "vol_reclam"]]
 
     # ------------------------------------------------------------------
-    # n_erb computation
-    # ------------------------------------------------------------------
     def _compute_n_erb(self, mosaico: pd.DataFrame) -> pd.DataFrame:
-        """Count ERB stations per H3 hexagon from Mosaico Estações."""
         if mosaico.empty:
-            return pd.DataFrame(columns=[f"h3_r{r}" for r in self.h3_resolutions] + ["n_erb"])
+            return pd.DataFrame(
+                columns=[f"h3_r{r}" for r in self.h3_resolutions] + ["n_erb"]
+            )
 
         mosaico.columns = [c.strip().lower() for c in mosaico.columns]
         lat_col = _find_col(mosaico, ["latitude", "lat"])
@@ -242,7 +208,9 @@ class AnatelConnector(BaseConnector):
             logger.warning(
                 "[anatel] Lat/lon columns not found in Mosaico. n_erb will be empty."
             )
-            return pd.DataFrame(columns=[f"h3_r{r}" for r in self.h3_resolutions] + ["n_erb"])
+            return pd.DataFrame(
+                columns=[f"h3_r{r}" for r in self.h3_resolutions] + ["n_erb"]
+            )
 
         mosaico[lat_col] = pd.to_numeric(mosaico[lat_col], errors="coerce")
         mosaico[lon_col] = pd.to_numeric(mosaico[lon_col], errors="coerce")
@@ -251,26 +219,25 @@ class AnatelConnector(BaseConnector):
 
         res_primary = self.h3_resolutions[0]
         col = f"h3_r{res_primary}"
-        mosaico[col], failed = latlon_to_h3(mosaico[lat_col], mosaico[lon_col], res_primary)
+        mosaico[col], failed = latlon_to_h3(
+            mosaico[lat_col], mosaico[lon_col], res_primary
+        )
         if failed:
             logger.warning("[anatel] %d stations failed H3 assignment.", failed)
 
-        # Supplement with secondary resolution
         for res in self.h3_resolutions[1:]:
             c2 = f"h3_r{res}"
             mosaico[c2], _ = latlon_to_h3(mosaico[lat_col], mosaico[lon_col], res)
 
         erb_count = (
-            mosaico.groupby(col)
-            .size()
-            .rename("n_erb")
-            .reset_index()
+            mosaico.groupby(col).size().rename("n_erb").reset_index()
         )
-        logger.info("[anatel] ERB station counts per hexagon (res %d): %d", res_primary, len(erb_count))
+        logger.info(
+            "[anatel] ERB station counts per hexagon (res %d): %d",
+            res_primary, len(erb_count),
+        )
         return erb_count
 
-    # ------------------------------------------------------------------
-    # CSV loader helper
     # ------------------------------------------------------------------
     @staticmethod
     def _load_csv(url: str, label: str) -> pd.DataFrame:
@@ -294,9 +261,6 @@ class AnatelConnector(BaseConnector):
             return pd.DataFrame()
 
 
-# ------------------------------------------------------------------
-# Column-name discovery helper
-# ------------------------------------------------------------------
 def _find_col(df: pd.DataFrame, candidates: list[str]) -> Optional[str]:
     """Return the first candidate column name present in *df*, else None."""
     for c in candidates:

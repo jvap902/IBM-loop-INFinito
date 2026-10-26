@@ -16,7 +16,7 @@ Two layers of validation are provided:
 
 Usage
 -----
-    from processing.quality import validate_gold, FeatureRow
+    from data_ingestion.processing.quality import validate_gold, FeatureRow
 
     report = validate_gold(gold_df, municipalities_total=5570)
     if not report.passed:
@@ -171,9 +171,6 @@ def validate_gold(
     # ── Check 3: H3 coverage > 80% of populated municipalities ─────────
     report.checks_run += 1
     if "h3_id" in gold.columns and municipalities_total > 0:
-        # A rough proxy: unique populated municipalities ≈ unique H3 res-5
-        # parent cells.  Exact municipality coverage requires joining to the
-        # IBGE mesh — this heuristic is a best-effort check.
         try:
             import h3 as _h3
 
@@ -185,8 +182,6 @@ def validate_gold(
 
             covered = gold["h3_id"].dropna().map(_to_res5)
             unique_cells_res5 = covered[covered != ""].nunique()
-            # Approximate: res-5 cells in Brazil ≈ 482; 80% ≈ 386
-            # Use as proxy for municipality coverage
             fraction = unique_cells_res5 / max(municipalities_total, 1)
             if fraction < h3_coverage_threshold:
                 msg = (
@@ -198,15 +193,14 @@ def validate_gold(
             else:
                 logger.info(
                     "[quality] PASS | H3 coverage %.1f%% ≥ %.0f%% threshold.",
-                    fraction * 100,
-                    h3_coverage_threshold * 100,
+                    fraction * 100, h3_coverage_threshold * 100,
                 )
         except ImportError:
-            logger.warning(
-                "[quality] h3 not installed; skipping coverage check."
-            )
+            logger.warning("[quality] h3 not installed; skipping coverage check.")
     else:
-        report.failures.append("Cannot compute H3 coverage: h3_id column missing or municipalities_total=0.")
+        report.failures.append(
+            "Cannot compute H3 coverage: h3_id column missing or municipalities_total=0."
+        )
 
     # ── Check 4: Gold table is not empty ────────────────────────────────
     report.checks_run += 1
@@ -224,8 +218,7 @@ def validate_gold(
                 logger.warning(
                     "[quality] WARN | Optional column '%s' is %.1f%% null — "
                     "check upstream connector.",
-                    col,
-                    null_pct,
+                    col, null_pct,
                 )
 
     logger.info("[quality] %s", report.summary())

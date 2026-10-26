@@ -51,10 +51,7 @@ def latlon_to_h3(
     try:
         import h3
     except ImportError:
-        logger.error(
-            "[spatial] h3 library not installed. "
-            "Run: pip install h3"
-        )
+        logger.error("[spatial] h3 library not installed. Run: pip install h3")
         return pd.Series([None] * len(lat)), len(lat)
 
     def _safe_convert(row):
@@ -75,9 +72,7 @@ def latlon_to_h3(
     if failed:
         logger.debug(
             "[spatial] latlon_to_h3(res=%d): %d/%d conversions failed",
-            resolution,
-            failed,
-            len(lat),
+            resolution, failed, len(lat),
         )
     return result, int(failed)
 
@@ -90,22 +85,12 @@ def quadkey_to_h3(
 
     The quadkey is first decoded to a (lat, lon) tile centroid using the
     ``mercantile`` library, then converted to H3.
-
-    Parameters
-    ----------
-    quadkey_series : pandas Series of quadkey strings
-    resolution     : H3 resolution
-
-    Returns
-    -------
-    (h3_series, failed_count)
     """
     try:
         import mercantile
     except ImportError:
         logger.error(
-            "[spatial] mercantile library not installed. "
-            "Run: pip install mercantile"
+            "[spatial] mercantile library not installed. Run: pip install mercantile"
         )
         return pd.Series([None] * len(quadkey_series)), len(quadkey_series)
 
@@ -152,9 +137,7 @@ def h3_disk_neighbours(h3_index: str, ring_size: int = 1) -> list[str]:
     except Exception as exc:
         logger.warning(
             "[spatial] h3_disk_neighbours failed for %s (ring=%d): %s",
-            h3_index,
-            ring_size,
-            exc,
+            h3_index, ring_size, exc,
         )
         return []
 
@@ -165,7 +148,7 @@ def h3_resolution_bridge(
     target_resolution: int,
     target_col: str | None = None,
 ) -> pd.DataFrame:
-    """Add a column with the parent (or child) H3 cell at *target_resolution*.
+    """Add a column with the parent H3 cell at *target_resolution*.
 
     If *target_col* is None, it defaults to ``h3_r{target_resolution}``.
     """

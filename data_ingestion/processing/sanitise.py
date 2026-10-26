@@ -16,25 +16,17 @@ from __future__ import annotations
 import logging
 from typing import Sequence
 
-import pandas as pd
 import numpy as np
+import pandas as pd
 
-from processing.spatial import h3_disk_neighbours
+from data_ingestion.processing.spatial import h3_disk_neighbours
 
 logger = logging.getLogger(__name__)
 
 # Features subject to IQR outlier clipping
 _NUMERIC_FEATURES = [
-    "d_down",
-    "d_up",
-    "lat",
-    "vol_test",
-    "n_dom",
-    "n_com",
-    "ren_med",
-    "n_erb",
-    "HHI",
-    "vol_reclam",
+    "d_down", "d_up", "lat", "vol_test",
+    "n_dom", "n_com", "ren_med", "n_erb", "HHI", "vol_reclam",
 ]
 
 
@@ -75,12 +67,8 @@ def clip_outliers(
             logger.info(
                 "[sanitise] clip_outliers | feature=%r | lower=%.4f | upper=%.4f | "
                 "clipped=%d (%.1f%%) | justification=IQR×%.1f fence",
-                feat,
-                lower,
-                upper,
-                out_of_range,
-                100.0 * out_of_range / total_cells,
-                iqr_multiplier,
+                feat, lower, upper, out_of_range,
+                100.0 * out_of_range / total_cells, iqr_multiplier,
             )
         df[feat] = df[feat].clip(lower=lower, upper=upper)
 
@@ -100,22 +88,10 @@ def impute_spatial_median(
     2. Compute the median value of those neighbours from *df*.
     3. If no neighbour has a value, the cell remains null
        (will be caught by quality checks).
-
-    Parameters
-    ----------
-    df        : Silver layer DataFrame with an H3 index column.
-    h3_col    : Column name holding the H3 index string.
-    features  : Columns to impute; defaults to ``_NUMERIC_FEATURES``.
-    ring_size : Number of H3 rings to consider (spec: ring-1 = 1).
-
-    Returns
-    -------
-    DataFrame with imputed values.  Imputation counts are logged per feature.
     """
     features = [f for f in (features or _NUMERIC_FEATURES) if f in df.columns]
     df = df.copy()
 
-    # Build a lookup dict: h3_index → row position for fast neighbour access
     h3_to_idx = {h3: i for i, h3 in enumerate(df[h3_col])}
 
     for feat in features:
@@ -131,7 +107,6 @@ def impute_spatial_median(
         for row_i in df.index[null_mask]:
             h3_idx = df.at[row_i, h3_col]
             neighbours = h3_disk_neighbours(h3_idx, ring_size)
-            # Exclude the cell itself (ring_size=0 is the cell; disk includes it)
             neighbour_values = [
                 values[h3_to_idx[n]]
                 for n in neighbours
@@ -147,18 +122,13 @@ def impute_spatial_median(
             logger.info(
                 "[sanitise] impute_spatial_median | feature=%r | nulls=%d | "
                 "imputed=%d | still_null=%d | method=ring-%d spatial median",
-                feat,
-                null_count,
-                imputed,
-                not_imputed,
-                ring_size,
+                feat, null_count, imputed, not_imputed, ring_size,
             )
             if not_imputed:
                 logger.warning(
                     "[sanitise] %d cells for feature %r could not be imputed "
                     "(no neighbour data); will be flagged in quality checks.",
-                    not_imputed,
-                    feat,
+                    not_imputed, feat,
                 )
 
     return df
@@ -174,17 +144,6 @@ def flag_low_confidence(
     Low-confidence hexagons are NOT removed — they remain in the Gold layer
     so analysts can see coverage gaps.  ML pipelines may optionally filter
     them via the ``low_confidence`` column.
-
-    Parameters
-    ----------
-    df           : Silver/Gold DataFrame.
-    vol_test_col : Column holding the normalised test count.
-    threshold    : Minimum number of tests required for high confidence.
-                   Spec mandates 3.
-
-    Returns
-    -------
-    DataFrame with a boolean ``low_confidence`` column added/updated.
     """
     if vol_test_col not in df.columns:
         logger.warning(
@@ -199,9 +158,7 @@ def flag_low_confidence(
     low_count = df["low_confidence"].sum()
     logger.info(
         "[sanitise] flag_low_confidence | threshold=%d | flagged=%d (%.1f%%)",
-        threshold,
-        low_count,
-        100.0 * low_count / max(len(df), 1),
+        threshold, low_count, 100.0 * low_count / max(len(df), 1),
     )
     return df
 
@@ -212,10 +169,8 @@ def run_sanitisation(
     iqr_multiplier: float = 3.0,
     ring_size: int = 1,
 ) -> pd.DataFrame:
-    """Run the full sanitisation pipeline in the specified order.
+    """Run the full sanitisation pipeline in order.
 
-    Order
-    -----
     1. Clip outliers (IQR × 3).
     2. Impute missing via spatial median.
     3. Flag low-confidence hexagons.

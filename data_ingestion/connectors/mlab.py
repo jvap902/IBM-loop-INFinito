@@ -34,8 +34,8 @@ from datetime import datetime, timedelta
 
 import pandas as pd
 
-from ingestion.base import BaseConnector
-from processing.spatial import latlon_to_h3
+from data_ingestion.connectors.base import BaseConnector
+from data_ingestion.processing.spatial import latlon_to_h3
 
 logger = logging.getLogger(__name__)
 
@@ -43,7 +43,6 @@ _GCP_PROJECT = os.getenv("GCP_PROJECT", "")
 _DATE_RANGE_DAYS = int(os.getenv("MLAB_DATE_RANGE_DAYS", "30"))
 _H3_RESOLUTIONS = [8, 9]
 
-# Brazil bounding box
 _LAT_MIN, _LAT_MAX = -33.8, 5.3
 _LON_MIN, _LON_MAX = -73.9, -32.4
 
@@ -110,12 +109,9 @@ class MLABConnector(BaseConnector):
         ]:
             sql = _QUERY_TEMPLATE.format(
                 table=table,
-                lat_min=_LAT_MIN,
-                lat_max=_LAT_MAX,
-                lon_min=_LON_MIN,
-                lon_max=_LON_MAX,
-                date_start=self.date_start,
-                date_end=self.date_end,
+                lat_min=_LAT_MIN, lat_max=_LAT_MAX,
+                lon_min=_LON_MIN, lon_max=_LON_MAX,
+                date_start=self.date_start, date_end=self.date_end,
             )
             logger.info("[mlab] BigQuery SQL (%s):\n%s", direction, sql)
             try:
@@ -136,7 +132,6 @@ class MLABConnector(BaseConnector):
         raw["client_lon"] = pd.to_numeric(raw["client_lon"], errors="coerce")
         raw = raw.dropna(subset=["client_lat", "client_lon"])
 
-        # Assign H3 indexes
         res_primary = self.h3_resolutions[0]
         col_primary = f"h3_r{res_primary}"
         raw[col_primary], failed = latlon_to_h3(
@@ -150,20 +145,17 @@ class MLABConnector(BaseConnector):
             col = f"h3_r{res}"
             raw[col], _ = latlon_to_h3(raw["client_lat"], raw["client_lon"], res)
 
-        # Aggregate per hexagon
         dl = raw[raw["direction"] == "download"]
         ul = raw[raw["direction"] == "upload"]
 
         def _agg(grp: pd.DataFrame, suffix: str) -> pd.DataFrame:
             return (
                 grp.groupby(col_primary)
-                .agg(
-                    **{
-                        f"mlab_{suffix}_mbps": ("mean_throughput_mbps", "mean"),
-                        "mlab_min_rtt_ms": ("min_rtt_ms", "median"),
-                        "mlab_loss_rate": ("loss_rate", "mean"),
-                    }
-                )
+                .agg(**{
+                    f"mlab_{suffix}_mbps": ("mean_throughput_mbps", "mean"),
+                    "mlab_min_rtt_ms": ("min_rtt_ms", "median"),
+                    "mlab_loss_rate": ("loss_rate", "mean"),
+                })
                 .reset_index()
             )
 
@@ -171,9 +163,7 @@ class MLABConnector(BaseConnector):
         ul_agg = _agg(ul, "up")
 
         result = dl_agg.merge(
-            ul_agg[[col_primary, "mlab_up_mbps"]],
-            on=col_primary,
-            how="outer",
+            ul_agg[[col_primary, "mlab_up_mbps"]], on=col_primary, how="outer",
         )
         logger.info(
             "[mlab] Aggregated hexagons (res %d): %d", res_primary, len(result)

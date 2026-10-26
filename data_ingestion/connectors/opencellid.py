@@ -21,8 +21,8 @@ import os
 import pandas as pd
 import requests
 
-from ingestion.base import BaseConnector
-from processing.spatial import latlon_to_h3
+from data_ingestion.connectors.base import BaseConnector
+from data_ingestion.processing.spatial import latlon_to_h3
 
 logger = logging.getLogger(__name__)
 
@@ -33,9 +33,6 @@ _DOWNLOAD_URL = (
 )
 _MCC_BRAZIL = 724
 _H3_RESOLUTIONS = [8, 9]
-
-# Fallback to the public OpenCelliD REST endpoint if dump is unavailable
-_REST_CELL_URL = "https://opencellid.org/cell/get"
 
 
 class OpenCelliDConnector(BaseConnector):
@@ -86,13 +83,11 @@ class OpenCelliDConnector(BaseConnector):
         total = len(df)
         logger.info("[opencellid] Total towers in dump: %d", total)
 
-        # Filter to Brazil (mcc == 724)
         df = df[df["mcc"] == _MCC_BRAZIL].copy()
         brazil_count = len(df)
         self._log_discard("mcc != 724", total - brazil_count, total)
         logger.info("[opencellid] Brazilian towers (mcc=724): %d", brazil_count)
 
-        # Validate coordinates
         df["lat"] = pd.to_numeric(df["lat"], errors="coerce")
         df["lon"] = pd.to_numeric(df["lon"], errors="coerce")
         invalid_coords = df[["lat", "lon"]].isna().any(axis=1).sum()
@@ -100,19 +95,18 @@ class OpenCelliDConnector(BaseConnector):
             self._log_discard("invalid lat/lon", invalid_coords, brazil_count)
         df = df.dropna(subset=["lat", "lon"])
 
-        # Assign H3 indexes
         res_primary = self.h3_resolutions[0]
         col_primary = f"h3_r{res_primary}"
         df[col_primary], failed = latlon_to_h3(df["lat"], df["lon"], res_primary)
         if failed:
             logger.warning(
-                "[opencellid] %d towers failed H3 assignment at res %d", failed, res_primary
+                "[opencellid] %d towers failed H3 assignment at res %d",
+                failed, res_primary,
             )
         for res in self.h3_resolutions[1:]:
             col = f"h3_r{res}"
             df[col], _ = latlon_to_h3(df["lat"], df["lon"], res)
 
-        # Aggregate to hexagon counts
         erb_count = (
             df.groupby(col_primary)
             .agg(
@@ -124,8 +118,7 @@ class OpenCelliDConnector(BaseConnector):
         )
         logger.info(
             "[opencellid] Hexagons with at least 1 tower (res %d): %d",
-            res_primary,
-            len(erb_count),
+            res_primary, len(erb_count),
         )
         return erb_count
 

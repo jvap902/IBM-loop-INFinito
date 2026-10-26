@@ -31,14 +31,14 @@ from typing import Any
 import pandas as pd
 import requests
 
-from ingestion.base import BaseConnector
+from data_ingestion.connectors.base import BaseConnector
 
 logger = logging.getLogger(__name__)
 
 _API_TOKEN = os.getenv("CLOUDFLARE_API_TOKEN", "")
 _BASE_URL = "https://api.cloudflare.com/client/v4/radar"
 _DATE_RANGE_DAYS = int(os.getenv("CLOUDFLARE_DATE_RANGE_DAYS", "30"))
-_PAGE_LIMIT = 100  # items per request
+_PAGE_LIMIT = 100
 
 
 class CloudflareRadarConnector(BaseConnector):
@@ -75,11 +75,8 @@ class CloudflareRadarConnector(BaseConnector):
         anomalies = self._fetch_traffic_anomalies()
         result = pd.concat([outages, anomalies], ignore_index=True)
         logger.info(
-            "[cloudflare] Total reference events: %d "
-            "(outages=%d, anomalies=%d)",
-            len(result),
-            len(outages),
-            len(anomalies),
+            "[cloudflare] Total reference events: %d (outages=%d, anomalies=%d)",
+            len(result), len(outages), len(anomalies),
         )
         return result
 
@@ -90,26 +87,22 @@ class CloudflareRadarConnector(BaseConnector):
             params={
                 "dateRange": f"{self.date_start}..{self.date_end}",
                 "limit": _PAGE_LIMIT,
-                "location": "BR",  # Filter to Brazil
+                "location": "BR",
             },
             result_key="annotations",
         )
         rows = []
         for r in records:
-            rows.append(
-                {
-                    "event_id": r.get("id"),
-                    "event_type": "outage",
-                    "start_time": r.get("startDate"),
-                    "end_time": r.get("endDate"),
-                    "location_code": r.get("locations", [""])[0]
-                    if r.get("locations")
-                    else "",
-                    "asn": r.get("linkedUrl", {}).get("asn") if r.get("linkedUrl") else None,
-                    "description": r.get("description", ""),
-                    "scope": r.get("scope", ""),
-                }
-            )
+            rows.append({
+                "event_id": r.get("id"),
+                "event_type": "outage",
+                "start_time": r.get("startDate"),
+                "end_time": r.get("endDate"),
+                "location_code": r.get("locations", [""])[0] if r.get("locations") else "",
+                "asn": r.get("linkedUrl", {}).get("asn") if r.get("linkedUrl") else None,
+                "description": r.get("description", ""),
+                "scope": r.get("scope", ""),
+            })
         df = pd.DataFrame(rows) if rows else _empty_schema()
         logger.info("[cloudflare] Outage events fetched: %d", len(df))
         return df
@@ -126,20 +119,16 @@ class CloudflareRadarConnector(BaseConnector):
         )
         rows = []
         for r in records:
-            rows.append(
-                {
-                    "event_id": r.get("uuid"),
-                    "event_type": "traffic_anomaly",
-                    "start_time": r.get("startDate"),
-                    "end_time": r.get("endDate"),
-                    "location_code": r.get("locations", [""])[0]
-                    if r.get("locations")
-                    else "",
-                    "asn": r.get("asn"),
-                    "description": r.get("type", ""),
-                    "scope": r.get("status", ""),
-                }
-            )
+            rows.append({
+                "event_id": r.get("uuid"),
+                "event_type": "traffic_anomaly",
+                "start_time": r.get("startDate"),
+                "end_time": r.get("endDate"),
+                "location_code": r.get("locations", [""])[0] if r.get("locations") else "",
+                "asn": r.get("asn"),
+                "description": r.get("type", ""),
+                "scope": r.get("status", ""),
+            })
         df = pd.DataFrame(rows) if rows else _empty_schema()
         logger.info("[cloudflare] Traffic anomaly events fetched: %d", len(df))
         return df
@@ -148,7 +137,6 @@ class CloudflareRadarConnector(BaseConnector):
     def _paginate(
         self, endpoint: str, params: dict[str, Any], result_key: str
     ) -> list[dict]:
-        """Paginate through a Cloudflare Radar endpoint."""
         headers = {
             "Authorization": f"Bearer {_API_TOKEN}",
             "Content-Type": "application/json",
@@ -176,24 +164,14 @@ class CloudflareRadarConnector(BaseConnector):
             except Exception as exc:
                 logger.warning(
                     "[cloudflare] Request failed (offset=%d, endpoint=%s): %s",
-                    offset,
-                    endpoint,
-                    exc,
+                    offset, endpoint, exc,
                 )
                 break
         return all_records
 
 
 def _empty_schema() -> pd.DataFrame:
-    return pd.DataFrame(
-        columns=[
-            "event_id",
-            "event_type",
-            "start_time",
-            "end_time",
-            "location_code",
-            "asn",
-            "description",
-            "scope",
-        ]
-    )
+    return pd.DataFrame(columns=[
+        "event_id", "event_type", "start_time", "end_time",
+        "location_code", "asn", "description", "scope",
+    ])
