@@ -21,7 +21,7 @@
 
 ## Sub-Task 1 — Data Ingestion & Feature Store
 
-**Status:** `[ ] pending`
+**Status:** `[x] complete`
 
 ### Intent
 Establish the ETL pipelines that pull from every external source defined in `knowledge-api.json`, apply LGPD-safe aggregation rules, and materialise a unified H3-resolution-8/9 feature store ready for ML consumption.
