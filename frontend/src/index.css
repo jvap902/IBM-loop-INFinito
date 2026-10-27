@@ -2,9 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Leaflet CSS — required for map tiles and markers */
-@import 'leaflet/dist/leaflet.css';
-
 /* Force dark scrollbar on webkit */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: #1e293b; }

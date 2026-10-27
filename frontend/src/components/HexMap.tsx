@@ -1,5 +1,17 @@
-import { MapContainer, TileLayer, CircleMarker, Popup } from 'react-leaflet'
+import { useEffect, useRef } from 'react'
+import { MapContainer, TileLayer, CircleMarker, Popup, useMap } from 'react-leaflet'
 import type { Axis1HexagonResult, Axis2ClusterSummary, Axis3HexagonResult } from '../types'
+
+// Forces Leaflet to recalculate tile layout after mount inside flex/grid containers
+function InvalidateSizeOnMount() {
+  const map = useMap()
+  useEffect(() => {
+    // Small delay ensures the container has its final CSS dimensions
+    const t = setTimeout(() => map.invalidateSize(), 100)
+    return () => clearTimeout(t)
+  }, [map])
+  return null
+}
 
 interface Props {
   axis1Results?: Axis1HexagonResult[]
@@ -13,18 +25,21 @@ const BRAZIL_CENTER: [number, number] = [-14.235, -51.925]
 const BRAZIL_ZOOM = 4
 
 export default function HexMap({ axis1Results, axis2Clusters, axis3Results, height = '360px' }: Props) {
+  const wrapperRef = useRef<HTMLDivElement>(null)
+
   return (
-    <div style={{ height }} className="rounded overflow-hidden border border-ind-border">
+    <div ref={wrapperRef} style={{ height, minHeight: height }} className="rounded border border-ind-border overflow-hidden flex flex-col">
+      <div style={{ flex: 1, minHeight: 0 }}>
       <MapContainer
         center={BRAZIL_CENTER}
         zoom={BRAZIL_ZOOM}
-        style={{ height: '100%', width: '100%', background: '#1e293b' }}
+        style={{ height: '100%', width: '100%', minHeight: height }}
         scrollWheelZoom={true}
       >
+        <InvalidateSizeOnMount />
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          className="map-tiles-dark"
         />
 
         {/* Axis 1 — critical hexagons (red) */}
@@ -88,9 +103,10 @@ export default function HexMap({ axis1Results, axis2Clusters, axis3Results, heig
           </CircleMarker>
         ))}
       </MapContainer>
+      </div>
 
       {/* Legend */}
-      <div className="flex gap-4 px-3 py-2 bg-ind-surface border-t border-ind-border text-xs text-ind-muted">
+      <div className="flex gap-4 px-3 py-2 bg-ind-surface border-t border-ind-border text-xs text-ind-muted shrink-0">
         {axis1Results && (
           <span className="flex items-center gap-1.5">
             <span className="inline-block w-3 h-3 rounded-full bg-red-500" />

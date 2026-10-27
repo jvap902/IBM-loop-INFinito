@@ -1,0 +1,680 @@
+
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Tutorial — Interface Web Telecom AI Platform</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, "Segoe UI", system-ui, sans-serif;
+    background: #ffffff;
+    color: #1f2328;
+    font-size: 14px;
+    line-height: 1.7;
+  }
+  .page { max-width: 760px; margin: 0 auto; padding: 40px 24px 64px; }
+
+  /* Header */
+  .hero {
+    background: #0f172a;
+    color: #e2e8f0;
+    border-radius: 10px;
+    padding: 28px 28px 24px;
+    margin-bottom: 36px;
+  }
+  .hero-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: #f59e0b;
+    margin-bottom: 6px;
+  }
+  .hero h1 { font-size: 20px; font-weight: 700; color: #f1f5f9; margin-bottom: 6px; }
+  .hero p  { font-size: 13px; color: #94a3b8; }
+
+  /* Section */
+  .section { margin-bottom: 40px; }
+  .section-title {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #57606a;
+    border-bottom: 1px solid #e5e7eb;
+    padding-bottom: 6px;
+    margin-bottom: 20px;
+  }
+
+  /* Steps */
+  .steps { display: flex; flex-direction: column; gap: 16px; }
+  .step {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+  }
+  .step-num {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: #0f172a;
+    color: #f59e0b;
+    font-size: 11px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .step-body { flex: 1; }
+  .step-body strong { display: block; font-size: 14px; color: #1f2328; margin-bottom: 3px; }
+  .step-body p { font-size: 13px; color: #57606a; }
+
+  /* Code block */
+  pre {
+    background: #0f172a;
+    color: #e2e8f0;
+    border-radius: 6px;
+    padding: 12px 14px;
+    font-family: Consolas, Monaco, monospace;
+    font-size: 12px;
+    overflow-x: auto;
+    margin: 8px 0;
+    line-height: 1.6;
+  }
+  code {
+    font-family: Consolas, Monaco, monospace;
+    font-size: 12px;
+    background: #f0f2f5;
+    padding: 1px 5px;
+    border-radius: 3px;
+    color: #1f2328;
+  }
+  .amber { color: #f59e0b; }
+  .green { color: #22c55e; }
+  .blue  { color: #60a5fa; }
+  .muted { color: #64748b; }
+
+  /* Page cards */
+  .page-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .page-card {
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 14px 16px;
+    background: #f7f8fa;
+  }
+  .page-card .route {
+    font-family: Consolas, Monaco, monospace;
+    font-size: 11px;
+    color: #3b82d4;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .page-card .title { font-size: 13px; font-weight: 600; color: #1f2328; margin-bottom: 4px; }
+  .page-card .desc  { font-size: 12px; color: #57606a; }
+
+  /* Callout */
+  .callout {
+    border-left: 3px solid #f59e0b;
+    background: #fffbeb;
+    border-radius: 0 6px 6px 0;
+    padding: 10px 14px;
+    font-size: 13px;
+    color: #78350f;
+    margin: 12px 0;
+  }
+  .callout-danger {
+    border-left-color: #ef4444;
+    background: #fff1f2;
+    color: #9f1239;
+  }
+  .callout-blue {
+    border-left-color: #3b82f6;
+    background: #eff6ff;
+    color: #1e40af;
+  }
+
+  /* Table */
+  table { width: 100%; border-collapse: collapse; font-size: 13px; margin: 8px 0; }
+  th {
+    background: #f7f8fa;
+    color: #57606a;
+    font-weight: 600;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 8px 10px;
+    text-align: left;
+    border-bottom: 1px solid #e5e7eb;
+  }
+  td { padding: 7px 10px; border-bottom: 1px solid #f0f2f5; }
+  tr:last-child td { border-bottom: none; }
+
+  /* Badge */
+  .badge {
+    display: inline-block;
+    padding: 2px 7px;
+    border-radius: 10px;
+    font-size: 10px;
+    font-weight: 600;
+  }
+  .badge-red    { background: #fee2e2; color: #991b1b; }
+  .badge-blue   { background: #dbeafe; color: #1e40af; }
+  .badge-green  { background: #dcfce7; color: #166534; }
+  .badge-amber  { background: #fef3c7; color: #92400e; }
+
+  /* Sidebar preview */
+  .sidebar-preview {
+    background: #1e293b;
+    border-radius: 8px;
+    padding: 14px 0;
+    font-size: 12px;
+    margin: 10px 0;
+  }
+  .sp-logo { padding: 0 16px 10px; border-bottom: 1px solid #334155; }
+  .sp-logo .name { color: #f59e0b; font-family: monospace; font-size: 11px; font-weight: 700; letter-spacing: 0.1em; }
+  .sp-logo .sub  { color: #64748b; font-size: 10px; }
+  .sp-links { padding: 8px 10px 0; }
+  .sp-link  { padding: 7px 10px; border-radius: 4px; color: #94a3b8; margin-bottom: 2px; display: flex; align-items: center; gap: 8px; }
+  .sp-link.active { background: rgba(245,158,11,0.1); color: #f59e0b; font-weight: 600; }
+  .sp-icon { font-size: 12px; }
+
+  /* Map preview */
+  .map-preview {
+    background: #dce8f5;
+    border-radius: 6px;
+    height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    margin: 10px 0;
+    border: 1px solid #e5e7eb;
+  }
+  .map-preview .grid-lines {
+    position: absolute; inset: 0;
+    background-image: linear-gradient(rgba(0,0,0,0.05) 1px, transparent 1px),
+                      linear-gradient(90deg, rgba(0,0,0,0.05) 1px, transparent 1px);
+    background-size: 20px 20px;
+  }
+  .map-dot {
+    position: absolute;
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    border: 2px solid white;
+  }
+
+  footer {
+    text-align: center;
+    font-size: 12px;
+    color: #57606a;
+    border-top: 1px solid #e5e7eb;
+    padding-top: 16px;
+    margin-top: 32px;
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  
+  <div class="hero">
+    <div class="hero-label">Telecom AI Platform</div>
+    <h1>Tutorial da Interface Web</h1>
+    <p>Guia passo a passo para instalar, configurar e usar todas as telas da plataforma — do primeiro <code style="background:#1e293b;color:#f59e0b">npm install</code> até a leitura dos resultados.</p>
+  </div>
+
+  
+  <div class="section">
+    <div class="section-title">1 — Pré-requisitos</div>
+    <table>
+      <thead><tr><th>Ferramenta</th><th>Versão mínima</th><th>Como verificar</th></tr></thead>
+      <tbody>
+        <tr><td>Python</td><td>3.10+</td><td><code>python --version</code></td></tr>
+        <tr><td>Node.js</td><td>18+</td><td><code>node --version</code></td></tr>
+        <tr><td>npm</td><td>9+</td><td><code>npm --version</code></td></tr>
+        <tr><td>pip</td><td>latest</td><td><code>pip --version</code></td></tr>
+      </tbody>
+    </table>
+    <div class="callout">
+      Node.js 18+ é obrigatório apenas para a interface web. O backend Python funciona de forma independente.
+    </div>
+  </div>
+
+  
+  <div class="section">
+    <div class="section-title">2 — Configuração Inicial (uma vez)</div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <strong>Instalar dependências Python</strong>
+          <p>Na raiz do repositório:</p>
+          <pre><span class="green">pip</span> install -r requirements.txt</pre>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <strong>Criar o arquivo <code>.env</code></strong>
+          <pre><span class="muted"># PowerShell</span>
+Copy-Item .env.example .env</pre>
+          <p>Abra o <code>.env</code> e defina no mínimo estas variáveis:</p>
+          <pre>TOOL_API_KEY=telecom-dev-key-2024
+GOLD_PARQUET_PATH=data/gold/features.parquet
+TOOL_API_BASE_URL=http://localhost:8000
+<span class="amber">CORS_ORIGINS=http://localhost:5173</span></pre>
+          <div class="callout"><strong>CORS_ORIGINS</strong> é obrigatório para a interface web funcionar. Sem ele, o browser vai rejeitar as chamadas ao backend.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <strong>Gerar o Feature Store sintético (se necessário)</strong>
+          <p>Verifique se o arquivo <code>data/gold/features.parquet</code> existe. Se não existir:</p>
+          <pre><span class="green">python</span> -c "
+import numpy as np, pandas as pd, h3, pathlib
+rng = np.random.default_rng(42)
+n = 2000
+hex_ids = list({h3.geo_to_h3(rng.uniform(-33,5), rng.uniform(-74,-34), 8) for _ in range(n*2)})[:n]
+df = pd.DataFrame({'h3_id': hex_ids})
+<span class="muted"># ... (ver EXECUTION_GUIDE.md Seção 3.3 para o script completo)</span>
+"</pre>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <strong>Instalar dependências do frontend</strong>
+          <pre><span class="blue">cd</span> frontend
+<span class="green">npm</span> install</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  
+  <div class="section">
+    <div class="section-title">3 — Iniciando os Servidores</div>
+    <p style="margin-bottom:14px;color:#57606a;font-size:13px">São necessários dois terminais simultâneos. Abra-os na raiz do repositório.</p>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">A</div>
+        <div class="step-body">
+          <strong>Terminal 1 — Backend (FastAPI)</strong>
+          <p>Carregue as variáveis de ambiente e suba o servidor:</p>
+          <pre><span class="muted"># Carrega o .env no PowerShell</span>
+Get-Content .env | ForEach-Object {
+    if ($_ -match '^\s*([^#=][^=]*)=(.*)$') {
+        [System.Environment]::SetEnvironmentVariable(
+            $matches[1].Trim(), $matches[2].Trim(), 'Process'
+        )
+    }
+}
+
+<span class="muted"># Sobe o servidor na porta 8000</span>
+<span class="green">uvicorn</span> api.main:app --host 0.0.0.0 --port 8000 --reload</pre>
+          <p>Verifique: <code>http://localhost:8000/health</code> deve retornar <code>{"status":"ok"}</code>.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">B</div>
+        <div class="step-body">
+          <strong>Terminal 2 — Frontend (Vite)</strong>
+          <pre><span class="blue">cd</span> frontend
+<span class="green">npm</span> run dev</pre>
+          <p>A interface estará disponível em: <strong>http://localhost:5173</strong></p>
+          <div class="callout callout-blue">O Vite faz proxy automático de todas as chamadas <code>/v1/*</code> para <code>http://localhost:8000</code>. Não é necessário configurar nada além do <code>CORS_ORIGINS</code>.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  
+  <div class="section">
+    <div class="section-title">4 — Visão Geral da Interface</div>
+
+    <p style="font-size:13px;color:#57606a;margin-bottom:14px">A navegação fica na barra lateral à esquerda, sempre visível.</p>
+
+    <div style="display:flex;gap:16px;align-items:flex-start;margin-bottom:16px">
+      <div class="sidebar-preview" style="width:180px;flex-shrink:0">
+        <div class="sp-logo"><div class="name">TELECOM AI</div><div class="sub">Plataforma de Análise</div></div>
+        <div class="sp-links">
+          <div class="sp-link active"><span class="sp-icon">▦</span> Dashboard</div>
+          <div class="sp-link"><span class="sp-icon">▶</span> Análise Completa</div>
+          <div class="sp-link"><span class="sp-icon">⬡</span> Eixo 1 — Criticidade</div>
+          <div class="sp-link"><span class="sp-icon">⬡</span> Eixo 2 — Expansão</div>
+          <div class="sp-link"><span class="sp-icon">⬡</span> Eixo 3 — Segmentação</div>
+          <div class="sp-link"><span class="sp-icon">≡</span> Auditoria</div>
+        </div>
+      </div>
+      <div style="flex:1">
+        <div class="page-grid">
+          <div class="page-card">
+            <div class="route">/</div>
+            <div class="title">Dashboard</div>
+            <div class="desc">Painel de resultados com KPIs, mapa, gráficos e tabela de hipóteses de investimento.</div>
+          </div>
+          <div class="page-card">
+            <div class="route">/run</div>
+            <div class="title">Análise Completa</div>
+            <div class="desc">Dispara o agente LangGraph completo com todos os parâmetros configuráveis.</div>
+          </div>
+          <div class="page-card">
+            <div class="route">/axis1</div>
+            <div class="title">Eixo 1 — Criticidade</div>
+            <div class="desc">Detecção de anomalias (IsolationForest + LOF) com controles independentes.</div>
+          </div>
+          <div class="page-card">
+            <div class="route">/axis2</div>
+            <div class="title">Eixo 2 — Expansão</div>
+            <div class="desc">Clustering geoespacial (UMAP + HDBSCAN) para oportunidades de expansão.</div>
+          </div>
+          <div class="page-card">
+            <div class="route">/axis3</div>
+            <div class="title">Eixo 3 — Segmentação</div>
+            <div class="desc">K-Means++ para perfis de mercado e targeting promocional.</div>
+          </div>
+          <div class="page-card">
+            <div class="route">/audit</div>
+            <div class="title">Auditoria</div>
+            <div class="desc">Consulta de todos os eventos registrados pelo agente com filtros avançados.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  
+  <div class="section">
+    <div class="section-title">5 — Executando a Análise Completa (/run)</div>
+    <p style="font-size:13px;color:#57606a;margin-bottom:14px">Esta é a tela principal. Ela dispara o agente LangGraph com os três eixos e exibe os resultados no Dashboard.</p>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <strong>Informe a X-API-Key</strong>
+          <p>Digite a mesma chave definida em <code>TOOL_API_KEY</code> no seu <code>.env</code>. Marque "Salvar na sessão" para não precisar digitar novamente.</p>
+          <pre>Exemplo: telecom-dev-key-2024</pre>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <strong>Defina a Região</strong>
+          <p>Três formatos aceitos:</p>
+          <table>
+            <thead><tr><th>Valor</th><th>Significado</th></tr></thead>
+            <tbody>
+              <tr><td><code>all</code></td><td>Todos os hexágonos do Feature Store</td></tr>
+              <tr><td><code>BR-SP</code></td><td>Label de região (qualquer string)</td></tr>
+              <tr><td><code>855198c7fffffff</code></td><td>H3 parent cell ID (resolução 5 ou 6)</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <strong>Selecione os Eixos</strong>
+          <p>Marque os eixos desejados. Os três estão selecionados por padrão. É possível rodar apenas um ou dois.</p>
+          <div style="display:flex;gap:8px;margin-top:6px;flex-wrap:wrap">
+            <span class="badge badge-red">Eixo 1 — Criticidade</span>
+            <span class="badge badge-blue">Eixo 2 — Expansão</span>
+            <span class="badge badge-green">Eixo 3 — Segmentação</span>
+          </div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <strong>Escolha o Provedor LLM</strong>
+          <table>
+            <thead><tr><th>Opção</th><th>Quando usar</th><th>Credenciais necessárias</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Stub</strong></td><td>Sempre (padrão, funciona offline)</td><td>Nenhuma</td></tr>
+              <tr><td>IBM watsonx.ai</td><td>Quando houver conta IBM</td><td><code>WATSONX_API_KEY</code> no servidor</td></tr>
+              <tr><td>OpenAI GPT-4o</td><td>Quando houver conta OpenAI</td><td><code>OPENAI_API_KEY</code> no servidor</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">5</div>
+        <div class="step-body">
+          <strong>Forçar re-execução (opcional)</strong>
+          <p>Ative o toggle "Forçar re-execução" para ignorar verificações de freshness e garantir que todos os eixos rodem do zero.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">6</div>
+        <div class="step-body">
+          <strong>Clique em "Executar Análise"</strong>
+          <p>Uma sobreposição de loading bloqueia a interface enquanto o agente processa. O tempo varia entre <strong>5 e 60 segundos</strong> dependendo do dataset e do provedor LLM. Ao concluir, você é redirecionado automaticamente para o Dashboard.</p>
+          <div class="callout callout-danger">Se aparecer "504 Gateway Timeout", o agente demorou mais que o limite configurado. Aumente <code>AGENT_RUN_TIMEOUT_SECONDS=180</code> no <code>.env</code> e reinicie o backend.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  
+  <div class="section">
+    <div class="section-title">6 — Lendo o Dashboard (/)</div>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">①</div>
+        <div class="step-body">
+          <strong>Linha de KPIs (topo)</strong>
+          <p>Cinco cartões com as métricas-chave do último run:</p>
+          <table>
+            <thead><tr><th>Cartão</th><th>O que significa</th></tr></thead>
+            <tbody>
+              <tr><td>Hexágonos Analisados</td><td>Total de células H3 processadas</td></tr>
+              <tr><td><span class="badge badge-red">Anomalias Críticas</span></td><td>Hexágonos flagados pelo Eixo 1; % do total</td></tr>
+              <tr><td><span class="badge badge-blue">Clusters de Expansão</span></td><td>Grupos identificados pelo Eixo 2 (HDBSCAN)</td></tr>
+              <tr><td><span class="badge badge-green">Segmentos de Mercado</span></td><td>Perfis K-Means++ do Eixo 3</td></tr>
+              <tr><td><span class="badge badge-amber">TAM Total</span></td><td>Mercado endereçável total estimado em R$</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">②</div>
+        <div class="step-body">
+          <strong>Mapa Geoespacial (Leaflet)</strong>
+          <p>Centroides dos hexágonos plotados sobre o mapa do Brasil. Use scroll para zoom e arraste para navegar. Clique em qualquer marcador para ver os detalhes:</p>
+          <div class="map-preview">
+            <div class="grid-lines"></div>
+            <div class="map-dot" style="background:#ef4444;top:35%;left:62%"></div>
+            <div class="map-dot" style="background:#ef4444;top:42%;left:58%"></div>
+            <div class="map-dot" style="background:#3b82f6;top:55%;left:45%;width:14px;height:14px"></div>
+            <div class="map-dot" style="background:#3b82f6;top:40%;left:70%;width:14px;height:14px"></div>
+            <div class="map-dot" style="background:#22c55e;top:60%;left:55%"></div>
+            <div class="map-dot" style="background:#22c55e;top:30%;left:50%"></div>
+          </div>
+          <div style="display:flex;gap:16px;font-size:12px;color:#57606a;margin-top:4px">
+            <span>● <span style="color:#ef4444">Vermelho</span> — Eixo 1 Crítico</span>
+            <span>● <span style="color:#3b82f6">Azul</span> — Eixo 2 Cluster</span>
+            <span>● <span style="color:#22c55e">Verde</span> — Eixo 3 Segmento</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">③</div>
+        <div class="step-body">
+          <strong>Gráfico de TAM por Cluster</strong>
+          <p>Barras ordenadas por TAM estimado (R$). A barra mais alta (âmbar) representa a oportunidade prioritária. Passe o mouse sobre cada barra para ver o valor exato.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">④</div>
+        <div class="step-body">
+          <strong>Gráfico de Segmentos (Donut)</strong>
+          <p>Distribuição proporcional dos hexágonos por segmento de mercado. Cada fatia corresponde a um perfil K-Means++ (ex: Premium, Conectividade Essencial, Alta Vulnerabilidade).</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">⑤</div>
+        <div class="step-body">
+          <strong>Tabela de Hipóteses de Investimento</strong>
+          <p>Lista priorizada de oportunidades gerada pelo agente. Clique no cabeçalho de qualquer coluna para ordenar. Principais colunas:</p>
+          <table>
+            <thead><tr><th>Coluna</th><th>Significado</th></tr></thead>
+            <tbody>
+              <tr><td>Prioridade</td><td>P1 = crítico+expansão / P2 = alta / P3 = padrão</td></tr>
+              <tr><td>TAM (R$)</td><td>Mercado endereçável estimado do cluster</td></tr>
+              <tr><td>Dom/Hex</td><td>Média de domicílios por hexágono no cluster</td></tr>
+              <tr><td>Vel↓ Mbps</td><td>Velocidade média de download atual</td></tr>
+              <tr><td>HHI</td><td>Índice de concentração de mercado (maior = menos concorrência)</td></tr>
+              <tr><td>Justificativa</td><td>Rationale gerado pelo agente (passe o mouse para ver completo)</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  
+  <div class="section">
+    <div class="section-title">7 — Eixos Individuais (/axis1, /axis2, /axis3)</div>
+    <p style="font-size:13px;color:#57606a;margin-bottom:14px">Cada página tem um painel de parâmetros à esquerda e os resultados à direita. Útil para experimentar parâmetros sem rodar o agente completo.</p>
+
+    <table>
+      <thead><tr><th>Parâmetro</th><th>Eixo</th><th>O que ajusta</th><th>Padrão</th></tr></thead>
+      <tbody>
+        <tr><td>Threshold de Anomalia</td><td><span class="badge badge-red">1</span></td><td>Score mínimo para classificar como crítico (slider 0–1)</td><td>0.65</td></tr>
+        <tr><td>Contaminação</td><td><span class="badge badge-red">1</span></td><td>Fração esperada de anomalias no dataset</td><td>0.05</td></tr>
+        <tr><td>Top N</td><td><span class="badge badge-red">1</span></td><td>Quantos hexágonos críticos retornar</td><td>50</td></tr>
+        <tr><td>Tamanho mín. cluster</td><td><span class="badge badge-blue">2</span></td><td>HDBSCAN min_cluster_size (slider 2–500)</td><td>50</td></tr>
+        <tr><td>Pular UMAP</td><td><span class="badge badge-blue">2</span></td><td>Usa features escaladas direto, sem redução de dimensão</td><td>Off</td></tr>
+        <tr><td>Número de segmentos k</td><td><span class="badge badge-green">3</span></td><td>Quantidade de clusters K-Means++ (slider 2–10)</td><td>3</td></tr>
+        <tr><td>Sweep automático</td><td><span class="badge badge-green">3</span></td><td>Busca k ótimo se silhouette &lt; 0.30</td><td>On</td></tr>
+        <tr><td>Filtro de Região</td><td>Todos</td><td>H3 parent IDs separados por vírgula (vazio = dataset completo)</td><td>—</td></tr>
+        <tr><td>Resolução H3</td><td>Todos</td><td>Granularidade dos hexágonos (8 = ~0.7 km², 9 = ~0.1 km²)</td><td>8</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout">
+      A <strong>X-API-Key</strong> definida na tela de Análise Completa fica salva na sessão do browser. Nas páginas de eixo individuais ela é usada automaticamente — não precisa digitar novamente se já salvou.
+    </div>
+  </div>
+
+  
+  <div class="section">
+    <div class="section-title">8 — Log de Auditoria (/audit)</div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <strong>Aplique os filtros desejados</strong>
+          <p>Todos os filtros são opcionais. Deixe em branco para ver os eventos mais recentes.</p>
+          <table>
+            <thead><tr><th>Filtro</th><th>Valores possíveis</th></tr></thead>
+            <tbody>
+              <tr><td>Agent ID</td><td><code>planner</code>, <code>operational</code>, <code>system</code></td></tr>
+              <tr><td>Tipo de Evento</td><td><code>tool_call</code>, <code>reasoning_step</code>, <code>report_generated</code>, <code>model_run</code></td></tr>
+              <tr><td>Run ID</td><td>UUID de um run específico (cole do Dashboard)</td></tr>
+              <tr><td>De / Até</td><td>Intervalo de datas no formato <code>YYYY-MM-DD</code></td></tr>
+              <tr><td>Limite</td><td>Máximo de eventos retornados (padrão: 100)</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <strong>Clique em "Buscar"</strong>
+          <p>A tabela é preenchida com os eventos. O tipo de evento aparece colorido para identificação rápida.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <strong>Expanda uma linha para ver o payload completo</strong>
+          <p>Clique em qualquer linha da tabela para expandir e ver o JSON completo do evento. Clique no ícone ⎘ ao lado do Run ID para copiar o UUID para a área de transferência.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  
+  <div class="section">
+    <div class="section-title">9 — Fluxo de Uso Recomendado</div>
+    <div style="background:#f7f8fa;border:1px solid #e5e7eb;border-radius:8px;padding:16px 20px;font-size:13px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+        <span style="background:#0f172a;color:#f59e0b;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0">1</span>
+        <span>Acesse <strong>/run</strong> → configure região e eixos → clique "Executar Análise"</span>
+      </div>
+      <div style="border-left:2px solid #e5e7eb;margin-left:10px;height:14px"></div>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+        <span style="background:#0f172a;color:#f59e0b;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0">2</span>
+        <span>Ao redirecionar para <strong>/</strong> → leia os KPIs e identifique clusters prioritários no mapa</span>
+      </div>
+      <div style="border-left:2px solid #e5e7eb;margin-left:10px;height:14px"></div>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+        <span style="background:#0f172a;color:#f59e0b;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0">3</span>
+        <span>Acesse <strong>/axis1</strong> ou <strong>/axis2</strong> → ajuste thresholds → compare com o resultado do agente</span>
+      </div>
+      <div style="border-left:2px solid #e5e7eb;margin-left:10px;height:14px"></div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="background:#0f172a;color:#f59e0b;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0">4</span>
+        <span>Acesse <strong>/audit</strong> → filtre pelo Run ID do Dashboard → verifique a trilha de auditoria completa</span>
+      </div>
+    </div>
+  </div>
+
+  
+  <div class="section">
+    <div class="section-title">10 — Solução de Problemas Comuns</div>
+    <table>
+      <thead><tr><th>Sintoma</th><th>Causa provável</th><th>Solução</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>Tela em branco ao abrir <code>localhost:5173</code></td>
+          <td><code>npm run dev</code> não está rodando</td>
+          <td>Execute <code>cd frontend &amp;&amp; npm run dev</code> no Terminal 2</td>
+        </tr>
+        <tr>
+          <td>Erro 401 ao executar análise</td>
+          <td>X-API-Key não preenchida ou incorreta</td>
+          <td>Verifique se a chave no formulário bate com <code>TOOL_API_KEY</code> no <code>.env</code></td>
+        </tr>
+        <tr>
+          <td>Erro CORS no console do browser</td>
+          <td><code>CORS_ORIGINS</code> ausente ou errado no <code>.env</code></td>
+          <td>Adicione <code>CORS_ORIGINS=http://localhost:5173</code> e reinicie o backend</td>
+        </tr>
+        <tr>
+          <td>504 Gateway Timeout</td>
+          <td>Agente demorou mais que 120s</td>
+          <td>Adicione <code>AGENT_RUN_TIMEOUT_SECONDS=180</code> no <code>.env</code></td>
+        </tr>
+        <tr>
+          <td>Mapa não carrega (tiles cinzas)</td>
+          <td>Sem acesso à internet para o OpenStreetMap</td>
+          <td>Verifique conexão; o mapa requer acesso externo para os tiles</td>
+        </tr>
+        <tr>
+          <td><code>data/gold/features.parquet</code> não encontrado</td>
+          <td>Feature Store não foi gerado</td>
+          <td>Execute o script de geração sintética (Seção 2, Passo 3)</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <footer>Made with IBM Bob</footer>
+</div>
+</body>
+</html>

@@ -1,7 +1,9 @@
+import 'leaflet/dist/leaflet.css'
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import L from 'leaflet'
 
 import App from './App'
 import Dashboard from './pages/Dashboard'
@@ -12,6 +14,15 @@ import Axis3Page from './pages/Axis3Page'
 import AuditPage from './pages/AuditPage'
 
 import './index.css'
+
+// Fix Leaflet default marker icons broken by Vite's asset bundling
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+delete (L.Icon.Default.prototype as any)._getIconUrl
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+})
 
 const queryClient = new QueryClient({
   defaultOptions: {
