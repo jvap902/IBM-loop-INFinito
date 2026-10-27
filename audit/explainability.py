@@ -275,7 +275,14 @@ def explain_axis3(
         explainer = shap.KernelExplainer(_predict, background)
         # nsamples controls the Shapley sampling budget per row
         shap_values = explainer.shap_values(X_sample, nsamples=64, silent=True)
-        # shap_values is a list of (sample_size, n_features) arrays, one per class
+        # Normalise: ensure shap_values is always a list of k arrays (sample_size, n_features)
+        if isinstance(shap_values, np.ndarray):
+            if shap_values.ndim == 3:
+                # (k, sample_size, n_features) — split along axis 0
+                shap_values = [shap_values[i] for i in range(shap_values.shape[0])]
+            else:
+                # (sample_size, n_features) — single output; wrap in list
+                shap_values = [shap_values] * k
     except Exception as exc:
         logger.warning("[explainability] Axis 3 SHAP failed: %s", exc)
         return _shap_unavailable(str(exc))
@@ -284,6 +291,9 @@ def explain_axis3(
     for seg_idx in range(k):
         sv = shap_values[seg_idx]          # (sample_size, n_features)
         seg_mask = labels_sample == seg_idx
+        # Guard: mask must match sv row count
+        if len(seg_mask) != len(sv):
+            seg_mask = np.zeros(len(sv), dtype=bool)
         if seg_mask.sum() == 0:
             sv_seg = sv                    # fall back to global if no samples
         else:

@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Telecom AI Platform — Dashboard</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, "Segoe UI", system-ui, sans-serif; background: #f7f8fa; color: #1f2328; font-size: 14px; line-height: 1.6; }
+  header { background: #1f2328; color: #fff; padding: 16px 32px; display: flex; align-items: center; justify-content: space-between; }
+  header h1 { font-size: 16px; font-weight: 600; }
+  header .meta { font-size: 12px; color: #8b949e; }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+  .badge-ok { background: #d1fae5; color: #065f46; }
+  .badge-warn { background: #fef3c7; color: #92400e; }
+  .container { max-width: 1100px; margin: 0 auto; padding: 24px 16px; }
+  .kpi-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 24px; }
+  .kpi { background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; }
+  .kpi .label { font-size: 11px; color: #57606a; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
+  .kpi .value { font-size: 24px; font-weight: 700; }
+  .kpi .sub { font-size: 11px; color: #57606a; margin-top: 2px; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+  .card { background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 20px; }
+  .card h2 { font-size: 13px; font-weight: 600; margin-bottom: 16px; padding-bottom: 10px; border-bottom: 1px solid #e5e7eb; display: flex; align-items: center; gap: 8px; }
+  .tag { font-size: 10px; font-weight: 500; color: #57606a; background: #f7f8fa; border: 1px solid #e5e7eb; border-radius: 4px; padding: 1px 6px; }
+  /* Map */
+  .map-wrap { position: relative; width: 100%; background: #dce8f5; border-radius: 6px; overflow: hidden; }
+  svg.map { width: 100%; display: block; }
+  .map-legend { position: absolute; bottom: 10px; left: 10px; background: rgba(255,255,255,0.92); border: 1px solid #e5e7eb; border-radius: 6px; padding: 8px 12px; font-size: 11px; }
+  .map-legend div { display: flex; align-items: center; gap: 6px; margin-bottom: 3px; }
+  .map-legend div:last-child { margin-bottom: 0; }
+  .ldot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+  /* Bars */
+  .bar-row { display: flex; align-items: center; margin-bottom: 7px; gap: 8px; }
+  .bar-label { width: 68px; font-size: 11px; color: #57606a; text-align: right; flex-shrink: 0; }
+  .bar-track { flex: 1; background: #f0f2f5; border-radius: 4px; height: 18px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 4px; display: flex; align-items: center; padding-left: 6px; font-size: 10px; color: #fff; font-weight: 600; min-width: 32px; }
+  /* Donut */
+  .donut-wrap { display: flex; align-items: center; gap: 20px; }
+  svg.donut { width: 130px; height: 130px; flex-shrink: 0; }
+  .seg-item { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; font-size: 11px; }
+  .seg-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  /* Pipeline */
+  .pipe-row { margin-bottom: 10px; }
+  .pipe-label { display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 3px; }
+  .pipe-label .nm { font-weight: 600; }
+  .pipe-label .dr { color: #57606a; }
+  .pipe-track { background: #f0f2f5; border-radius: 4px; height: 8px; overflow: hidden; }
+  .pipe-bar { height: 100%; border-radius: 4px; }
+  /* Table */
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  th { background: #f7f8fa; color: #57606a; font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; padding: 8px 10px; text-align: left; border-bottom: 1px solid #e5e7eb; }
+  td { padding: 7px 10px; border-bottom: 1px solid #f0f2f5; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #f7f8fa; }
+  code { font-family: monospace; font-size: 11px; background: #f0f2f5; padding: 1px 4px; border-radius: 3px; }
+  .run-info { font-size: 11px; color: #57606a; background: #f7f8fa; border: 1px solid #e5e7eb; border-radius: 6px; padding: 10px 14px; margin-top: 14px; }
+  .run-info .rv { color: #1f2328; font-weight: 600; font-family: monospace; }
+  .run-row { margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center; }
+  footer { text-align: center; padding: 16px; font-size: 12px; color: #57606a; border-top: 1px solid #e5e7eb; margin-top: 8px; }
+  .tooltip-box { position: fixed; background: #1f2328; color: #fff; padding: 7px 11px; border-radius: 5px; font-size: 11px; pointer-events: none; white-space: nowrap; display: none; z-index: 999; line-height: 1.5; }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>Telecom AI Platform &mdash; Dashboard de Resultados</h1>
+    <div class="meta">Regiao: BR-SP &nbsp;|&nbsp; Gerado em: 2026-10-26 22:39 UTC &nbsp;|&nbsp; <span class="badge badge-ok">3 eixos concluidos</span></div>
+  </div>
+  <div class="meta" style="text-align:right;">Run ID<br><code style="color:#fff;font-size:11px;">d51dae0d-1ec6-4cf4-af72-f7df2d4bef19</code></div>
+</header>
+
+<div class="tooltip-box" id="tt"></div>
+
+<div class="container">
+
+  <div class="kpi-row">
+    <div class="kpi"><div class="label">Hexagonos Analisados</div><div class="value">2.000</div><div class="sub">H3 resolucao 8</div></div>
+    <div class="kpi"><div class="label">Anomalias Criticas</div><div class="value" style="color:#ef4444;">66</div><div class="sub">3,3% do total &mdash; Eixo 1</div></div>
+    <div class="kpi"><div class="label">Clusters Expansao</div><div class="value" style="color:#3b82d4;">14</div><div class="sub">13,1% ruido &mdash; Eixo 2</div></div>
+    <div class="kpi"><div class="label">Segmentos Mercado</div><div class="value" style="color:#22c55e;">6</div><div class="sub">Silhouette 0,156 &mdash; Eixo 3</div></div>
+    <div class="kpi"><div class="label">TAM Estimado Total</div><div class="value" style="color:#3b82d4;">R$102,5M</div><div class="sub">CAPEX proxy: R$15,4M</div></div>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <h2>Distribuicao Geoespacial dos Clusters <span class="tag">Eixo 2 + Eixo 1</span></h2>
+      <div class="map-wrap">
+        <svg class="map" id="mapSvg" viewBox="0 0 600 340"></svg>
+        <div class="map-legend">
+          <div><span class="ldot" style="background:#3b82d4;"></span> Cluster de expansao (tamanho = TAM)</div>
+          <div><span class="ldot" style="background:#ef4444;border-radius:0;transform:rotate(45deg);display:inline-block;"></span> Hexagono critico (Eixo 1)</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>TAM por Cluster <span class="tag">top 8 &mdash; R$ milhoes</span></h2>
+      <div id="tamBars"></div>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <h2>Segmentacao de Mercado <span class="tag">Eixo 3 &mdash; K-Means++ k=6</span></h2>
+      <div class="donut-wrap">
+        <svg class="donut" viewBox="0 0 130 130" id="donutSvg"></svg>
+        <div id="segLegend"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Performance dos Pipelines</h2>
+      <div id="pipeRows"></div>
+      <div class="run-info">
+        <div class="run-row"><span>Anomaly rate Eixo 1: <span class="rv">3,3%</span> (limite 1-15%)</span> <span class="badge badge-ok">OK</span></div>
+        <div class="run-row"><span>Noise rate Eixo 2: <span class="rv">13,1%</span> (limite &lt;25%)</span> <span class="badge badge-ok">OK</span></div>
+        <div class="run-row"><span>Silhouette global: <span class="rv">0,156</span> (limiar &gt;0,30)</span> <span class="badge badge-warn">Abaixo</span></div>
+        <div class="run-row"><span>Eventos de auditoria: <span class="rv">7</span> em logs/audit.jsonl</span> <span class="badge badge-ok">OK</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:16px;">
+    <h2>Hipoteses de Investimento &mdash; Clusters Ranqueados por TAM</h2>
+    <table>
+      <thead><tr><th>Cluster</th><th>Prioridade</th><th>TAM/ano</th><th>Dom/Hex</th><th>Vel. Media (Mbps)</th><th>HHI</th><th>Tam. (hex)</th><th>Centroide</th></tr></thead>
+      <tbody id="investBody"></tbody>
+    </table>
+  </div>
+
+  <div class="card" style="margin-bottom:16px;">
+    <h2>Top 5 Hexagonos Criticos <span class="tag">Eixo 1 &mdash; IsolationForest score >= 0,65</span></h2>
+    <table>
+      <thead><tr><th>H3 ID</th><th>Score Anomalia</th><th>Latitude</th><th>Longitude</th></tr></thead>
+      <tbody>
+        <tr><td><code>88800b9a89fffff</code></td><td><strong style="color:#ef4444;">1,0000</strong></td><td>-1,4741</td><td>-44,0732</td></tr>
+        <tr><td><code>88b32dad41fffff</code></td><td>0,9135</td><td>-18,2203</td><td>-65,8239</td></tr>
+        <tr><td><code>88801db369fffff</code></td><td>0,8872</td><td>-2,4828</td><td>-42,3621</td></tr>
+        <tr><td><code>88b2207935fffff</code></td><td>0,8699</td><td>-24,4780</td><td>-69,9729</td></tr>
+        <tr><td><code>8880ae15d9fffff</code></td><td>0,8610</td><td>-1,7125</td><td>-37,0163</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<footer>Made with IBM Bob &nbsp;&mdash;&nbsp; Telecom AI Platform</footer>
+
+<script>
+var clusters = [
+  {id:2,  tam:16062379, n_dom:1454, d_down:46.8,  hhi:4747, size:189, lat:-13.93, lon:-55.85},
+  {id:13, tam:10509068, n_dom:1097, d_down:48.8,  hhi:5175, size:164, lat:-13.18, lon:-52.82},
+  {id:9,  tam:9194046,  n_dom:1558, d_down:155.0, hhi:3381, size:101, lat:-15.77, lon:-55.08},
+  {id:5,  tam:9165938,  n_dom:796,  d_down:153.6, hhi:7691, size:197, lat:-14.44, lon:-51.94},
+  {id:7,  tam:8622668,  n_dom:1379, d_down:147.7, hhi:3601, size:107, lat:-14.38, lon:-54.31},
+  {id:0,  tam:8022716,  n_dom:1056, d_down:49.6,  hhi:8175, size:130, lat:-13.00, lon:-55.14},
+  {id:1,  tam:6516438,  n_dom:531,  d_down:121.9, hhi:2652, size:210, lat:-16.13, lon:-53.25},
+  {id:8,  tam:6187039,  n_dom:1059, d_down:153.9, hhi:5142, size:100, lat:-15.08, lon:-51.96},
+  {id:11, tam:5624953,  n_dom:1528, d_down:56.6,  hhi:2536, size:63,  lat:-13.99, lon:-52.22},
+  {id:4,  tam:5589249,  n_dom:629,  d_down:134.8, hhi:5626, size:152, lat:-15.76, lon:-53.19},
+  {id:12, tam:4996835,  n_dom:1677, d_down:41.4,  hhi:7113, size:51,  lat:-15.16, lon:-54.29},
+  {id:3,  tam:4969663,  n_dom:1701, d_down:141.8, hhi:7740, size:50,  lat:-12.51, lon:-51.87},
+  {id:6,  tam:4382625,  n_dom:620,  d_down:35.5,  hhi:5559, size:121, lat:-12.10, lon:-53.38},
+  {id:10, tam:2667675,  n_dom:443,  d_down:49.9,  hhi:3827, size:103, lat:-13.72, lon:-53.16}
+];
+var critHex = [
+  {id:'88800b9a89fffff', score:1.0000, lat:-1.47, lon:-44.07},
+  {id:'88b32dad41fffff', score:0.9135, lat:-18.22, lon:-65.82},
+  {id:'88801db369fffff', score:0.8872, lat:-2.48, lon:-42.36},
+  {id:'88b2207935fffff', score:0.8699, lat:-24.48, lon:-69.97},
+  {id:'8880ae15d9fffff', score:0.8610, lat:-1.71, lon:-37.02}
+];
+var segs = [
+  {name:'Conectividade Essencial', count:1357, color:'#3b82d4'},
+  {name:'Premium',                 count:336,  color:'#7c5cd8'},
+  {name:'Alta Vuln. Concorrencia', count:307,  color:'#f97316'}
+];
+var pipes = [
+  {name:'Eixo 1 - IsolationForest + LOF', dur:0.77,  color:'#ef4444'},
+  {name:'Eixo 2 - UMAP + HDBSCAN',        dur:30.79, color:'#3b82d4'},
+  {name:'Eixo 3 - K-Means++',             dur:5.76,  color:'#22c55e'}
+];
+
+var tt = document.getElementById('tt');
+
+function proj(lat, lon, W, H) {
+  var latMin=-33.8, latMax=5.3, lonMin=-73.9, lonMax=-32.4;
+  return {
+    x: ((lon - lonMin) / (lonMax - lonMin)) * W,
+    y: H - ((lat - latMin) / (latMax - latMin)) * H
+  };
+}
+
+// MAP
+(function() {
+  var svg = document.getElementById('mapSvg');
+  var W = 600, H = 340;
+  var ns = 'http://www.w3.org/2000/svg';
+
+  function el(tag, attrs) {
+    var e = document.createElementNS(ns, tag);
+    Object.keys(attrs).forEach(function(k){ e.setAttribute(k, attrs[k]); });
+    return e;
+  }
+
+  svg.appendChild(el('rect', {width:W, height:H, fill:'#dce8f5'}));
+
+  for (var lon = -70; lon <= -35; lon += 5) {
+    var p1 = proj(-33.8, lon, W, H), p2 = proj(5.3, lon, W, H);
+    svg.appendChild(el('line', {x1:p1.x,y1:p1.y,x2:p2.x,y2:p2.y,stroke:'#b8d0e8','stroke-width':'0.5'}));
+  }
+  for (var lat = -30; lat <= 5; lat += 5) {
+    var pa = proj(lat, -73.9, W, H), pb = proj(lat, -32.4, W, H);
+    svg.appendChild(el('line', {x1:pa.x,y1:pa.y,x2:pb.x,y2:pb.y,stroke:'#b8d0e8','stroke-width':'0.5'}));
+  }
+
+  var maxTam = clusters[0].tam;
+  clusters.forEach(function(c) {
+    var p = proj(c.lat, c.lon, W, H);
+    var r = 7 + (c.tam / maxTam) * 20;
+    var circle = el('circle', {cx:p.x, cy:p.y, r:r, fill:'#3b82d4', 'fill-opacity':'0.55', stroke:'#1d4ed8', 'stroke-width':'1', style:'cursor:pointer'});
+    circle.addEventListener('mouseenter', function(e) {
+      tt.style.display = 'block';
+      tt.innerHTML = 'Cluster ' + c.id + '<br>TAM: R$ ' + (c.tam/1e6).toFixed(1) + 'M<br>Dom/hex: ' + c.n_dom + '<br>Vel: ' + c.d_down.toFixed(0) + ' Mbps<br>Tamanho: ' + c.size + ' hex';
+    });
+    circle.addEventListener('mousemove', function(e) { tt.style.left=(e.pageX+14)+'px'; tt.style.top=(e.pageY-10)+'px'; });
+    circle.addEventListener('mouseleave', function() { tt.style.display='none'; });
+    svg.appendChild(circle);
+
+    var lbl = el('text', {x:p.x, y:p.y+3, 'text-anchor':'middle', 'font-size':'9', fill:'#fff', 'font-weight':'700'});
+    lbl.textContent = c.id;
+    svg.appendChild(lbl);
+  });
+
+  critHex.forEach(function(h) {
+    var p = proj(h.lat, h.lon, W, H);
+    var s = 7;
+    var pts = p.x+','+( p.y-s)+' '+(p.x+s)+','+p.y+' '+p.x+','+(p.y+s)+' '+(p.x-s)+','+p.y;
+    var diamond = el('polygon', {points:pts, fill:'#ef4444', 'fill-opacity':'0.85', stroke:'#b91c1c', 'stroke-width':'1', style:'cursor:pointer'});
+    diamond.addEventListener('mouseenter', function(e) {
+      tt.style.display='block';
+      tt.innerHTML = 'CRITICO<br>' + h.id.substring(0,12) + '...<br>Score: ' + h.score.toFixed(4);
+    });
+    diamond.addEventListener('mousemove', function(e) { tt.style.left=(e.pageX+14)+'px'; tt.style.top=(e.pageY-10)+'px'; });
+    diamond.addEventListener('mouseleave', function() { tt.style.display='none'; });
+    svg.appendChild(diamond);
+  });
+})();
+
+// TAM BARS
+(function() {
+  var el = document.getElementById('tamBars');
+  var top8 = clusters.slice(0,8);
+  var maxT = top8[0].tam;
+  top8.forEach(function(c) {
+    var pct = (c.tam/maxT*100).toFixed(1);
+    var lbl = (c.tam/1e6).toFixed(1)+'M';
+    el.innerHTML += '<div class="bar-row"><div class="bar-label">Cluster '+c.id+'</div><div class="bar-track"><div class="bar-fill" style="width:'+pct+'%;background:#3b82d4;">'+lbl+'</div></div></div>';
+  });
+})();
+
+// DONUT
+(function() {
+  var svg = document.getElementById('donutSvg');
+  var ns = 'http://www.w3.org/2000/svg';
+  var total = segs.reduce(function(a,s){return a+s.count;},0);
+  var cx=65, cy=65, R=52, r=33, angle=-Math.PI/2;
+
+  function el(tag, attrs) {
+    var e = document.createElementNS(ns, tag);
+    Object.keys(attrs).forEach(function(k){ e.setAttribute(k, attrs[k]); });
+    return e;
+  }
+
+  segs.forEach(function(s) {
+    var sweep = (s.count/total)*2*Math.PI;
+    var x1=cx+R*Math.cos(angle), y1=cy+R*Math.sin(angle);
+    var x2=cx+R*Math.cos(angle+sweep), y2=cy+R*Math.sin(angle+sweep);
+    var ix1=cx+r*Math.cos(angle), iy1=cy+r*Math.sin(angle);
+    var ix2=cx+r*Math.cos(angle+sweep), iy2=cy+r*Math.sin(angle+sweep);
+    var large = sweep>Math.PI?1:0;
+    svg.appendChild(el('path', {d:'M'+x1+','+y1+' A'+R+','+R+' 0 '+large+',1 '+x2+','+y2+' L'+ix2+','+iy2+' A'+r+','+r+' 0 '+large+',0 '+ix1+','+iy1+' Z', fill:s.color}));
+    angle += sweep;
+  });
+
+  var t1 = el('text', {x:cx, y:cy-5, 'text-anchor':'middle', 'font-size':'13', 'font-weight':'700', fill:'#1f2328'});
+  t1.textContent = '2.000'; svg.appendChild(t1);
+  var t2 = el('text', {x:cx, y:cy+10, 'text-anchor':'middle', 'font-size':'9', fill:'#57606a'});
+  t2.textContent = 'hexagonos'; svg.appendChild(t2);
+
+  var leg = document.getElementById('segLegend');
+  segs.forEach(function(s) {
+    var pct = (s.count/total*100).toFixed(1);
+    leg.innerHTML += '<div class="seg-item"><span class="seg-dot" style="background:'+s.color+'"></span><span>'+s.name+' <strong>'+pct+'%</strong></span></div>';
+  });
+})();
+
+// PIPELINES
+(function() {
+  var el = document.getElementById('pipeRows');
+  var maxD = pipes[1].dur;
+  pipes.forEach(function(p) {
+    var pct = (p.dur/maxD*100).toFixed(1);
+    el.innerHTML += '<div class="pipe-row"><div class="pipe-label"><span class="nm">'+p.name+'</span><span class="dr">'+p.dur.toFixed(2)+'s</span></div><div class="pipe-track"><div class="pipe-bar" style="width:'+pct+'%;background:'+p.color+';"></div></div></div>';
+  });
+})();
+
+// INVEST TABLE
+(function() {
+  var tbody = document.getElementById('investBody');
+  clusters.forEach(function(c) {
+    tbody.innerHTML += '<tr><td><strong>'+c.id+'</strong></td><td><span style="font-size:10px;font-weight:600;color:#57606a;">P3</span></td><td><strong>R$ '+(c.tam/1e6).toFixed(2)+'M</strong></td><td>'+c.n_dom+'</td><td>'+c.d_down.toFixed(1)+'</td><td>'+c.hhi+'</td><td>'+c.size+'</td><td style="font-size:11px;color:#57606a;">'+c.lat.toFixed(2)+', '+c.lon.toFixed(2)+'</td></tr>';
+  });
+})();
+</script>
+</body>
+</html>

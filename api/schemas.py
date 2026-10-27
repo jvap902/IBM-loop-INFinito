@@ -280,6 +280,79 @@ class ToolCatalogueResponse(BaseModel):
     tools: list[ToolDefinition]
 
 
+# ── Agent BFF ──────────────────────────────────────────────────────────────
+
+class AgentRunRequest(BaseModel):
+    """Request body for ``POST /v1/agent/run``.
+
+    Triggers the full LangGraph operational agent and returns the complete
+    report JSON without requiring CLI access.
+    """
+
+    region: Annotated[str, Field(
+        default="all",
+        description=(
+            "Region label (e.g. 'BR-SP') or H3 parent cell ID at resolution 5/6. "
+            "Use 'all' to analyse the full Gold Feature Store."
+        ),
+        examples=["BR-SP", "all", "855198c7fffffff"],
+    )] = "all"
+    axes: Annotated[list[str], Field(
+        default=["axis1", "axis2", "axis3"],
+        description="List of axes to execute. Valid values: axis1, axis2, axis3.",
+        examples=[["axis1", "axis2", "axis3"]],
+    )] = ["axis1", "axis2", "axis3"]
+    force: Annotated[bool, Field(
+        default=False,
+        description="When True, skips freshness checks and re-runs all selected axes.",
+    )] = False
+    llm_provider: Annotated[str, Field(
+        default="stub",
+        description="LLM provider to use: 'stub' (no credentials), 'watsonx', or 'openai'.",
+        examples=["stub", "watsonx", "openai"],
+    )] = "stub"
+
+
+class AgentRunSummary(BaseModel):
+    """High-level summary metrics from the agent run."""
+
+    n_critical_hexagons: int = 0
+    n_expansion_clusters: int = 0
+    n_market_segments: int = 0
+    n_investment_hypotheses: int = 0
+    total_tam_brl: float = 0.0
+    capex_proxy_brl: float = 0.0
+    p1_clusters: int = 0
+    p2_clusters: int = 0
+
+
+class AgentRunResponse(BaseModel):
+    """Response body for ``POST /v1/agent/run``."""
+
+    run_id: Annotated[str, Field(description="UUID assigned to this agent execution.")]
+    region_scope: Annotated[str, Field(description="Region label or H3 parent ID that was analysed.")]
+    axes_executed: Annotated[list[str], Field(description="Axes that were actually executed.")]
+    duration_seconds: Annotated[float, Field(description="Wall-clock time for the full agent run.")]
+    summary: AgentRunSummary
+    investment_hypotheses: Annotated[list[dict], Field(
+        description="Structured investment hypotheses with TAM, priority class, and rationale.",
+        default_factory=list,
+    )]
+    axis1_summary: Annotated[Optional[dict], Field(
+        description="Condensed Axis 1 output (n_critical, anomaly_rate, top critical hexagons).",
+    )] = None
+    axis2_summary: Annotated[Optional[dict], Field(
+        description="Condensed Axis 2 output (n_clusters, noise_rate, cluster list).",
+    )] = None
+    axis3_summary: Annotated[Optional[dict], Field(
+        description="Condensed Axis 3 output (n_segments, silhouette, segment profiles).",
+    )] = None
+    errors: Annotated[list[dict], Field(
+        description="Accumulated execution errors, if any.",
+        default_factory=list,
+    )]
+
+
 # ── Health ─────────────────────────────────────────────────────────────────
 
 class HealthResponse(BaseModel):

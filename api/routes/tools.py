@@ -713,7 +713,8 @@ async def run_axis3(
         run_id, n_segments, n_total, sil_global, duration,
     )
 
-    # ── KernelExplainer explainability ────────────────────────────────────
+    # ── KernelExplainer explainability (run in thread to avoid event loop conflict) ─
+    import asyncio as _asyncio
     label_map_ax3 = result_df.set_index("h3_id")["segment_id"].to_dict()
     work_ax3_aligned = work_ax3[work_ax3["h3_id"].isin(result_df["h3_id"])].copy()
     X_for_shap = scaler_ax3.transform(
@@ -722,11 +723,12 @@ async def run_axis3(
     labels_for_shap = np.array([
         label_map_ax3.get(h3, 0) for h3 in work_ax3_aligned["h3_id"]
     ])
-    explanation_ax3 = _xai.explain_axis3(
-        X_scaled=X_for_shap,
-        feature_names=feature_cols_ax3,
-        centroids=km_ax3.cluster_centers_,
-        segment_labels=labels_for_shap,
+    explanation_ax3 = await _asyncio.to_thread(
+        _xai.explain_axis3,
+        X_for_shap,
+        feature_cols_ax3,
+        km_ax3.cluster_centers_,
+        labels_for_shap,
     )
 
     # ── Audit log ─────────────────────────────────────────────────────────

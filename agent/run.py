@@ -1,10 +1,10 @@
-"""CLI entry point for the Operational Agent — Sub-Task 6.
+"""CLI entry point for the Operational Agent -- Sub-Task 6.
 
 Usage
 -----
-    python -m agent.run --region BR-SP --axes axis1 axis2 axis3
+    python -m agent.run --region BR-SP --axes axis1 --axes axis2 --axes axis3
     python -m agent.run --region 855198c7fffffff --force
-    python -m agent.run --region all --axes axis2 axis3 --output-dir reports/
+    python -m agent.run --region all --axes axis2 --axes axis3 --output-dir reports/
 
 Arguments
 ---------
@@ -52,12 +52,12 @@ from agent.tool_registry import ToolRegistry, reset_registry
 logger = logging.getLogger(__name__)
 logging.basicConfig(
     level=os.getenv("LOG_LEVEL", "INFO").upper(),
-    format="%(asctime)s [%(levelname)s] %(name)s — %(message)s",
+    format="%(asctime)s [%(levelname)s] %(name)s -- %(message)s",
 )
 
 app = typer.Typer(
     name="telecom-agent",
-    help="Telecom AI Operational Agent — generates prescriptive infrastructure reports.",
+    help="Telecom AI Operational Agent -- generates prescriptive infrastructure reports.",
     add_completion=False,
 )
 
@@ -102,7 +102,7 @@ def run_agent(
 ) -> None:
     """Run the Operational Agent and save the prescriptive infrastructure report."""
 
-    # ── Environment overrides ──────────────────────────────────────────────
+    # -- Environment overrides --------------------------------------------------
     if api_base:
         os.environ["TOOL_API_BASE_URL"] = api_base
     if api_key:
@@ -110,28 +110,28 @@ def run_agent(
     if llm:
         os.environ["LLM_PROVIDER"] = llm
 
-    # ── Normalise axes ────────────────────────────────────────────────────
+    # -- Normalise axes ---------------------------------------------------------
     valid_axes = {"axis1", "axis2", "axis3"}
     if axes:
         requested_axes = [a.lower().strip() for a in axes if a.lower().strip() in valid_axes]
         invalid = [a for a in axes if a.lower().strip() not in valid_axes]
         if invalid:
-            typer.echo(f"⚠️  Unknown axes ignored: {invalid}", err=True)
+            typer.echo(f"WARNING: Unknown axes ignored: {invalid}", err=True)
     else:
         requested_axes = ["axis1", "axis2", "axis3"]
 
     if not requested_axes:
-        typer.echo("❌ No valid axes specified. Use --axes axis1 axis2 axis3", err=True)
+        typer.echo("ERROR: No valid axes specified. Use --axes axis1 --axes axis2 --axes axis3", err=True)
         raise typer.Exit(code=1)
 
-    # ── Prepare tool registry ─────────────────────────────────────────────
+    # -- Prepare tool registry --------------------------------------------------
     reset_registry()
     registry = ToolRegistry(
         base_url=os.getenv("TOOL_API_BASE_URL", "http://localhost:8000"),
         api_key=os.getenv("TOOL_API_KEY", ""),
     )
 
-    # ── Build initial state ───────────────────────────────────────────────
+    # -- Build initial state ----------------------------------------------------
     run_id = str(uuid.uuid4())
     initial_state: AgentState = {
         "region_scope": region,
@@ -143,7 +143,7 @@ def run_agent(
     }
 
     typer.echo(
-        f"\n🚀 Telecom Operational Agent\n"
+        f"\nTelecom Operational Agent\n"
         f"   Region  : {region}\n"
         f"   Axes    : {requested_axes}\n"
         f"   Force   : {force}\n"
@@ -152,20 +152,19 @@ def run_agent(
         f"   LLM     : {os.getenv('LLM_PROVIDER', 'stub')}\n"
     )
 
-    # ── Execute graph ─────────────────────────────────────────────────────
-    typer.echo("⏳ Running agent graph…")
+    # -- Execute graph ----------------------------------------------------------
+    typer.echo("Running agent graph...")
     try:
         compiled_graph = build_graph(registry=registry)
         final_state: AgentState = compiled_graph.invoke(initial_state)
     except Exception as exc:
-        typer.echo(f"❌ Agent execution failed: {exc}", err=True)
+        typer.echo(f"ERROR: Agent execution failed: {exc}", err=True)
         logger.exception("Agent graph execution failed")
         raise typer.Exit(code=2) from exc
 
-    # ── Save reports ──────────────────────────────────────────────────────
+    # -- Save reports -----------------------------------------------------------
     output_dir.mkdir(parents=True, exist_ok=True)
     date_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-    # Sanitise region for use in filename
     safe_region = region.replace("/", "-").replace(" ", "_").replace(":", "-")[:50]
     base_name = f"{safe_region}_{date_str}"
 
@@ -182,23 +181,23 @@ def run_agent(
         encoding="utf-8",
     )
 
-    typer.echo(f"\n✅ Report saved:")
-    typer.echo(f"   📄 {md_path}")
-    typer.echo(f"   🗂  {json_path}")
+    typer.echo(f"\nReport saved:")
+    typer.echo(f"   MD  : {md_path}")
+    typer.echo(f"   JSON: {json_path}")
 
-    # ── Audit summary ─────────────────────────────────────────────────────
+    # -- Audit summary ----------------------------------------------------------
     audit_trail = final_state.get("audit_trail", [])
-    typer.echo(f"\n📋 Audit trail: {len(audit_trail)} events recorded (run_id={run_id})")
+    typer.echo(f"\nAudit trail: {len(audit_trail)} events recorded (run_id={run_id})")
 
     if errors:
-        typer.echo(f"\n⚠️  {len(errors)} error(s) during execution:")
+        typer.echo(f"\nWARNING: {len(errors)} error(s) during execution:")
         for err in errors:
-            typer.echo(f"   • [{err.get('node', '?')}] {err.get('error', 'unknown')}")
+            typer.echo(f"   [{err.get('node', '?')}] {err.get('error', 'unknown')}")
 
-    # ── Print executive summary ───────────────────────────────────────────
+    # -- Print executive summary ------------------------------------------------
     summary = report_json.get("summary", {})
     typer.echo(
-        f"\n📊 Summary:\n"
+        f"\nSummary:\n"
         f"   Critical hexagons (Axis 1) : {summary.get('n_critical_hexagons', 0)}\n"
         f"   Expansion clusters (Axis 2): {summary.get('n_expansion_clusters', 0)}\n"
         f"   Market segments  (Axis 3)  : {summary.get('n_market_segments', 0)}\n"

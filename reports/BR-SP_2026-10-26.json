@@ -1,0 +1,337 @@
+{
+  "run_id": "d51dae0d-1ec6-4cf4-af72-f7df2d4bef19",
+  "generated_at": "2026-10-26 22:39 UTC",
+  "region_scope": "BR-SP",
+  "axes_executed": [
+    "axis1",
+    "axis2",
+    "axis3"
+  ],
+  "summary": {
+    "n_critical_hexagons": 66,
+    "n_expansion_clusters": 14,
+    "n_market_segments": 6,
+    "n_investment_hypotheses": 14,
+    "total_tam_brl": 102511293.74000001,
+    "capex_proxy_brl": 15376694.061,
+    "p1_clusters": 0,
+    "p2_clusters": 0
+  },
+  "investment_hypotheses": [
+    {
+      "cluster_id": 2,
+      "priority_class": "P3_STANDARD_EXPANSION",
+      "tam_estimate_brl": 16062379.39,
+      "avg_n_dom": 1454.3704,
+      "avg_d_down_mbps": 46.8299,
+      "avg_hhi": 4746.8571,
+      "cluster_size_hexagons": 189,
+      "arpu_assumed_brl": 89.9,
+      "penetration_rate_assumed": 0.35,
+      "rationale": "Cluster 2: oportunidade de expansão padrão sem sinais críticos imediatos.",
+      "lat_centroid": -13.932165,
+      "lon_centroid": -55.853279
+    },
+    {
+      "cluster_id": 13,
+      "priority_class": "P3_STANDARD_EXPANSION",
+      "tam_estimate_brl": 10509067.64,
+      "avg_n_dom": 1096.5976,
+      "avg_d_down_mbps": 48.8034,
+      "avg_hhi": 5175.2378,
+      "cluster_size_hexagons": 164,
+      "arpu_assumed_brl": 89.9,
+      "penetration_rate_assumed": 0.35,
+      "rationale": "Cluster 13: oportunidade de expansão padrão sem sinais críticos imediatos.",
+      "lat_centroid": -13.180859,
+      "lon_centroid": -52.818348
+    },
+    {
+      "cluster_id": 9,
+      "priority_class": "P3_STANDARD_EXPANSION",
+      "tam_estimate_brl": 9194046.15,
+      "avg_n_dom": 1557.802,
+      "avg_d_down_mbps": 155.0244,
+      "avg_hhi": 3380.6139,
+      "cluster_size_hexagons": 101,
+      "arpu_assumed_brl": 89.9,
+      "penetration_rate_assumed": 0.35,
+      "rationale": "Cluster 9: oportunidade de expansão padrão sem sinais críticos imediatos.",
+      "lat_centroid": -15.76782,
+      "lon_centroid": -55.083337
+    },
+    {
+      "cluster_id": 5,
+      "priority_class": "P3_STANDARD_EXPANSION",
+      "tam_estimate_brl": 9165938.49,
+      "avg_n_dom": 796.2284,
+      "avg_d_down_mbps": 153.6232,
+      "avg_hhi": 7691.4619,
+      "cluster_size_hexagons": 197,
+      "arpu_assumed_brl": 89.9,
+      "penetration_rate_assumed": 0.35,
+      "rationale": "Cluster 5: oportunidade de expansão padrão sem sinais críticos imediatos.",
+      "lat_centroid": -14.44393,
+      "lon_centroid": -51.94161
+    },
+    {
+      "cluster_id": 7,
+      "priority_class": "P3_STANDARD_EXPANSION",
+      "tam_estimate_brl": 8622668.47,
+      "avg_n_dom": 1379.0654,
+      "avg_d_down_mbps": 147.7398,
+      "avg_hhi": 3600.5047,
+      "cluster_size_hexagons": 107,
+      "arpu_assumed_brl": 89.9,
+      "penetration_rate_assumed": 0.35,
+      "rationale": "Cluster 7: oportunidade de expansão padrão sem sinais críticos imediatos.",
+      "lat_centroid": -14.378503,
+      "lon_centroid": -54.308161
+    },
+    {
+      "cluster_id": 0,
+      "priority_class": "P3_STANDARD_EXPANSION",
+      "tam_estimate_brl": 8022716.46,
+      "avg_n_dom": 1056.1,
+      "avg_d_down_mbps": 49.5988,
+      "avg_hhi": 8175.0538,
+      "cluster_size_hexagons": 130,
+      "arpu_assumed_brl": 89.9,
+      "penetration_rate_assumed": 0.35,
+      "rationale": "Cluster 0: oportunidade de expansão padrão sem sinais críticos imediatos.",
+      "lat_centroid": -12.999785,
+      "lon_centroid": -55.144975
+    },
+    {
+      "cluster_id": 1,
+      "priority_class": "P3_STANDARD_EXPANSION",
+      "tam_estimate_brl": 6516437.81,
+      "avg_n_dom": 531.0286,
+      "avg_d_down_mbps": 121.947,
+      "avg_hhi": 2651.9952,
+      "cluster_size_hexagons": 210,
+      "arpu_assumed_brl": 89.9,
+      "penetration_rate_assumed": 0.35,
+      "rationale": "Cluster 1: oportunidade de expansão padrão sem sinais críticos imediatos.",
+      "lat_centroid": -16.128164,
+      "lon_centroid": -53.247042
+    },
+    {
+      "cluster_id": 8,
+      "priority_class": "P3_STANDARD_EXPANSION",
+      "tam_estimate_brl": 6187039.37,
+      "avg_n_dom": 1058.79,
+      "avg_d_down_mbps": 153.8533,
+      "avg_hhi": 5142.21,
+      "cluster_size_hexagons": 100,
+      "arpu_assumed_brl": 89.9,
+      "penetration_rate_assumed": 0.35,
+      "rationale": "Cluster 8: oportunidade de expansão padrão sem sinais críticos imediatos.",
+      "lat_centroid": -15.084832,
+      "lon_centroid": -51.961466
+    },
+    {
+      "cluster_id": 11,
+      "priority_class": "P3_STANDARD_EXPANSION",
+      "tam_estimate_brl": 5624953.07,
+      "avg_n_dom": 1527.9365,
+      "avg_d_down_mbps": 56.5598,
+      "avg_hhi": 2536.3333,
+      "cluster_size_hexagons": 63,
+      "arpu_assumed_brl": 89.9,
+      "penetration_rate_assumed": 0.35,
+      "rationale": "Cluster 11: oportunidade de expansão padrão sem sinais críticos imediatos.",
+      "lat_centroid": -13.985024,
+      "lon_centroid": -52.220543
+    },
+    {
+      "cluster_id": 4,
+      "priority_class": "P3_STANDARD_EXPANSION",
+      "tam_estimate_brl": 5589248.99,
+      "avg_n_dom": 629.2697,
+      "avg_d_down_mbps": 134.7657,
+      "avg_hhi": 5626.0921,
+      "cluster_size_hexagons": 152,
+      "arpu_assumed_brl": 89.9,
+      "penetration_rate_assumed": 0.35,
+      "rationale": "Cluster 4: oportunidade de expansão padrão sem sinais críticos imediatos.",
+      "lat_centroid": -15.764917,
+      "lon_centroid": -53.19427
+    },
+    {
+      "cluster_id": 12,
+      "priority_class": "P3_STANDARD_EXPANSION",
+      "tam_estimate_brl": 4996835.36,
+      "avg_n_dom": 1676.6863,
+      "avg_d_down_mbps": 41.4053,
+      "avg_hhi": 7112.9216,
+      "cluster_size_hexagons": 51,
+      "arpu_assumed_brl": 89.9,
+      "penetration_rate_assumed": 0.35,
+      "rationale": "Cluster 12: oportunidade de expansão padrão sem sinais críticos imediatos.",
+      "lat_centroid": -15.157125,
+      "lon_centroid": -54.289432
+    },
+    {
+      "cluster_id": 3,
+      "priority_class": "P3_STANDARD_EXPANSION",
+      "tam_estimate_brl": 4969663.01,
+      "avg_n_dom": 1700.92,
+      "avg_d_down_mbps": 141.8024,
+      "avg_hhi": 7740.02,
+      "cluster_size_hexagons": 50,
+      "arpu_assumed_brl": 89.9,
+      "penetration_rate_assumed": 0.35,
+      "rationale": "Cluster 3: oportunidade de expansão padrão sem sinais críticos imediatos.",
+      "lat_centroid": -12.505642,
+      "lon_centroid": -51.87298
+    },
+    {
+      "cluster_id": 6,
+      "priority_class": "P3_STANDARD_EXPANSION",
+      "tam_estimate_brl": 4382624.92,
+      "avg_n_dom": 619.8347,
+      "avg_d_down_mbps": 35.5056,
+      "avg_hhi": 5558.7355,
+      "cluster_size_hexagons": 121,
+      "arpu_assumed_brl": 89.9,
+      "penetration_rate_assumed": 0.35,
+      "rationale": "Cluster 6: oportunidade de expansão padrão sem sinais críticos imediatos.",
+      "lat_centroid": -12.097993,
+      "lon_centroid": -53.382695
+    },
+    {
+      "cluster_id": 10,
+      "priority_class": "P3_STANDARD_EXPANSION",
+      "tam_estimate_brl": 2667674.61,
+      "avg_n_dom": 443.2233,
+      "avg_d_down_mbps": 49.9071,
+      "avg_hhi": 3826.8641,
+      "cluster_size_hexagons": 103,
+      "arpu_assumed_brl": 89.9,
+      "penetration_rate_assumed": 0.35,
+      "rationale": "Cluster 10: oportunidade de expansão padrão sem sinais críticos imediatos.",
+      "lat_centroid": -13.72223,
+      "lon_centroid": -53.159206
+    }
+  ],
+  "cross_matrix": [
+    {
+      "cluster_id": 2,
+      "priority_class": "P3_STANDARD_EXPANSION",
+      "tam_brl": 16062379.39,
+      "axis1_overlap_proxy": false,
+      "axis3_churn_risk": false
+    },
+    {
+      "cluster_id": 13,
+      "priority_class": "P3_STANDARD_EXPANSION",
+      "tam_brl": 10509067.64,
+      "axis1_overlap_proxy": false,
+      "axis3_churn_risk": false
+    },
+    {
+      "cluster_id": 9,
+      "priority_class": "P3_STANDARD_EXPANSION",
+      "tam_brl": 9194046.15,
+      "axis1_overlap_proxy": false,
+      "axis3_churn_risk": false
+    },
+    {
+      "cluster_id": 5,
+      "priority_class": "P3_STANDARD_EXPANSION",
+      "tam_brl": 9165938.49,
+      "axis1_overlap_proxy": false,
+      "axis3_churn_risk": false
+    },
+    {
+      "cluster_id": 7,
+      "priority_class": "P3_STANDARD_EXPANSION",
+      "tam_brl": 8622668.47,
+      "axis1_overlap_proxy": false,
+      "axis3_churn_risk": false
+    },
+    {
+      "cluster_id": 0,
+      "priority_class": "P3_STANDARD_EXPANSION",
+      "tam_brl": 8022716.46,
+      "axis1_overlap_proxy": false,
+      "axis3_churn_risk": false
+    },
+    {
+      "cluster_id": 1,
+      "priority_class": "P3_STANDARD_EXPANSION",
+      "tam_brl": 6516437.81,
+      "axis1_overlap_proxy": false,
+      "axis3_churn_risk": false
+    },
+    {
+      "cluster_id": 8,
+      "priority_class": "P3_STANDARD_EXPANSION",
+      "tam_brl": 6187039.37,
+      "axis1_overlap_proxy": false,
+      "axis3_churn_risk": false
+    },
+    {
+      "cluster_id": 11,
+      "priority_class": "P3_STANDARD_EXPANSION",
+      "tam_brl": 5624953.07,
+      "axis1_overlap_proxy": false,
+      "axis3_churn_risk": false
+    },
+    {
+      "cluster_id": 4,
+      "priority_class": "P3_STANDARD_EXPANSION",
+      "tam_brl": 5589248.99,
+      "axis1_overlap_proxy": false,
+      "axis3_churn_risk": false
+    },
+    {
+      "cluster_id": 12,
+      "priority_class": "P3_STANDARD_EXPANSION",
+      "tam_brl": 4996835.36,
+      "axis1_overlap_proxy": false,
+      "axis3_churn_risk": false
+    },
+    {
+      "cluster_id": 3,
+      "priority_class": "P3_STANDARD_EXPANSION",
+      "tam_brl": 4969663.01,
+      "axis1_overlap_proxy": false,
+      "axis3_churn_risk": false
+    },
+    {
+      "cluster_id": 6,
+      "priority_class": "P3_STANDARD_EXPANSION",
+      "tam_brl": 4382624.92,
+      "axis1_overlap_proxy": false,
+      "axis3_churn_risk": false
+    },
+    {
+      "cluster_id": 10,
+      "priority_class": "P3_STANDARD_EXPANSION",
+      "tam_brl": 2667674.61,
+      "axis1_overlap_proxy": false,
+      "axis3_churn_risk": false
+    }
+  ],
+  "axis1_summary": {
+    "n_critical": 66,
+    "total_hexagons_scored": 2000,
+    "anomaly_rate": 0.033,
+    "duration_seconds": 0.771
+  },
+  "axis2_summary": {
+    "n_clusters": 14,
+    "total_hexagons_processed": 2000,
+    "noise_rate": 0.131,
+    "duration_seconds": 30.785
+  },
+  "axis3_summary": {
+    "n_segments": 6,
+    "total_hexagons_segmented": 2000,
+    "silhouette_score_global": 0.15619,
+    "duration_seconds": 5.761
+  },
+  "errors": []
+}
