@@ -297,3 +297,25 @@ async def get_run(
         return AgentRunResponse.model_validate_json(path.read_text(encoding="utf-8"))
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"Failed to parse run file: {exc}") from exc
+
+
+@router.delete(
+    "/agent/runs/{run_id}",
+    status_code=204,
+    summary="Delete a persisted agent run",
+    tags=["Agent"],
+)
+async def delete_run(
+    run_id: str,
+    _api_key: str = Depends(require_api_key),
+) -> None:
+    """Delete the persisted JSON snapshot for a run. Returns 204 on success."""
+    safe = Path(run_id).name
+    path = _RUNS_DIR / f"{safe}.json"
+    if not path.exists():
+        raise HTTPException(status_code=404, detail=f"Run '{safe}' not found.")
+    try:
+        path.unlink()
+        logger.info('{"event": "run_deleted", "run_id": "%s"}', safe)
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Failed to delete run: {exc}") from exc

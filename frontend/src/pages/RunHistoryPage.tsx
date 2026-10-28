@@ -1,6 +1,7 @@
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useQuery, useMutation } from '@tanstack/react-query'
-import { listRuns, getRun } from '../api/runsApi'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { listRuns, getRun, deleteRun } from '../api/runsApi'
 import { useReportStore } from '../stores/reportStore'
 import type { RunMeta } from '../api/runsApi'
 
@@ -38,12 +39,18 @@ function RunCard({
   isActive,
   onLoad,
   isLoading,
+  onDelete,
+  isDeleting,
 }: {
   run: RunMeta
   isActive: boolean
   onLoad: () => void
   isLoading: boolean
+  onDelete: () => void
+  isDeleting: boolean
 }) {
+  const [confirming, setConfirming] = useState(false)
+
   return (
     <div
       className={[
@@ -103,7 +110,7 @@ function RunCard({
       {/* Load button */}
       <button
         onClick={onLoad}
-        disabled={isLoading || isActive}
+        disabled={isLoading || isActive || isDeleting}
         className={[
           'w-full py-1.5 rounded text-xs font-bold transition-colors',
           isActive
@@ -113,13 +120,42 @@ function RunCard({
       >
         {isLoading ? 'Carregando…' : isActive ? '✓ Carregado no Dashboard' : 'Carregar no Dashboard'}
       </button>
+
+      {/* Delete / confirm row */}
+      {!confirming ? (
+        <button
+          onClick={() => setConfirming(true)}
+          disabled={isDeleting}
+          className="w-full mt-1.5 py-1 rounded text-[11px] text-ind-muted hover:text-red-400 hover:border-red-800/50 border border-transparent transition-colors disabled:opacity-40"
+        >
+          {isDeleting ? 'Excluindo…' : '✕ Excluir análise'}
+        </button>
+      ) : (
+        <div className="mt-1.5 flex gap-2 items-center">
+          <span className="text-[11px] text-ind-muted flex-1">Confirmar exclusão?</span>
+          <button
+            onClick={() => { onDelete(); setConfirming(false) }}
+            className="px-2 py-1 rounded text-[11px] bg-red-900/40 text-red-400 border border-red-800/50 hover:bg-red-900/70 transition-colors"
+          >
+            Excluir
+          </button>
+          <button
+            onClick={() => setConfirming(false)}
+            className="px-2 py-1 rounded text-[11px] text-ind-muted border border-ind-border hover:text-ind-text transition-colors"
+          >
+            Cancelar
+          </button>
+        </div>
+      )}
     </div>
   )
 }
 
 export default function RunHistoryPage() {
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const setReport = useReportStore((s) => s.setReport)
+  const clearReport = useReportStore((s) => s.clearReport)
   const activeReport = useReportStore((s) => s.report)
 
   const { data, isLoading, error, refetch } = useQuery({
@@ -132,6 +168,15 @@ export default function RunHistoryPage() {
     onSuccess: (runData) => {
       setReport(runData)
       navigate('/')
+    },
+  })
+
+  const { mutate: removeRun, variables: deletingRunId, isPending: isDeletePending } = useMutation({
+    mutationFn: (runId: string) => deleteRun(runId),
+    onSuccess: (_data, runId) => {
+      // If the deleted run is the active one, clear the dashboard
+      if (activeReport?.run_id === runId) clearReport()
+      queryClient.invalidateQueries({ queryKey: ['runs-list'] })
     },
   })
 
@@ -191,6 +236,8 @@ export default function RunHistoryPage() {
                 isActive={activeReport?.run_id === run.run_id}
                 onLoad={() => loadRun(run.run_id)}
                 isLoading={isPending && loadingRunId === run.run_id}
+                onDelete={() => removeRun(run.run_id)}
+                isDeleting={isDeletePending && deletingRunId === run.run_id}
               />
             ))}
           </div>

@@ -25,3 +25,7 @@ export async function getReport(filename: string): Promise<ReportContentResponse
   const { data } = await client.get<ReportContentResponse>(`/reports/${encodeURIComponent(filename)}`)
   return data
 }
+
+export async function deleteReport(filename: string): Promise<void> {
+  await client.delete(`/reports/${encodeURIComponent(filename)}`)
+}

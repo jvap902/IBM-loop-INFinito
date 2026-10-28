@@ -1,12 +1,12 @@
 {
-  "run_id": "870ccadc-d3aa-4cf6-a4fd-137bc63ac93c",
-  "region_scope": "all",
+  "run_id": "141b15b9-c130-4d32-9fc3-6aaf8719944e",
+  "region_scope": "BR-RS",
   "axes_executed": [
     "axis1",
     "axis2",
     "axis3"
   ],
-  "duration_seconds": 25.302,
+  "duration_seconds": 28.573,
   "summary": {
     "n_critical_hexagons": 95,
     "n_expansion_clusters": 13,
@@ -29,7 +29,8 @@
       "cluster_size_hexagons": 430,
       "arpu_assumed_brl": 89.9,
       "penetration_rate_assumed": 0.35,
-      "rationale": "Cluster 12: oportunidade de expansão padrão sem sinais críticos imediatos.",
+      "rationale": "Cluster 12 (Sinop, Mato Grosso, BR): oportunidade de expansão padrão sem sinais críticos imediatos.",
+      "place_name": "Sinop, Mato Grosso, BR",
       "lat_centroid": -13.423549,
       "lon_centroid": -54.048135
     },
@@ -43,7 +44,8 @@
       "cluster_size_hexagons": 167,
       "arpu_assumed_brl": 89.9,
       "penetration_rate_assumed": 0.35,
-      "rationale": "Cluster 9: oportunidade de expansão padrão sem sinais críticos imediatos.",
+      "rationale": "Cluster 9 (Chapada dos Guimaraes, Mato Grosso, BR): oportunidade de expansão padrão sem sinais críticos imediatos.",
+      "place_name": "Chapada dos Guimaraes, Mato Grosso, BR",
       "lat_centroid": -14.603653,
       "lon_centroid": -54.975139
     },
@@ -57,7 +59,8 @@
       "cluster_size_hexagons": 202,
       "arpu_assumed_brl": 89.9,
       "penetration_rate_assumed": 0.35,
-      "rationale": "Cluster 10: oportunidade de expansão padrão sem sinais críticos imediatos.",
+      "rationale": "Cluster 10 (Sinop, Mato Grosso, BR): oportunidade de expansão padrão sem sinais críticos imediatos.",
+      "place_name": "Sinop, Mato Grosso, BR",
       "lat_centroid": -13.405762,
       "lon_centroid": -54.059074
     },
@@ -71,7 +74,8 @@
       "cluster_size_hexagons": 77,
       "arpu_assumed_brl": 89.9,
       "penetration_rate_assumed": 0.35,
-      "rationale": "Cluster 11: oportunidade de expansão padrão sem sinais críticos imediatos.",
+      "rationale": "Cluster 11 (Alto Araguaia, Mato Grosso, BR): oportunidade de expansão padrão sem sinais críticos imediatos.",
+      "place_name": "Alto Araguaia, Mato Grosso, BR",
       "lat_centroid": -16.932179,
       "lon_centroid": -53.635218
     },
@@ -85,7 +89,8 @@
       "cluster_size_hexagons": 67,
       "arpu_assumed_brl": 89.9,
       "penetration_rate_assumed": 0.35,
-      "rationale": "Cluster 8: oportunidade de expansão padrão sem sinais críticos imediatos.",
+      "rationale": "Cluster 8 (Sinop, Mato Grosso, BR): oportunidade de expansão padrão sem sinais críticos imediatos.",
+      "place_name": "Sinop, Mato Grosso, BR",
       "lat_centroid": -11.634492,
       "lon_centroid": -54.41011
     },
@@ -99,7 +104,8 @@
       "cluster_size_hexagons": 64,
       "arpu_assumed_brl": 89.9,
       "penetration_rate_assumed": 0.35,
-      "rationale": "Cluster 5: oportunidade de expansão padrão sem sinais críticos imediatos.",
+      "rationale": "Cluster 5 (Barra do Garcas, Mato Grosso, BR): oportunidade de expansão padrão sem sinais críticos imediatos.",
+      "place_name": "Barra do Garcas, Mato Grosso, BR",
       "lat_centroid": -13.878105,
       "lon_centroid": -52.90689
     },
@@ -113,7 +119,8 @@
       "cluster_size_hexagons": 129,
       "arpu_assumed_brl": 89.9,
       "penetration_rate_assumed": 0.35,
-      "rationale": "Cluster 2: oportunidade de expansão padrão sem sinais críticos imediatos.",
+      "rationale": "Cluster 2 (Poxoreo, Mato Grosso, BR): oportunidade de expansão padrão sem sinais críticos imediatos.",
+      "place_name": "Poxoreo, Mato Grosso, BR",
       "lat_centroid": -14.222844,
       "lon_centroid": -53.906026
     },
@@ -127,7 +134,8 @@
       "cluster_size_hexagons": 176,
       "arpu_assumed_brl": 89.9,
       "penetration_rate_assumed": 0.35,
-      "rationale": "Cluster 1: oportunidade de expansão padrão sem sinais críticos imediatos.",
+      "rationale": "Cluster 1 (Nobres, Mato Grosso, BR): oportunidade de expansão padrão sem sinais críticos imediatos.",
+      "place_name": "Nobres, Mato Grosso, BR",
       "lat_centroid": -14.361756,
       "lon_centroid": -55.225555
     },
@@ -141,7 +149,8 @@
       "cluster_size_hexagons": 112,
       "arpu_assumed_brl": 89.9,
       "penetration_rate_assumed": 0.35,
-      "rationale": "Cluster 0: oportunidade de expansão padrão sem sinais críticos imediatos.",
+      "rationale": "Cluster 0 (Sinop, Mato Grosso, BR): oportunidade de expansão padrão sem sinais críticos imediatos.",
+      "place_name": "Sinop, Mato Grosso, BR",
       "lat_centroid": -13.307046,
       "lon_centroid": -54.73975
     },
@@ -155,7 +164,8 @@
       "cluster_size_hexagons": 102,
       "arpu_assumed_brl": 89.9,
       "penetration_rate_assumed": 0.35,
-      "rationale": "Cluster 3: mercado competitivo (HHI=2478) com demanda por expansão. Risco de churn identificado pelo Eixo 3.",
+      "rationale": "Cluster 3 (Poxoreo, Mato Grosso, BR): mercado competitivo (HHI=2478) com demanda por expansão. Risco de churn identificado pelo Eixo 3.",
+      "place_name": "Poxoreo, Mato Grosso, BR",
       "lat_centroid": -14.537961,
       "lon_centroid": -54.29461
     },
@@ -169,7 +179,8 @@
       "cluster_size_hexagons": 86,
       "arpu_assumed_brl": 89.9,
       "penetration_rate_assumed": 0.35,
-      "rationale": "Cluster 4: mercado competitivo (HHI=2437) com demanda por expansão. Risco de churn identificado pelo Eixo 3.",
+      "rationale": "Cluster 4 (Poxoreo, Mato Grosso, BR): mercado competitivo (HHI=2437) com demanda por expansão. Risco de churn identificado pelo Eixo 3.",
+      "place_name": "Poxoreo, Mato Grosso, BR",
       "lat_centroid": -13.803532,
       "lon_centroid": -53.342344
     },
@@ -183,7 +194,8 @@
       "cluster_size_hexagons": 50,
       "arpu_assumed_brl": 89.9,
       "penetration_rate_assumed": 0.35,
-      "rationale": "Cluster 6: oportunidade de expansão padrão sem sinais críticos imediatos.",
+      "rationale": "Cluster 6 (Barra do Garcas, Mato Grosso, BR): oportunidade de expansão padrão sem sinais críticos imediatos.",
+      "place_name": "Barra do Garcas, Mato Grosso, BR",
       "lat_centroid": -14.588569,
       "lon_centroid": -53.04678
     },
@@ -197,7 +209,8 @@
       "cluster_size_hexagons": 55,
       "arpu_assumed_brl": 89.9,
       "penetration_rate_assumed": 0.35,
-      "rationale": "Cluster 7: oportunidade de expansão padrão sem sinais críticos imediatos.",
+      "rationale": "Cluster 7 (Guiratinga, Mato Grosso, BR): oportunidade de expansão padrão sem sinais críticos imediatos.",
+      "place_name": "Guiratinga, Mato Grosso, BR",
       "lat_centroid": -15.968022,
       "lon_centroid": -53.4567
     }
@@ -206,7 +219,7 @@
     "n_critical": 95,
     "total_hexagons_scored": 2000,
     "anomaly_rate": 0.0475,
-    "duration_seconds": 0.636,
+    "duration_seconds": 0.643,
     "top_critical": [
       {
         "h3_id": "88a876a117fffff",
@@ -664,7 +677,7 @@
     "n_clusters": 13,
     "total_hexagons_processed": 2000,
     "noise_rate": 0.1415,
-    "duration_seconds": 16.538,
+    "duration_seconds": 17.249,
     "clusters": [
       {
         "cluster_id": 10,
@@ -675,7 +688,8 @@
         "avg_n_dom": 1404.0743,
         "avg_HHI": 5362.5125,
         "tam_estimate": 283623.01,
-        "is_noise": 0
+        "is_noise": 0,
+        "place_name": "Sinop, Mato Grosso, BR"
       },
       {
         "cluster_id": -1,
@@ -686,7 +700,8 @@
         "avg_n_dom": 2502.1131,
         "avg_HHI": 5334.1539,
         "tam_estimate": 2502.11,
-        "is_noise": 1
+        "is_noise": 1,
+        "place_name": null
       },
       {
         "cluster_id": 9,
@@ -697,7 +712,8 @@
         "avg_n_dom": 3841.4371,
         "avg_HHI": 3487.8569,
         "tam_estimate": 641520.0,
-        "is_noise": 0
+        "is_noise": 0,
+        "place_name": "Chapada dos Guimaraes, Mato Grosso, BR"
       },
       {
         "cluster_id": 1,
@@ -708,7 +724,8 @@
         "avg_n_dom": 1155.7614,
         "avg_HHI": 4547.9052,
         "tam_estimate": 203414.01,
-        "is_noise": 0
+        "is_noise": 0,
+        "place_name": "Nobres, Mato Grosso, BR"
       },
       {
         "cluster_id": 2,
@@ -719,7 +736,8 @@
         "avg_n_dom": 1706.7752,
         "avg_HHI": 6639.3811,
         "tam_estimate": 220174.0,
-        "is_noise": 0
+        "is_noise": 0,
+        "place_name": "Poxoreo, Mato Grosso, BR"
       },
       {
         "cluster_id": 12,
@@ -730,7 +748,8 @@
         "avg_n_dom": 3790.6116,
         "avg_HHI": 4815.9875,
         "tam_estimate": 1629962.99,
-        "is_noise": 0
+        "is_noise": 0,
+        "place_name": "Sinop, Mato Grosso, BR"
       },
       {
         "cluster_id": 8,
@@ -741,7 +760,8 @@
         "avg_n_dom": 3961.2687,
         "avg_HHI": 7480.3077,
         "tam_estimate": 265405.0,
-        "is_noise": 0
+        "is_noise": 0,
+        "place_name": "Sinop, Mato Grosso, BR"
       },
       {
         "cluster_id": 4,
@@ -752,7 +772,8 @@
         "avg_n_dom": 1723.7209,
         "avg_HHI": 2437.4457,
         "tam_estimate": 148240.0,
-        "is_noise": 0
+        "is_noise": 0,
+        "place_name": "Poxoreo, Mato Grosso, BR"
       },
       {
         "cluster_id": 5,
@@ -763,7 +784,8 @@
         "avg_n_dom": 3712.2188,
         "avg_HHI": 6786.1565,
         "tam_estimate": 237582.0,
-        "is_noise": 0
+        "is_noise": 0,
+        "place_name": "Barra do Garcas, Mato Grosso, BR"
       },
       {
         "cluster_id": 7,
@@ -774,7 +796,8 @@
         "avg_n_dom": 826.2182,
         "avg_HHI": 5790.9778,
         "tam_estimate": 45442.0,
-        "is_noise": 0
+        "is_noise": 0,
+        "place_name": "Guiratinga, Mato Grosso, BR"
       },
       {
         "cluster_id": 11,
@@ -785,7 +808,8 @@
         "avg_n_dom": 3673.7532,
         "avg_HHI": 7481.8996,
         "tam_estimate": 282879.0,
-        "is_noise": 0
+        "is_noise": 0,
+        "place_name": "Alto Araguaia, Mato Grosso, BR"
       },
       {
         "cluster_id": 0,
@@ -796,7 +820,8 @@
         "avg_n_dom": 1441.0536,
         "avg_HHI": 6863.0591,
         "tam_estimate": 161398.0,
-        "is_noise": 0
+        "is_noise": 0,
+        "place_name": "Sinop, Mato Grosso, BR"
       },
       {
         "cluster_id": 3,
@@ -807,7 +832,8 @@
         "avg_n_dom": 1564.6667,
         "avg_HHI": 2477.7454,
         "tam_estimate": 159596.0,
-        "is_noise": 0
+        "is_noise": 0,
+        "place_name": "Poxoreo, Mato Grosso, BR"
       },
       {
         "cluster_id": 6,
@@ -818,7 +844,8 @@
         "avg_n_dom": 1518.34,
         "avg_HHI": 4135.8233,
         "tam_estimate": 75917.0,
-        "is_noise": 0
+        "is_noise": 0,
+        "place_name": "Barra do Garcas, Mato Grosso, BR"
       }
     ]
   },
@@ -826,7 +853,7 @@
     "n_segments": 6,
     "total_hexagons_segmented": 2000,
     "silhouette_score_global": 0.162474,
-    "duration_seconds": 0.794,
+    "duration_seconds": 0.745,
     "segment_profiles": [
       {
         "segment_id": 3,

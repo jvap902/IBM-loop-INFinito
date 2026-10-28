@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
-import { listReports, getReport } from '../api/reportsApi'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { listReports, getReport, deleteReport } from '../api/reportsApi'
 import type { ReportMeta } from '../api/reportsApi'
 
 // ── Minimal Markdown → HTML renderer (no external dep) ────────────────────
@@ -50,28 +50,67 @@ function ReportListItem({
   report,
   isSelected,
   onClick,
+  onDelete,
+  isDeleting,
 }: {
   report: ReportMeta
   isSelected: boolean
   onClick: () => void
+  onDelete: () => void
+  isDeleting: boolean
 }) {
+  const [confirming, setConfirming] = useState(false)
   const kb = (report.size_bytes / 1024).toFixed(1)
+
   return (
-    <button
-      onClick={onClick}
-      className={[
-        'w-full text-left px-3 py-2.5 rounded transition-colors border',
-        isSelected
-          ? 'bg-ind-accent/10 border-ind-accent text-ind-accent'
-          : 'border-transparent text-ind-muted hover:text-ind-text hover:bg-ind-surface',
-      ].join(' ')}
-    >
-      <div className="text-sm font-semibold truncate">{report.region}</div>
-      <div className="text-xs mt-0.5 flex items-center justify-between">
-        <span>{report.date}</span>
-        <span className="font-mono">{kb} KB</span>
-      </div>
-    </button>
+    <div className="group relative">
+      <button
+        onClick={onClick}
+        className={[
+          'w-full text-left px-3 py-2.5 rounded transition-colors border pr-8',
+          isSelected
+            ? 'bg-ind-accent/10 border-ind-accent text-ind-accent'
+            : 'border-transparent text-ind-muted hover:text-ind-text hover:bg-ind-surface',
+        ].join(' ')}
+      >
+        <div className="text-sm font-semibold truncate">{report.region}</div>
+        <div className="text-xs mt-0.5 flex items-center justify-between">
+          <span>{report.date}</span>
+          <span className="font-mono">{kb} KB</span>
+        </div>
+      </button>
+
+      {/* Delete button — visible on hover */}
+      {!confirming && (
+        <button
+          onClick={(e) => { e.stopPropagation(); setConfirming(true) }}
+          disabled={isDeleting}
+          title="Excluir relatório"
+          className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity text-ind-muted hover:text-red-400 text-sm leading-none p-0.5 disabled:opacity-30"
+        >
+          ✕
+        </button>
+      )}
+
+      {/* Inline confirm */}
+      {confirming && (
+        <div className="mt-1 px-1 flex gap-1.5 items-center">
+          <span className="text-[10px] text-ind-muted flex-1">Excluir?</span>
+          <button
+            onClick={() => { onDelete(); setConfirming(false) }}
+            className="px-2 py-0.5 rounded text-[10px] bg-red-900/40 text-red-400 border border-red-800/50 hover:bg-red-900/70 transition-colors"
+          >
+            Sim
+          </button>
+          <button
+            onClick={() => setConfirming(false)}
+            className="px-2 py-0.5 rounded text-[10px] text-ind-muted border border-ind-border hover:text-ind-text transition-colors"
+          >
+            Não
+          </button>
+        </div>
+      )}
+    </div>
   )
 }
 
@@ -88,6 +127,7 @@ function MarkdownContent({ content }: { content: string }) {
 
 export default function ReportsPage() {
   const [selectedFilename, setSelectedFilename] = useState<string | null>(null)
+  const queryClient = useQueryClient()
 
   const {
     data: listData,
@@ -106,6 +146,15 @@ export default function ReportsPage() {
     queryKey: ['report-content', selectedFilename],
     queryFn: () => getReport(selectedFilename!),
     enabled: !!selectedFilename,
+  })
+
+  const { mutate: removeReport, variables: deletingFilename, isPending: isDeletePending } = useMutation({
+    mutationFn: (filename: string) => deleteReport(filename),
+    onSuccess: (_data, filename) => {
+      // If the deleted report was selected, deselect it
+      if (selectedFilename === filename) setSelectedFilename(null)
+      queryClient.invalidateQueries({ queryKey: ['reports-list'] })
+    },
   })
 
   const listErr = listError as { message?: string } | null
@@ -152,6 +201,8 @@ export default function ReportsPage() {
                     report={r}
                     isSelected={r.filename === selectedFilename}
                     onClick={() => setSelectedFilename(r.filename)}
+                    onDelete={() => removeReport(r.filename)}
+                    isDeleting={isDeletePending && deletingFilename === r.filename}
                   />
                 ))}
               </div>

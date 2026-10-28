@@ -2,16 +2,22 @@
 
 Endpoints
 ---------
-GET  /reports         — List all generated Markdown reports.
-GET  /reports/{name}  — Return the raw Markdown content of a specific report.
+GET    /reports          — List all generated Markdown reports.
+GET    /reports/{name}   — Return the raw Markdown content of a specific report.
+DELETE /reports/{name}   — Delete a report file.
 """
 from __future__ import annotations
 
+import logging
 import os
 from pathlib import Path
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
+
+from api.auth import require_api_key
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -87,3 +93,27 @@ async def get_report(filename: str) -> ReportContentResponse:
     if not path.exists() or path.suffix != ".md":
         raise HTTPException(status_code=404, detail=f"Report '{safe}' not found.")
     return ReportContentResponse(filename=safe, content=path.read_text(encoding="utf-8"))
+
+
+# ── DELETE /reports/{filename} ─────────────────────────────────────────────
+
+@router.delete(
+    "/reports/{filename}",
+    status_code=204,
+    summary="Reports — Delete a report",
+    tags=["Reports"],
+)
+async def delete_report(
+    filename: str,
+    _api_key: str = Depends(require_api_key),
+) -> None:
+    """Delete a Markdown report file. Returns 204 on success."""
+    safe = Path(filename).name
+    path = _REPORTS_DIR / safe
+    if not path.exists() or path.suffix != ".md":
+        raise HTTPException(status_code=404, detail=f"Report '{safe}' not found.")
+    try:
+        path.unlink()
+        logger.info('{"event": "report_deleted", "filename": "%s"}', safe)
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Failed to delete report: {exc}") from exc

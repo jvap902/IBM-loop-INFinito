@@ -29,3 +29,7 @@ export async function getRun(runId: string): Promise<AgentRunResponse> {
   const { data } = await client.get<AgentRunResponse>(`/agent/runs/${encodeURIComponent(runId)}`)
   return data
 }
+
+export async function deleteRun(runId: string): Promise<void> {
+  await client.delete(`/agent/runs/${encodeURIComponent(runId)}`)
+}
