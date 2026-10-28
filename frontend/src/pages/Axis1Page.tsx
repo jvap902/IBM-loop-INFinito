@@ -60,8 +60,8 @@ export default function Axis1Page() {
   return (
     <div className="p-6 max-w-7xl mx-auto">
       <div className="mb-6">
-        <h1 className="text-lg font-bold text-ind-text">Eixo 1 — Manutenção / Criticidade</h1>
-        <p className="text-ind-muted text-sm mt-0.5">Detecção de anomalias com IsolationForest + Local Outlier Factor.</p>
+        <h1 className="text-lg font-bold text-ind-text">Manutenção Necessária</h1>
+        <p className="text-ind-muted text-sm mt-0.5">Detecta hexágonos com infraestrutura degradada usando IsolationForest + Local Outlier Factor.</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">

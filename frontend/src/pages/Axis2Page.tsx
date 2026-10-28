@@ -66,8 +66,8 @@ export default function Axis2Page() {
   return (
     <div className="p-6 max-w-7xl mx-auto">
       <div className="mb-6">
-        <h1 className="text-lg font-bold text-ind-text">Eixo 2 — Expansão</h1>
-        <p className="text-ind-muted text-sm mt-0.5">Identificação de oportunidades de expansão com UMAP + HDBSCAN.</p>
+        <h1 className="text-lg font-bold text-ind-text">Oportunidades de Expansão</h1>
+        <p className="text-ind-muted text-sm mt-0.5">Identifica zonas de alta demanda não atendida usando UMAP + HDBSCAN.</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">

@@ -27,6 +27,7 @@ export default function TamBarChart({ clusters }: Props) {
           formatter={(v: number) => [fmtBrl(v), 'TAM']}
           contentStyle={{ background: '#1e293b', border: '1px solid #334155', borderRadius: 6, fontSize: 12 }}
           labelStyle={{ color: '#e2e8f0' }}
+          itemStyle={{ color: '#e2e8f0' }}
         />
         <Bar dataKey="tam" radius={[3, 3, 0, 0]}>
           {data.map((_, i) => (

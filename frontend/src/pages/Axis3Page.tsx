@@ -56,7 +56,7 @@ export default function Axis3Page() {
   return (
     <div className="p-6 max-w-7xl mx-auto">
       <div className="mb-6">
-        <h1 className="text-lg font-bold text-ind-text">Eixo 3 — Segmentação Promocional</h1>
+        <h1 className="text-lg font-bold text-ind-text">Segmentação de Mercado</h1>
         <p className="text-ind-muted text-sm mt-0.5">Perfis de mercado para targeting promocional com K-Means++.</p>
       </div>
 
