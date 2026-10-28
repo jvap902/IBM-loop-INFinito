@@ -30,6 +30,7 @@ export interface InvestmentHypothesis {
   penetration_rate_assumed: number
   rationale: string
   interpretation?: string
+  place_name?: string | null
   lat_centroid: number
   lon_centroid: number
 }
@@ -93,6 +94,7 @@ export interface Axis2ClusterSummary {
   avg_HHI: number | null
   tam_estimate: number | null
   is_noise: number
+  place_name?: string | null
 }
 
 export interface Axis2RunResponse {

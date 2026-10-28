@@ -183,6 +183,9 @@ class Axis2ClusterSummary(BaseModel):
     avg_HHI: Annotated[Optional[float], Field(description="Mean Herfindahl–Hirschman Index (market concentration) in the cluster.")] = None
     tam_estimate: Annotated[Optional[float], Field(description="Estimated Total Addressable Market proxy (avg_n_dom × cluster_size).")] = None
     is_noise: Annotated[int, Field(ge=0, le=1, description="1 if this is the noise cluster (-1 label).")] = 0
+    place_name: Annotated[Optional[str], Field(
+        description="Human-readable geographic location (city, state) resolved via reverse geocoding at the cluster centroid.",
+    )] = None
 
 
 class Axis2RunResponse(BaseModel):

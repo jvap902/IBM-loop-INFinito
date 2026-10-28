@@ -390,6 +390,8 @@ def result_interpreter(state: AgentState) -> dict[str, Any]:
         cluster_size = cluster.get("cluster_size", 1)
         avg_d_down = cluster.get("avg_d_down") or 0.0
         avg_hhi = cluster.get("avg_HHI") or 0.0
+        place_name: str | None = cluster.get("place_name")
+        location_str = f" ({place_name})" if place_name else ""
 
         # TAM = total addressable households × ARPU × unserved fraction
         tam_estimate = round(n_dom * cluster_size * arpu * (1 - pen_rate), 2)
@@ -404,20 +406,20 @@ def result_interpreter(state: AgentState) -> dict[str, Any]:
         if is_critical_proxy:
             priority_class = "P1_CRITICAL_EXPANSION"
             rationale = (
-                f"Cluster {cid}: baixa velocidade média ({avg_d_down:.1f} Mbps) com alta "
+                f"Cluster {cid}{location_str}: baixa velocidade média ({avg_d_down:.1f} Mbps) com alta "
                 f"densidade domiciliar ({n_dom:.0f} dom/hex). Sobreposição provável com "
                 "anomalias críticas de infraestrutura (Eixo 1)."
             )
         elif is_competitive_pressure:
             priority_class = "P2_EXPANSION_CHURN_RISK"
             rationale = (
-                f"Cluster {cid}: mercado competitivo (HHI={avg_hhi:.0f}) com demanda por "
+                f"Cluster {cid}{location_str}: mercado competitivo (HHI={avg_hhi:.0f}) com demanda por "
                 "expansão. Risco de churn identificado pelo Eixo 3."
             )
         else:
             priority_class = "P3_STANDARD_EXPANSION"
             rationale = (
-                f"Cluster {cid}: oportunidade de expansão padrão sem sinais críticos imediatos."
+                f"Cluster {cid}{location_str}: oportunidade de expansão padrão sem sinais críticos imediatos."
             )
 
         hypothesis = {
@@ -431,6 +433,7 @@ def result_interpreter(state: AgentState) -> dict[str, Any]:
             "arpu_assumed_brl": arpu,
             "penetration_rate_assumed": pen_rate,
             "rationale": rationale,
+            "place_name": place_name,
             "lat_centroid": cluster.get("lat_centroid"),
             "lon_centroid": cluster.get("lon_centroid"),
         }
@@ -562,7 +565,7 @@ def report_writer(state: AgentState) -> dict[str, Any]:
         noise_rate = a2.get("noise_rate", 0.0)
         duration_a2 = a2.get("duration_seconds", 0)
         cluster_rows = "\n".join(
-            f"| {c['cluster_id']} | {c['cluster_size']:,} | "
+            f"| {c['cluster_id']} | {c.get('place_name') or '—'} | {c['cluster_size']:,} | "
             f"{c.get('avg_n_dom', 0.0):.1f} | "
             f"{c.get('avg_d_down', 0.0):.1f} | "
             f"R$ {c.get('tam_estimate') or 0:,.2f} |"
@@ -575,9 +578,9 @@ def report_writer(state: AgentState) -> dict[str, Any]:
             f"- **Taxa de ruído (HDBSCAN):** {noise_rate*100:.2f}%\n"
             f"- **Duração da análise:** {duration_a2:.2f}s\n"
             f"\n**Clusters de Expansão (top 8):**\n\n"
-            f"| Cluster | Hexágonos | Dom/Hex | Vel. Média (Mbps) | TAM Estimado |\n"
-            f"|---------|-----------|---------|-------------------|--------------|\n"
-            f"{cluster_rows if cluster_rows else '| — | — | — | — | — |'}\n"
+            f"| Cluster | Localização | Hexágonos | Dom/Hex | Vel. Média (Mbps) | TAM Estimado |\n"
+            f"|---------|-------------|-----------|---------|-------------------|--------------|\n"
+            f"{cluster_rows if cluster_rows else '| — | — | — | — | — | — |'}\n"
         )
     else:
         axis2_body = "_Eixo 2 não executado nesta análise._\n"
@@ -608,8 +611,14 @@ def report_writer(state: AgentState) -> dict[str, Any]:
         axis3_body = "_Eixo 3 não executado nesta análise._\n"
 
     # ── 5. Priorização de Investimentos ───────────────────────────────────
+    # Build lookup: cluster_id → place_name from investment_hypotheses
+    place_lookup: dict[int, str] = {
+        h["cluster_id"]: h.get("place_name") or "—"
+        for h in hypotheses
+    }
+
     matrix_rows = "\n".join(
-        f"| {r['cluster_id']} | {r['priority_class']} | "
+        f"| {r['cluster_id']} | {place_lookup.get(r['cluster_id'], '—')} | {r['priority_class']} | "
         f"{'✅' if r['axis1_overlap_proxy'] else '—'} | "
         f"{'⚠️' if r['axis3_churn_risk'] else '—'} | "
         f"R$ {r['tam_brl']:,.2f} |"
@@ -618,9 +627,9 @@ def report_writer(state: AgentState) -> dict[str, Any]:
     priority_body = (
         "Cruzamento entre anomalias críticas (Eixo 1), clusters de expansão (Eixo 2) "
         "e segmentos de churn (Eixo 3):\n\n"
-        "| Cluster | Prioridade | Anomalia Crítica | Risco Churn | TAM |\n"
-        "|---------|-----------|-----------------|-------------|-----|\n"
-        f"{matrix_rows if matrix_rows else '| — | — | — | — | — |'}\n"
+        "| Cluster | Localização | Prioridade | Anomalia Crítica | Risco Churn | TAM |\n"
+        "|---------|-------------|-----------|-----------------|-------------|-----|\n"
+        f"{matrix_rows if matrix_rows else '| — | — | — | — | — | — |'}\n"
         "\n**Classes de Prioridade:**\n"
         "- `P1_CRITICAL_EXPANSION` — Crise de infraestrutura em zona de alta demanda (intervenção imediata)\n"
         "- `P2_EXPANSION_CHURN_RISK` — Expansão com risco competitivo (ação urgente)\n"

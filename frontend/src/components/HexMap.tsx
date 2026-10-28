@@ -75,6 +75,7 @@ export default function HexMap({ axis1Results, axis2Clusters, axis3Results, heig
             <Popup>
               <div className="text-xs font-mono">
                 <div className="font-bold text-blue-600">Cluster {c.cluster_id} — Eixo 2</div>
+                {c.place_name && <div className="text-blue-500 text-[11px] mb-1">{c.place_name}</div>}
                 <div>Tamanho: {c.cluster_size} hex</div>
                 {c.avg_d_down != null && <div>Vel↓: {c.avg_d_down.toFixed(1)} Mbps</div>}
                 {c.tam_estimate != null && (

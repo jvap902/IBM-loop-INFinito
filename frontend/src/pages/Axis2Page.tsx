@@ -25,7 +25,10 @@ function ClusterTable({ clusters }: { clusters: Axis2RunResponse['clusters'] }) 
         <tbody>
           {real.map((c) => (
             <tr key={c.cluster_id} className="border-b border-ind-border/40 hover:bg-ind-surface transition-colors">
-              <td className="px-3 py-1.5 font-mono text-ind-cluster font-semibold">C{c.cluster_id}</td>
+              <td className="px-3 py-1.5">
+                <div className="font-mono text-ind-cluster font-semibold">C{c.cluster_id}</div>
+                {c.place_name && <div className="text-[10px] text-ind-muted mt-0.5">{c.place_name}</div>}
+              </td>
               <td className="px-3 py-1.5">{c.cluster_size}</td>
               <td className="px-3 py-1.5">{c.avg_d_down?.toFixed(1) ?? '—'}</td>
               <td className="px-3 py-1.5">{c.avg_n_dom?.toFixed(0) ?? '—'}</td>
