@@ -120,9 +120,9 @@ export default function Dashboard() {
 
       {/* Map + TAM Chart */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
-        <div className="flex flex-col gap-4">
-          {/* Map card — zero body padding so the map fills edge-to-edge */}
-          <div className="bg-ind-surface border border-ind-border rounded-lg overflow-hidden flex flex-col" style={{ minHeight: '420px' }}>
+        <div className="flex flex-col gap-4 h-full">
+          {/* Map card — grows to fill the full height of the grid row */}
+          <div className="bg-ind-surface border border-ind-border rounded-lg overflow-hidden flex flex-col flex-1">
             <div className="text-xs font-semibold uppercase tracking-wider text-ind-muted px-4 pt-4 pb-2 border-b border-ind-border shrink-0">
               Mapa Geoespacial — H3 Centroides
             </div>
