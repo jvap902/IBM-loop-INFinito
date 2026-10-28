@@ -6,7 +6,7 @@ const links = [
   { to: '/axis1',    label: 'Eixo 1 — Criticidade',  icon: '⬡' },
   { to: '/axis2',    label: 'Eixo 2 — Expansão',     icon: '⬡' },
   { to: '/axis3',    label: 'Eixo 3 — Segmentação',  icon: '⬡' },
-  { to: '/reports',  label: 'Relatórios',             icon: '📄' },
+  { to: '/reports',  label: 'Relatórios',             icon: '🗎' },
   { to: '/audit',    label: 'Auditoria',              icon: '≡' },
 ]
 
