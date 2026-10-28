@@ -58,7 +58,7 @@ import httpx
 
 # ── Agent imports ──────────────────────────────────────────────────────────
 from agent.state import AgentState
-from agent.llm_provider import StubProvider, get_llm_provider
+from agent.llm_provider import StubProvider, GeminiProvider, get_llm_provider
 from agent.tool_registry import ToolRegistry, reset_registry
 from agent.graph import (
     gap_detector,
@@ -775,4 +775,12 @@ class TestLLMProvider:
 
     def test_get_llm_provider_stub_explicit(self):
         provider = get_llm_provider("stub")
+        assert isinstance(provider, StubProvider)
+
+    def test_get_llm_provider_gemini_explicit(self):
+        provider = get_llm_provider("gemini")
+        assert isinstance(provider, GeminiProvider)
+
+    def test_get_llm_provider_unknown_falls_back_to_stub(self):
+        provider = get_llm_provider("nonexistent_provider")
         assert isinstance(provider, StubProvider)

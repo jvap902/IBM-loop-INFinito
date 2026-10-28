@@ -69,3 +69,4 @@ respx>=0.21.0            # HTTP mocking for integration tests
 # nannyml>=0.11.0        # drift monitoring (optional)
 # ibm-watsonx-ai>=1.0.0  # IBM watsonx.ai SDK (WatsonxProvider)
 # openai>=1.0.0           # OpenAI SDK (OpenAIProvider)
+google-genai>=1.0.0       # Google Gemini SDK v2 (GeminiProvider) — pip install google-genai

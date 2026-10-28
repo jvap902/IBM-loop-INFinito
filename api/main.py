@@ -28,6 +28,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from api.routes.tools import router as tools_router
 from api.routes.audit import router as audit_router
 from api.routes.agent import router as agent_router
+from api.routes.chat import router as chat_router
 from api.schemas import HealthResponse
 
 # ── Structured JSON logging ────────────────────────────────────────────────
@@ -55,9 +56,15 @@ LOGGING_CONFIG: dict = {
             "formatter": "json",
             "stream": "ext://sys.stdout",
         },
+        "file": {
+            "class": "logging.FileHandler",
+            "formatter": "json",
+            "filename": os.getenv("LOG_FILE", "logs/api.log"),
+            "encoding": "utf-8",
+        },
     },
     "root": {
-        "handlers": ["console"],
+        "handlers": ["console", "file"],
         "level": _LOG_LEVEL,
     },
 }
@@ -146,6 +153,9 @@ def create_app() -> FastAPI:
 
     # ── Agent BFF route under /v1 prefix ───────────────────────────────────
     app.include_router(agent_router, prefix="/v1")
+
+    # ── Agent Chat route under /v1 prefix ──────────────────────────────────
+    app.include_router(chat_router, prefix="/v1")
 
     logger.info(
         '{"event": "startup", "api_version": "%s", "log_level": "%s"}',

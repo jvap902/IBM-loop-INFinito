@@ -21,7 +21,7 @@ import uuid
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from api.auth import require_api_key
-from api.schemas import AgentRunRequest, AgentRunResponse, AgentRunSummary
+from api.schemas import AgentRunRequest, AgentRunResponse, AgentRunSummary, InterpretationsBlock
 
 logger = logging.getLogger(__name__)
 
@@ -172,12 +172,21 @@ async def run_agent(
         len(errors),
     )
 
+    raw_interp = report_json.get("interpretations") or {}
+    interp_block: InterpretationsBlock | None = None
+    if raw_interp:
+        try:
+            interp_block = InterpretationsBlock(**raw_interp)
+        except Exception:
+            interp_block = None
+
     return AgentRunResponse(
         run_id=run_id,
         region_scope=str(final_state.get("region_scope", request.region)),
         axes_executed=list(final_state.get("axes_selected", request.axes)),
         duration_seconds=duration,
         summary=summary,
+        interpretations=interp_block,
         investment_hypotheses=report_json.get("investment_hypotheses", []),
         axis1_summary=report_json.get("axis1_summary"),
         axis2_summary=report_json.get("axis2_summary"),

@@ -282,6 +282,27 @@ class ToolCatalogueResponse(BaseModel):
 
 # ── Agent BFF ──────────────────────────────────────────────────────────────
 
+class InterpretationsBlock(BaseModel):
+    """Business-language explanations generated for each analytical axis."""
+
+    executive_summary: Annotated[str, Field(
+        default="",
+        description="Top-level narrative connecting all three axes, oriented to C-level decision makers.",
+    )] = ""
+    axis1_interpretation: Annotated[str, Field(
+        default="",
+        description="Business interpretation of Axis 1 (anomaly detection) results.",
+    )] = ""
+    axis2_interpretation: Annotated[str, Field(
+        default="",
+        description="Business interpretation of Axis 2 (expansion clustering) results.",
+    )] = ""
+    axis3_interpretation: Annotated[str, Field(
+        default="",
+        description="Business interpretation of Axis 3 (market segmentation) results.",
+    )] = ""
+
+
 class AgentRunRequest(BaseModel):
     """Request body for ``POST /v1/agent/run``.
 
@@ -334,12 +355,15 @@ class AgentRunResponse(BaseModel):
     axes_executed: Annotated[list[str], Field(description="Axes that were actually executed.")]
     duration_seconds: Annotated[float, Field(description="Wall-clock time for the full agent run.")]
     summary: AgentRunSummary
+    interpretations: Annotated[Optional[InterpretationsBlock], Field(
+        description="Business-language interpretations generated for each analytical axis.",
+    )] = None
     investment_hypotheses: Annotated[list[dict], Field(
-        description="Structured investment hypotheses with TAM, priority class, and rationale.",
+        description="Structured investment hypotheses with TAM, priority class, rationale, and interpretation.",
         default_factory=list,
     )]
     axis1_summary: Annotated[Optional[dict], Field(
-        description="Condensed Axis 1 output (n_critical, anomaly_rate, top critical hexagons).",
+        description="Condensed Axis 1 output (n_critical, anomaly_rate).",
     )] = None
     axis2_summary: Annotated[Optional[dict], Field(
         description="Condensed Axis 2 output (n_clusters, noise_rate, cluster list).",
