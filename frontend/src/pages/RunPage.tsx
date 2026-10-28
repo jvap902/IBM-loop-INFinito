@@ -13,8 +13,9 @@ const AXES = [
 
 const LLM_OPTIONS = [
   { value: 'stub',    label: 'Stub (sem credenciais)', description: 'Seleciona todos os eixos automaticamente' },
-  { value: 'watsonx', label: 'IBM watsonx.ai',         description: 'Requer WATSONX_API_KEY no servidor' },
+  { value: 'gemini',  label: 'Google Gemini',          description: 'Requer GEMINI_API_KEY no servidor · Grátis em aistudio.google.com' },
   { value: 'openai',  label: 'OpenAI GPT-4o',          description: 'Requer OPENAI_API_KEY no servidor' },
+  { value: 'watsonx', label: 'IBM watsonx.ai',         description: 'Requer WATSONX_API_KEY + WML no servidor' },
 ]
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
@@ -33,8 +34,12 @@ export default function RunPage() {
   const [selectedAxes, setSelectedAxes] = useState<string[]>(['axis1', 'axis2', 'axis3'])
   const [llm, setLlm] = useState<AgentRunRequest['llm_provider']>('stub')
   const [force, setForce] = useState(false)
-  const [apiKey, setApiKey] = useState(() => sessionStorage.getItem('api_key') ?? '')
-  const [saveKey, setSaveKey] = useState(!!sessionStorage.getItem('api_key'))
+  const [apiKey, setApiKey] = useState(() =>
+    localStorage.getItem('api_key') ?? sessionStorage.getItem('api_key') ?? ''
+  )
+  const [saveKey, setSaveKey] = useState(
+    !!(localStorage.getItem('api_key') ?? sessionStorage.getItem('api_key'))
+  )
 
   const toggleAxis = (id: string) => {
     setSelectedAxes((prev) =>
@@ -44,10 +49,15 @@ export default function RunPage() {
 
   const { mutate, isPending, error, reset } = useMutation({
     mutationFn: (req: AgentRunRequest) => {
-      if (saveKey) sessionStorage.setItem('api_key', apiKey)
-      else sessionStorage.removeItem('api_key')
-      // Inject key for this request
+      if (saveKey) {
+        localStorage.setItem('api_key', apiKey)
+      } else {
+        localStorage.removeItem('api_key')
+        sessionStorage.removeItem('api_key')
+      }
+      // Always inject key for this session and record the provider used
       sessionStorage.setItem('api_key', apiKey)
+      localStorage.setItem('last_llm_provider', req.llm_provider)
       return runAgent(req)
     },
     onSuccess: (data) => {
@@ -94,7 +104,7 @@ export default function RunPage() {
               onChange={(e) => setSaveKey(e.target.checked)}
               className="accent-amber-500"
             />
-            Salvar na sessão
+            Salvar no navegador (persiste após fechar)
           </label>
         </div>
 

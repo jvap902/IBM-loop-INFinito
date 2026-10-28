@@ -6,9 +6,9 @@ const client = axios.create({
   headers: { 'Content-Type': 'application/json' },
 })
 
-// Request interceptor: inject X-API-Key from sessionStorage if present
+// Request interceptor: inject X-API-Key from localStorage if present
 client.interceptors.request.use((config) => {
-  const key = sessionStorage.getItem('api_key')
+  const key = localStorage.getItem('api_key') ?? sessionStorage.getItem('api_key')
   if (key) {
     config.headers['X-API-Key'] = key
   }

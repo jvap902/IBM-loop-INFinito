@@ -4,7 +4,7 @@ export interface AgentRunRequest {
   region: string
   axes: string[]
   force: boolean
-  llm_provider: 'stub' | 'watsonx' | 'openai'
+  llm_provider: 'stub' | 'watsonx' | 'openai' | 'gemini'
 }
 
 export interface AgentRunSummary {
@@ -29,8 +29,16 @@ export interface InvestmentHypothesis {
   arpu_assumed_brl: number
   penetration_rate_assumed: number
   rationale: string
+  interpretation?: string
   lat_centroid: number
   lon_centroid: number
+}
+
+export interface InterpretationsBlock {
+  executive_summary: string
+  axis1_interpretation: string
+  axis2_interpretation: string
+  axis3_interpretation: string
 }
 
 export interface AgentRunResponse {
@@ -39,6 +47,7 @@ export interface AgentRunResponse {
   axes_executed: string[]
   duration_seconds: number
   summary: AgentRunSummary
+  interpretations: InterpretationsBlock | null
   investment_hypotheses: InvestmentHypothesis[]
   axis1_summary: Axis1Summary | null
   axis2_summary: Axis2Summary | null

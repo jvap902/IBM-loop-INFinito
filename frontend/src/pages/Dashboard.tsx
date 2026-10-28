@@ -5,6 +5,7 @@ import HexMap from '../components/HexMap'
 import TamBarChart from '../components/TamBarChart'
 import SegmentPieChart from '../components/SegmentPieChart'
 import InvestmentTable from '../components/InvestmentTable'
+import InterpretationCard from '../components/InterpretationCard'
 
 const fmtBrl = (v: number) =>
   'R$ ' + v.toLocaleString('pt-BR', { maximumFractionDigits: 2 })
@@ -51,7 +52,7 @@ export default function Dashboard() {
     )
   }
 
-  const { summary, investment_hypotheses, axis1_summary, axis2_summary, axis3_summary, run_id, region_scope, axes_executed, duration_seconds } = report
+  const { summary, investment_hypotheses, axis1_summary, axis2_summary, axis3_summary, run_id, region_scope, axes_executed, duration_seconds, interpretations } = report
 
   const axis1Results = (axis1_summary as { top_critical?: unknown[] } | null)?.top_critical as
     | Parameters<typeof HexMap>[0]['axis1Results']
@@ -72,6 +73,17 @@ export default function Dashboard() {
         title="Dashboard de Resultados"
         sub={`Região: ${region_scope} · Eixos: ${axes_executed.join(', ')} · Run: ${run_id.slice(0, 8)}…`}
       />
+
+      {/* Executive Summary Interpretation */}
+      {interpretations?.executive_summary && (
+        <InterpretationCard
+          title="Sumário Executivo"
+          text={interpretations.executive_summary}
+          accentColor="border-ind-accent"
+          badge="Agente"
+          collapsible
+        />
+      )}
 
       {/* KPI Row */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-6">
@@ -108,14 +120,27 @@ export default function Dashboard() {
 
       {/* Map + TAM Chart */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
-        <Card title="Mapa Geoespacial — H3 Centroides">
-          <HexMap
-            axis1Results={axis1Results}
-            axis2Clusters={axis2Clusters}
-            axis3Results={axis3Results}
-            height="320px"
-          />
-        </Card>
+        <div className="flex flex-col gap-4">
+          <Card title="Mapa Geoespacial — H3 Centroides">
+            <HexMap
+              axis1Results={axis1Results}
+              axis2Clusters={axis2Clusters}
+              axis3Results={axis3Results}
+              height="300px"
+            />
+          </Card>
+          {/* Axis 1 interpretation */}
+          {interpretations?.axis1_interpretation && (
+            <InterpretationCard
+              title="Análise de Infraestrutura"
+              text={interpretations.axis1_interpretation}
+              accentColor="border-ind-danger"
+              badge="Eixo 1"
+              badgeColor="bg-red-900/30 text-red-400"
+              collapsible
+            />
+          )}
+        </div>
 
         <div className="flex flex-col gap-4">
           {clusters2.length > 0 && (
@@ -123,10 +148,32 @@ export default function Dashboard() {
               <TamBarChart clusters={clusters2} />
             </Card>
           )}
+          {/* Axis 2 interpretation */}
+          {interpretations?.axis2_interpretation && (
+            <InterpretationCard
+              title="Oportunidades de Expansão"
+              text={interpretations.axis2_interpretation}
+              accentColor="border-ind-cluster"
+              badge="Eixo 2"
+              badgeColor="bg-blue-900/30 text-blue-400"
+              collapsible
+            />
+          )}
           {seg3Profiles.length > 0 && (
             <Card title="Distribuição de Segmentos (Eixo 3)">
               <SegmentPieChart segments={seg3Profiles} />
             </Card>
+          )}
+          {/* Axis 3 interpretation */}
+          {interpretations?.axis3_interpretation && (
+            <InterpretationCard
+              title="Segmentação de Mercado"
+              text={interpretations.axis3_interpretation}
+              accentColor="border-ind-segment"
+              badge="Eixo 3"
+              badgeColor="bg-green-900/30 text-green-400"
+              collapsible
+            />
           )}
         </div>
       </div>

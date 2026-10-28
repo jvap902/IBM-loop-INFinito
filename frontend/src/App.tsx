@@ -1,5 +1,6 @@
 import { Outlet } from 'react-router-dom'
 import Sidebar from './components/Sidebar'
+import AgentChatDrawer from './components/AgentChatDrawer'
 
 export default function App() {
   return (
@@ -8,6 +9,7 @@ export default function App() {
       <main className="flex-1 overflow-auto">
         <Outlet />
       </main>
+      <AgentChatDrawer />
     </div>
   )
 }
