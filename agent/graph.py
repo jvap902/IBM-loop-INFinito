@@ -739,15 +739,30 @@ def report_writer(state: AgentState) -> dict[str, Any]:
         },
         "investment_hypotheses": hypotheses,
         "cross_matrix": cross_matrix,
-        "axis1_summary": {k: a1.get(k) for k in
-                          ("n_critical", "total_hexagons_scored", "anomaly_rate", "duration_seconds")
-                          } if a1 else None,
-        "axis2_summary": {k: a2.get(k) for k in
-                          ("n_clusters", "total_hexagons_processed", "noise_rate", "duration_seconds")
-                          } if a2 else None,
-        "axis3_summary": {k: a3.get(k) for k in
-                          ("n_segments", "total_hexagons_segmented", "silhouette_score_global", "duration_seconds")
-                          } if a3 else None,
+        "axis1_summary": {
+            "n_critical": a1.get("n_critical"),
+            "total_hexagons_scored": a1.get("total_hexagons_scored"),
+            "anomaly_rate": a1.get("anomaly_rate"),
+            "duration_seconds": a1.get("duration_seconds"),
+            # Dashboard HexMap reads axis1_summary.top_critical for red dot rendering
+            "top_critical": a1.get("results", []),
+        } if a1 else None,
+        "axis2_summary": {
+            "n_clusters": a2.get("n_clusters"),
+            "total_hexagons_processed": a2.get("total_hexagons_processed"),
+            "noise_rate": a2.get("noise_rate"),
+            "duration_seconds": a2.get("duration_seconds"),
+            # Dashboard HexMap reads axis2_summary.clusters for blue dot rendering
+            "clusters": a2.get("clusters", []),
+        } if a2 else None,
+        "axis3_summary": {
+            "n_segments": a3.get("n_segments"),
+            "total_hexagons_segmented": a3.get("total_hexagons_segmented"),
+            "silhouette_score_global": a3.get("silhouette_score_global"),
+            "duration_seconds": a3.get("duration_seconds"),
+            # Dashboard SegmentPieChart reads axis3_summary.segment_profiles
+            "segment_profiles": a3.get("segment_profiles", []),
+        } if a3 else None,
         "errors": errors,
     }
 

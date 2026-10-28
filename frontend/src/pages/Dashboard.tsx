@@ -108,14 +108,20 @@ export default function Dashboard() {
 
       {/* Map + TAM Chart */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
-        <Card title="Mapa Geoespacial — H3 Centroides">
-          <HexMap
-            axis1Results={axis1Results}
-            axis2Clusters={axis2Clusters}
-            axis3Results={axis3Results}
-            height="320px"
-          />
-        </Card>
+        {/* Map card — zero body padding so the map fills edge-to-edge */}
+        <div className="bg-ind-surface border border-ind-border rounded-lg overflow-hidden flex flex-col" style={{ minHeight: '420px' }}>
+          <div className="text-xs font-semibold uppercase tracking-wider text-ind-muted px-4 pt-4 pb-2 mb-0 border-b border-ind-border shrink-0">
+            Mapa Geoespacial — H3 Centroides
+          </div>
+          <div className="flex-1 min-h-0 p-3 pt-2">
+            <HexMap
+              axis1Results={axis1Results}
+              axis2Clusters={axis2Clusters}
+              axis3Results={axis3Results}
+              height="100%"
+            />
+          </div>
+        </div>
 
         <div className="flex flex-col gap-4">
           {clusters2.length > 0 && (
