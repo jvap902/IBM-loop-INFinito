@@ -30,7 +30,10 @@ function HypothesisRow({ h }: { h: InvestmentHypothesis }) {
             {h.priority_class.replace(/_/g, ' ')}
           </span>
         </td>
-        <td className="px-3 py-2 font-mono text-ind-muted text-xs">C{h.cluster_id}</td>
+        <td className="px-3 py-2">
+          <div className="font-mono text-ind-muted text-xs">C{h.cluster_id}</div>
+          {h.place_name && <div className="text-[10px] text-ind-muted/70 mt-0.5">{h.place_name}</div>}
+        </td>
         <td className="px-3 py-2 text-ind-accent font-semibold text-xs">{fmtBrl(h.tam_estimate_brl)}</td>
         <td className="px-3 py-2 text-ind-text text-xs">{h.avg_n_dom.toFixed(0)}</td>
         <td className="px-3 py-2 text-ind-text text-xs">{h.avg_d_down_mbps.toFixed(1)}</td>
@@ -46,7 +49,7 @@ function HypothesisRow({ h }: { h: InvestmentHypothesis }) {
         <tr className="border-b border-ind-border bg-ind-bg/30">
           <td colSpan={8} className="px-4 py-3">
             <InterpretationCard
-              title={`Análise detalhada — Cluster ${h.cluster_id}`}
+              title={`Análise detalhada — Cluster ${h.cluster_id}${h.place_name ? ` (${h.place_name})` : ''}`}
               text={h.interpretation}
               accentColor="border-ind-accent"
               collapsible={false}

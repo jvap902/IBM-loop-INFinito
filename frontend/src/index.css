@@ -12,3 +12,22 @@ body {
   background-color: #0f172a;
   color: #e2e8f0;
 }
+
+/* ── Markdown report renderer ─────────────────────────────────────────── */
+.prose-report { color: #e2e8f0; font-size: 0.875rem; line-height: 1.7; }
+.prose-report h1 { font-size: 1.25rem; font-weight: 700; margin: 1.25rem 0 0.5rem; color: #f1f5f9; }
+.prose-report h2 { font-size: 1.05rem; font-weight: 700; margin: 1.1rem 0 0.4rem; color: #f1f5f9; border-bottom: 1px solid #1e293b; padding-bottom: 0.25rem; }
+.prose-report h3 { font-size: 0.95rem; font-weight: 600; margin: 0.9rem 0 0.3rem; color: #cbd5e1; }
+.prose-report h4 { font-size: 0.85rem; font-weight: 600; margin: 0.75rem 0 0.25rem; color: #94a3b8; }
+.prose-report p  { margin: 0.5rem 0; }
+.prose-report strong { color: #f1f5f9; font-weight: 600; }
+.prose-report em { color: #94a3b8; font-style: italic; }
+.prose-report code { background: #1e293b; color: #f59e0b; padding: 0.1rem 0.35rem; border-radius: 3px; font-size: 0.8rem; font-family: monospace; }
+.prose-report hr { border: none; border-top: 1px solid #1e293b; margin: 1rem 0; }
+.prose-report blockquote { border-left: 3px solid #f59e0b; padding-left: 0.75rem; color: #94a3b8; margin: 0.5rem 0; font-style: italic; }
+.prose-report ul { list-style: disc; padding-left: 1.4rem; margin: 0.4rem 0; }
+.prose-report li { margin: 0.15rem 0; }
+.prose-report table { width: 100%; border-collapse: collapse; margin: 0.75rem 0; font-size: 0.8rem; }
+.prose-report td { padding: 0.35rem 0.6rem; border: 1px solid #1e293b; vertical-align: top; }
+.prose-report tr:first-child td { background: #0f172a; font-weight: 600; color: #94a3b8; text-transform: uppercase; font-size: 0.7rem; letter-spacing: 0.05em; }
+.prose-report tr:hover td { background: #1e293b40; }

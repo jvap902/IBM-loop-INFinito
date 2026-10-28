@@ -6,9 +6,9 @@ import { useReportStore } from '../stores/reportStore'
 import type { AgentRunRequest } from '../types'
 
 const AXES = [
-  { id: 'axis1', label: 'Eixo 1 — Manutenção / Criticidade', description: 'IsolationForest + LOF para detecção de anomalias' },
-  { id: 'axis2', label: 'Eixo 2 — Expansão',                  description: 'UMAP + HDBSCAN para clusters de oportunidade' },
-  { id: 'axis3', label: 'Eixo 3 — Segmentação Promocional',   description: 'K-Means++ para perfis de mercado' },
+  { id: 'axis1', label: 'Manutenção Necessária',     description: 'Detecta hexágonos com infraestrutura degradada (IsolationForest + LOF)' },
+  { id: 'axis2', label: 'Oportunidades de Expansão', description: 'Identifica zonas de alta demanda não atendida (UMAP + HDBSCAN)' },
+  { id: 'axis3', label: 'Segmentação de Mercado',    description: 'Perfis de mercado para campanhas promocionais (K-Means++)' },
 ]
 
 const LLM_OPTIONS = [

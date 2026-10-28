@@ -12,6 +12,8 @@ import Axis1Page from './pages/Axis1Page'
 import Axis2Page from './pages/Axis2Page'
 import Axis3Page from './pages/Axis3Page'
 import AuditPage from './pages/AuditPage'
+import ReportsPage from './pages/ReportsPage'
+import RunHistoryPage from './pages/RunHistoryPage'
 
 import './index.css'
 
@@ -39,8 +41,10 @@ const router = createBrowserRouter([
       { path: 'run',   element: <RunPage /> },
       { path: 'axis1', element: <Axis1Page /> },
       { path: 'axis2', element: <Axis2Page /> },
-      { path: 'axis3', element: <Axis3Page /> },
-      { path: 'audit', element: <AuditPage /> },
+      { path: 'axis3',   element: <Axis3Page /> },
+      { path: 'history', element: <RunHistoryPage /> },
+      { path: 'reports', element: <ReportsPage /> },
+      { path: 'audit',   element: <AuditPage /> },
     ],
   },
 ])

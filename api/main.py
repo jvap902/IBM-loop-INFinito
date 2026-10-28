@@ -29,6 +29,7 @@ from api.routes.tools import router as tools_router
 from api.routes.audit import router as audit_router
 from api.routes.agent import router as agent_router
 from api.routes.chat import router as chat_router
+from api.routes.reports import router as reports_router
 from api.schemas import HealthResponse
 
 # ── Structured JSON logging ────────────────────────────────────────────────
@@ -69,6 +70,10 @@ LOGGING_CONFIG: dict = {
     },
 }
 
+
+# line 71 — ensure the logs directory exists before FileHandler tries to open it
+os.makedirs(os.path.dirname(os.getenv("LOG_FILE", "logs/api.log")) or "logs", exist_ok=True)
+logging.config.dictConfig(LOGGING_CONFIG)
 logging.config.dictConfig(LOGGING_CONFIG)
 logger = logging.getLogger(__name__)
 
@@ -105,7 +110,7 @@ def create_app() -> FastAPI:
         CORSMiddleware,
         allow_origins=[o.strip() for o in allowed_origins],
         allow_credentials=True,
-        allow_methods=["GET", "POST"],
+        allow_methods=["GET", "POST", "DELETE"],
         allow_headers=["X-API-Key", "Content-Type", "Accept"],
     )
 
@@ -156,6 +161,9 @@ def create_app() -> FastAPI:
 
     # ── Agent Chat route under /v1 prefix ──────────────────────────────────
     app.include_router(chat_router, prefix="/v1")
+
+    # ── Reports route under /v1 prefix ─────────────────────────────────────
+    app.include_router(reports_router, prefix="/v1")
 
     logger.info(
         '{"event": "startup", "api_version": "%s", "log_level": "%s"}',

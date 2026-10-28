@@ -33,6 +33,7 @@ export default function SegmentPieChart({ segments }: Props) {
           formatter={(v: number) => [v + ' hex', 'Hexágonos']}
           contentStyle={{ background: '#1e293b', border: '1px solid #334155', borderRadius: 6, fontSize: 12 }}
           labelStyle={{ color: '#e2e8f0' }}
+          itemStyle={{ color: '#e2e8f0' }}
         />
         <Legend
           iconType="circle"

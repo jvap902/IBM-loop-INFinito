@@ -60,8 +60,8 @@ export default function Axis1Page() {
   return (
     <div className="p-6 max-w-7xl mx-auto">
       <div className="mb-6">
-        <h1 className="text-lg font-bold text-ind-text">Eixo 1 — Manutenção / Criticidade</h1>
-        <p className="text-ind-muted text-sm mt-0.5">Detecção de anomalias com IsolationForest + Local Outlier Factor.</p>
+        <h1 className="text-lg font-bold text-ind-text">Manutenção Necessária</h1>
+        <p className="text-ind-muted text-sm mt-0.5">Detecta hexágonos com infraestrutura degradada usando IsolationForest + Local Outlier Factor.</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
@@ -69,11 +69,11 @@ export default function Axis1Page() {
         <div>
           <form onSubmit={handleSubmit}>
             <AxisForm title="Parâmetros" description="Configure o pipeline de anomalias.">
-              <FormField label="Filtro de Região (H3 IDs, vírgula)" hint="Deixe vazio para o dataset completo">
-                <TextInput value={regionFilter} onChange={setRegionFilter} placeholder="85283473fffffff, 8528347bfffffff" monospace />
+              <FormField label="Filtrar por região (opcional)" hint="Deixe em branco para analisar todo o dataset. Para restringir a uma área, informe os códigos de região fornecidos pelo administrador.">
+                <TextInput value={regionFilter} onChange={setRegionFilter} placeholder="Ex.: 85283473fffffff" monospace />
               </FormField>
-              <FormField label="Resolução H3">
-                <SelectInput value={resolution} onChange={(v) => setResolution(parseInt(v) as 8 | 9)} options={[{ value: 8, label: 'Resolução 8' }, { value: 9, label: 'Resolução 9' }]} />
+              <FormField label="Nível de detalhe geográfico" hint="Padrão é mais rápido. Detalhado revela problemas em áreas densas, mas demora mais.">
+                <SelectInput value={resolution} onChange={(v) => setResolution(parseInt(v) as 8 | 9)} options={[{ value: 8, label: 'Padrão (visão por bairro)' }, { value: 9, label: 'Detalhado (visão por quarteirão)' }]} />
               </FormField>
               <FormField label={`Threshold de Anomalia: ${threshold.toFixed(2)}`} hint="Score ≥ threshold → hexágono crítico">
                 <Slider min={0} max={1} step={0.01} value={threshold} onChange={setThreshold} format={(v) => v.toFixed(2)} />

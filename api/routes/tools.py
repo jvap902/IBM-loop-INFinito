@@ -20,6 +20,12 @@ import time
 import uuid
 from typing import Optional
 
+try:
+    import reverse_geocoder as _rg
+    _RG_AVAILABLE = True
+except ImportError:
+    _RG_AVAILABLE = False
+
 import h3
 import httpx
 import numpy as np
@@ -124,6 +130,19 @@ def _h3_centroid(h3_id: str) -> tuple[float, float]:
 
 def _make_run_id() -> str:
     return str(uuid.uuid4())
+
+
+def _reverse_geocode(lat: float, lon: float) -> Optional[str]:
+    """Return 'City, State, CC' string for (lat, lon), or None if unavailable."""
+    if not _RG_AVAILABLE or lat == 0.0 and lon == 0.0:
+        return None
+    try:
+        results = _rg.search([(lat, lon)], mode=1, verbose=False)
+        r = results[0]
+        parts = [r.get("name", ""), r.get("admin1", ""), r.get("cc", "")]
+        return ", ".join(p for p in parts if p) or None
+    except Exception:
+        return None
 
 
 # ── GET /tools ─────────────────────────────────────────────────────────────
@@ -544,6 +563,7 @@ async def run_axis2(
         avg_hhi = None if pd.isna(row.get("avg_HHI")) else float(row["avg_HHI"])
         cluster_size = int(row["cluster_size"])
         tam = round(avg_n_dom * cluster_size, 2) if avg_n_dom is not None else None
+        place = _reverse_geocode(lat, lon) if not is_noise_cluster else None
 
         clusters.append(Axis2ClusterSummary(
             cluster_id=cid,
@@ -555,6 +575,7 @@ async def run_axis2(
             avg_HHI=avg_hhi,
             tam_estimate=tam,
             is_noise=is_noise_cluster,
+            place_name=place,
         ))
 
     n_real_clusters = int((result_df[result_df["is_noise"] == 0]["cluster_id"].nunique()))

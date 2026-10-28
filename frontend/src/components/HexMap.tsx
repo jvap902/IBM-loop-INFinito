@@ -52,12 +52,13 @@ export default function HexMap({ axis1Results, axis2Clusters, axis3Results, heig
           >
             <Popup>
               <div className="text-xs font-mono">
-                <div className="font-bold text-red-600">Crítico — Eixo 1</div>
+                <div className="font-bold text-red-600">⚠ Manutenção Necessária</div>
+                <div className="text-gray-500 text-[11px] mb-1">Infraestrutura degradada detectada</div>
                 <div>H3: {h.h3_id}</div>
                 <div>Score anomalia: {h.anomaly_score.toFixed(3)}</div>
                 <div>LOF: {h.lof_score.toFixed(3)}</div>
                 {h.cloudflare_outage_overlap === 1 && (
-                  <div className="text-orange-500 font-semibold">⚠ Overlap Cloudflare</div>
+                  <div className="text-orange-500 font-semibold">⚠ Confirmado: queda Cloudflare</div>
                 )}
               </div>
             </Popup>
@@ -74,7 +75,9 @@ export default function HexMap({ axis1Results, axis2Clusters, axis3Results, heig
           >
             <Popup>
               <div className="text-xs font-mono">
-                <div className="font-bold text-blue-600">Cluster {c.cluster_id} — Eixo 2</div>
+                <div className="font-bold text-blue-600">💡 Oportunidade de Expansão</div>
+                <div className="text-gray-500 text-[11px]">Cluster {c.cluster_id}{c.place_name ? ` — ${c.place_name}` : ''}</div>
+                <div className="mb-1" />
                 <div>Tamanho: {c.cluster_size} hex</div>
                 {c.avg_d_down != null && <div>Vel↓: {c.avg_d_down.toFixed(1)} Mbps</div>}
                 {c.tam_estimate != null && (
@@ -95,8 +98,8 @@ export default function HexMap({ axis1Results, axis2Clusters, axis3Results, heig
           >
             <Popup>
               <div className="text-xs font-mono">
-                <div className="font-bold text-green-600">Segmento {h.segment_id} — Eixo 3</div>
-                <div>{h.segment_name}</div>
+                <div className="font-bold text-green-600">Segmento de Mercado</div>
+                <div className="text-gray-500 text-[11px] mb-1">{h.segment_name} (S{h.segment_id})</div>
                 <div>H3: {h.h3_id}</div>
               </div>
             </Popup>
@@ -106,23 +109,23 @@ export default function HexMap({ axis1Results, axis2Clusters, axis3Results, heig
       </div>
 
       {/* Legend */}
-      <div className="flex gap-4 px-3 py-2 bg-ind-surface border-t border-ind-border text-xs text-ind-muted shrink-0">
+      <div className="flex flex-wrap gap-4 px-3 py-2 bg-ind-surface border-t border-ind-border text-xs text-ind-muted shrink-0">
         {axis1Results && (
           <span className="flex items-center gap-1.5">
-            <span className="inline-block w-3 h-3 rounded-full bg-red-500" />
-            Eixo 1 Crítico
+            <span className="inline-block w-3 h-3 rounded-full bg-red-500 shrink-0" />
+            <span><span className="text-ind-text font-medium">Manutenção Necessária</span> — infraestrutura degradada</span>
           </span>
         )}
         {axis2Clusters && (
           <span className="flex items-center gap-1.5">
-            <span className="inline-block w-3 h-3 rounded-full bg-blue-500" />
-            Eixo 2 Clusters
+            <span className="inline-block w-3 h-3 rounded-full bg-blue-500 shrink-0" />
+            <span><span className="text-ind-text font-medium">Oportunidade de Expansão</span> — zona de alta demanda</span>
           </span>
         )}
         {axis3Results && (
           <span className="flex items-center gap-1.5">
-            <span className="inline-block w-3 h-3 rounded-full bg-green-500" />
-            Eixo 3 Segmentos
+            <span className="inline-block w-3 h-3 rounded-full bg-green-500 shrink-0" />
+            <span><span className="text-ind-text font-medium">Segmento de Mercado</span> — perfil de clientes</span>
           </span>
         )}
       </div>

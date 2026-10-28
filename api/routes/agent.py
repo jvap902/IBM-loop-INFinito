@@ -1,4 +1,4 @@
-"""Agent BFF route — ``POST /v1/agent/run``.
+"""Agent BFF route — ``POST /v1/agent/run``, ``GET /v1/agent/runs``, ``GET /v1/agent/runs/{run_id}``.
 
 This endpoint wraps the LangGraph operational agent into a single HTTP call,
 allowing the web UI (or any HTTP client) to trigger a full agent run without
@@ -13,10 +13,13 @@ AGENT_RUN_TIMEOUT_SECONDS
 from __future__ import annotations
 
 import asyncio
+import json
 import logging
 import os
 import time
 import uuid
+from datetime import datetime, timezone
+from pathlib import Path
 
 from fastapi import APIRouter, Depends, HTTPException, status
 
@@ -28,6 +31,21 @@ logger = logging.getLogger(__name__)
 router = APIRouter(tags=["Agent"])
 
 _TIMEOUT_SECONDS = float(os.getenv("AGENT_RUN_TIMEOUT_SECONDS", "120"))
+_RUNS_DIR = Path(os.getenv("RUNS_DIR", "runs"))
+
+
+def _persist_run(response: AgentRunResponse) -> None:
+    """Write the AgentRunResponse JSON to runs/<run_id>.json."""
+    try:
+        _RUNS_DIR.mkdir(parents=True, exist_ok=True)
+        path = _RUNS_DIR / f"{response.run_id}.json"
+        path.write_text(
+            response.model_dump_json(indent=2),
+            encoding="utf-8",
+        )
+        logger.info('{"event": "run_persisted", "run_id": "%s", "path": "%s"}', response.run_id, path)
+    except Exception:
+        logger.exception('{"event": "run_persist_error", "run_id": "%s"}', response.run_id)
 
 
 def _invoke_agent(request: AgentRunRequest) -> dict:
@@ -180,7 +198,7 @@ async def run_agent(
         except Exception:
             interp_block = None
 
-    return AgentRunResponse(
+    response = AgentRunResponse(
         run_id=run_id,
         region_scope=str(final_state.get("region_scope", request.region)),
         axes_executed=list(final_state.get("axes_selected", request.axes)),
@@ -193,3 +211,111 @@ async def run_agent(
         axis3_summary=report_json.get("axis3_summary"),
         errors=errors,
     )
+    _persist_run(response)
+    return response
+
+
+# ── GET /agent/runs ────────────────────────────────────────────────────────
+
+from pydantic import BaseModel  # noqa: E402
+
+
+class RunMeta(BaseModel):
+    run_id: str
+    region_scope: str
+    axes_executed: list[str]
+    duration_seconds: float
+    timestamp: str
+    n_critical_hexagons: int
+    n_expansion_clusters: int
+    n_market_segments: int
+    total_tam_brl: float
+    p1_clusters: int
+    p2_clusters: int
+
+
+class RunListResponse(BaseModel):
+    total: int
+    runs: list[RunMeta]
+
+
+@router.get(
+    "/agent/runs",
+    response_model=RunListResponse,
+    summary="List persisted agent runs",
+    tags=["Agent"],
+)
+async def list_runs(
+    _api_key: str = Depends(require_api_key),
+) -> RunListResponse:
+    """Return a newest-first list of all persisted AgentRunResponse snapshots."""
+    if not _RUNS_DIR.is_dir():
+        return RunListResponse(total=0, runs=[])
+
+    items: list[RunMeta] = []
+    for path in sorted(_RUNS_DIR.glob("*.json"), key=lambda p: p.stat().st_mtime, reverse=True):
+        try:
+            raw = json.loads(path.read_text(encoding="utf-8"))
+            summary = raw.get("summary", {})
+            items.append(RunMeta(
+                run_id=raw["run_id"],
+                region_scope=raw.get("region_scope", "—"),
+                axes_executed=raw.get("axes_executed", []),
+                duration_seconds=raw.get("duration_seconds", 0.0),
+                timestamp=datetime.fromtimestamp(
+                    path.stat().st_mtime, tz=timezone.utc
+                ).strftime("%Y-%m-%d %H:%M UTC"),
+                n_critical_hexagons=summary.get("n_critical_hexagons", 0),
+                n_expansion_clusters=summary.get("n_expansion_clusters", 0),
+                n_market_segments=summary.get("n_market_segments", 0),
+                total_tam_brl=summary.get("total_tam_brl", 0.0),
+                p1_clusters=summary.get("p1_clusters", 0),
+                p2_clusters=summary.get("p2_clusters", 0),
+            ))
+        except Exception:
+            logger.warning('{"event": "run_list_parse_error", "file": "%s"}', path.name)
+
+    return RunListResponse(total=len(items), runs=items)
+
+
+@router.get(
+    "/agent/runs/{run_id}",
+    response_model=AgentRunResponse,
+    summary="Load a persisted agent run",
+    tags=["Agent"],
+)
+async def get_run(
+    run_id: str,
+    _api_key: str = Depends(require_api_key),
+) -> AgentRunResponse:
+    """Return the full AgentRunResponse for a previously persisted run."""
+    safe = Path(run_id).name
+    path = _RUNS_DIR / f"{safe}.json"
+    if not path.exists():
+        raise HTTPException(status_code=404, detail=f"Run '{safe}' not found.")
+    try:
+        return AgentRunResponse.model_validate_json(path.read_text(encoding="utf-8"))
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Failed to parse run file: {exc}") from exc
+
+
+@router.delete(
+    "/agent/runs/{run_id}",
+    status_code=204,
+    summary="Delete a persisted agent run",
+    tags=["Agent"],
+)
+async def delete_run(
+    run_id: str,
+    _api_key: str = Depends(require_api_key),
+) -> None:
+    """Delete the persisted JSON snapshot for a run. Returns 204 on success."""
+    safe = Path(run_id).name
+    path = _RUNS_DIR / f"{safe}.json"
+    if not path.exists():
+        raise HTTPException(status_code=404, detail=f"Run '{safe}' not found.")
+    try:
+        path.unlink()
+        logger.info('{"event": "run_deleted", "run_id": "%s"}', safe)
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Failed to delete run: {exc}") from exc

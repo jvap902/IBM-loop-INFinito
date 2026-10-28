@@ -93,21 +93,21 @@ export default function Dashboard() {
           sub="Gold Feature Store"
         />
         <KpiCard
-          label="Anomalias Críticas"
+          label="Infraestrutura Crítica"
           value={summary.n_critical_hexagons.toLocaleString('pt-BR')}
-          sub={`${axis1_summary ? (axis1_summary.anomaly_rate * 100).toFixed(1) + '% do total' : '—'} · Eixo 1`}
+          sub={`${axis1_summary ? (axis1_summary.anomaly_rate * 100).toFixed(1) + '% do total' : '—'} · Manutenção`}
           valueColor="text-ind-danger"
         />
         <KpiCard
-          label="Clusters de Expansão"
+          label="Zonas de Expansão"
           value={summary.n_expansion_clusters.toLocaleString('pt-BR')}
-          sub="Eixo 2 · HDBSCAN"
+          sub="Oportunidades · HDBSCAN"
           valueColor="text-ind-cluster"
         />
         <KpiCard
           label="Segmentos de Mercado"
           value={summary.n_market_segments.toLocaleString('pt-BR')}
-          sub="Eixo 3 · K-Means++"
+          sub="Segmentação · K-Means++"
           valueColor="text-ind-segment"
         />
         <KpiCard
@@ -141,7 +141,7 @@ export default function Dashboard() {
               title="Análise de Infraestrutura"
               text={interpretations.axis1_interpretation}
               accentColor="border-ind-danger"
-              badge="Eixo 1"
+              badge="Manutenção"
               badgeColor="bg-red-900/30 text-red-400"
               collapsible
             />
@@ -150,7 +150,7 @@ export default function Dashboard() {
 
         <div className="flex flex-col gap-4">
           {clusters2.length > 0 && (
-            <Card title="TAM por Cluster de Expansão (Eixo 2)">
+            <Card title="TAM por Zona de Expansão">
               <TamBarChart clusters={clusters2} />
             </Card>
           )}
@@ -160,13 +160,13 @@ export default function Dashboard() {
               title="Oportunidades de Expansão"
               text={interpretations.axis2_interpretation}
               accentColor="border-ind-cluster"
-              badge="Eixo 2"
+              badge="Expansão"
               badgeColor="bg-blue-900/30 text-blue-400"
               collapsible
             />
           )}
           {seg3Profiles.length > 0 && (
-            <Card title="Distribuição de Segmentos (Eixo 3)">
+            <Card title="Distribuição de Segmentos de Mercado">
               <SegmentPieChart segments={seg3Profiles} />
             </Card>
           )}
@@ -176,7 +176,7 @@ export default function Dashboard() {
               title="Segmentação de Mercado"
               text={interpretations.axis3_interpretation}
               accentColor="border-ind-segment"
-              badge="Eixo 3"
+              badge="Segmentação"
               badgeColor="bg-green-900/30 text-green-400"
               collapsible
             />

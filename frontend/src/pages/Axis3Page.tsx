@@ -56,7 +56,7 @@ export default function Axis3Page() {
   return (
     <div className="p-6 max-w-7xl mx-auto">
       <div className="mb-6">
-        <h1 className="text-lg font-bold text-ind-text">Eixo 3 — Segmentação Promocional</h1>
+        <h1 className="text-lg font-bold text-ind-text">Segmentação de Mercado</h1>
         <p className="text-ind-muted text-sm mt-0.5">Perfis de mercado para targeting promocional com K-Means++.</p>
       </div>
 
@@ -64,11 +64,11 @@ export default function Axis3Page() {
         <div>
           <form onSubmit={handleSubmit}>
             <AxisForm title="Parâmetros" description="Configure o pipeline de segmentação.">
-              <FormField label="Filtro de Região (H3 IDs, vírgula)" hint="Deixe vazio para o dataset completo">
-                <TextInput value={regionFilter} onChange={setRegionFilter} placeholder="85283473fffffff" monospace />
+              <FormField label="Filtrar por região (opcional)" hint="Deixe em branco para analisar todo o dataset. Para restringir a uma área, informe os códigos de região fornecidos pelo administrador.">
+                <TextInput value={regionFilter} onChange={setRegionFilter} placeholder="Ex.: 85283473fffffff" monospace />
               </FormField>
-              <FormField label="Resolução H3">
-                <SelectInput value={resolution} onChange={(v) => setResolution(parseInt(v) as 8 | 9)} options={[{ value: 8, label: 'Resolução 8' }, { value: 9, label: 'Resolução 9' }]} />
+              <FormField label="Nível de detalhe geográfico" hint="Padrão é mais rápido. Detalhado revela problemas em áreas densas, mas demora mais.">
+                <SelectInput value={resolution} onChange={(v) => setResolution(parseInt(v) as 8 | 9)} options={[{ value: 8, label: 'Padrão (visão por bairro)' }, { value: 9, label: 'Detalhado (visão por quarteirão)' }]} />
               </FormField>
               <FormField label={`Número de Segmentos (k): ${nClusters}`} hint="K-Means++ — número de clusters">
                 <Slider min={2} max={10} step={1} value={nClusters} onChange={setNClusters} format={(v) => String(Math.round(v))} />
