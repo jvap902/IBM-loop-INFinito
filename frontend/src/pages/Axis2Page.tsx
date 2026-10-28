@@ -71,11 +71,11 @@ export default function Axis2Page() {
         <div>
           <form onSubmit={handleSubmit}>
             <AxisForm title="Parâmetros" description="Configure o pipeline de clustering.">
-              <FormField label="Filtro de Região (H3 IDs, vírgula)" hint="Deixe vazio para o dataset completo">
-                <TextInput value={regionFilter} onChange={setRegionFilter} placeholder="85283473fffffff" monospace />
+              <FormField label="Filtrar por região (opcional)" hint="Deixe em branco para analisar todo o dataset. Para restringir a uma área, informe os códigos de região fornecidos pelo administrador.">
+                <TextInput value={regionFilter} onChange={setRegionFilter} placeholder="Ex.: 85283473fffffff" monospace />
               </FormField>
-              <FormField label="Resolução H3">
-                <SelectInput value={resolution} onChange={(v) => setResolution(parseInt(v) as 8 | 9)} options={[{ value: 8, label: 'Resolução 8' }, { value: 9, label: 'Resolução 9' }]} />
+              <FormField label="Nível de detalhe geográfico" hint="Padrão é mais rápido. Detalhado revela problemas em áreas densas, mas demora mais.">
+                <SelectInput value={resolution} onChange={(v) => setResolution(parseInt(v) as 8 | 9)} options={[{ value: 8, label: 'Padrão (visão por bairro)' }, { value: 9, label: 'Detalhado (visão por quarteirão)' }]} />
               </FormField>
               <FormField label={`Tamanho Mínimo de Cluster: ${minClusterSize}`} hint="HDBSCAN min_cluster_size">
                 <Slider min={2} max={500} step={1} value={minClusterSize} onChange={setMinClusterSize} format={(v) => String(Math.round(v))} />
