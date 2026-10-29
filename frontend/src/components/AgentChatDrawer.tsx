@@ -1,8 +1,41 @@
 import { useState, useRef, useEffect } from 'react'
+import { Link } from 'react-router-dom'
 import { useMutation } from '@tanstack/react-query'
 import { useReportStore } from '../stores/reportStore'
 import { sendChatMessage } from '../api/chatApi'
-import type { ChatMessage } from '../api/chatApi'
+import type { ChatMessage, SourceItem } from '../api/chatApi'
+
+// ── Sources footer ─────────────────────────────────────────────────────────
+
+function SourcesFooter({ sources }: { sources: SourceItem[] }) {
+  const [expanded, setExpanded] = useState(false)
+
+  if (!sources || sources.length === 0) return null
+
+  return (
+    <div className="mt-1 ml-8">
+      <button
+        onClick={() => setExpanded(v => !v)}
+        className="text-[10px] text-ind-muted hover:text-ind-text transition-colors flex items-center gap-1"
+      >
+        <span>{expanded ? '▴' : '▾'}</span>
+        <span>Fontes usadas ({sources.length} {sources.length === 1 ? 'seção' : 'seções'})</span>
+      </button>
+      {expanded && (
+        <div className="mt-1.5 space-y-1.5 pl-1">
+          {sources.map((src, i) => (
+            <div key={i} className="text-[10px]">
+              <span className="text-ind-accent font-medium">{src.section}</span>
+              {src.values.length > 0 && (
+                <span className="text-ind-muted ml-1">— {src.values.join(' · ')}</span>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
 
 // ── Message bubble ─────────────────────────────────────────────────────────
 
@@ -10,29 +43,34 @@ function MessageBubble({ msg }: { msg: ChatMessage }) {
   const isUser = msg.role === 'user'
   const isStub = !isUser && msg.is_stub
   return (
-    <div className={`flex ${isUser ? 'justify-end' : 'justify-start'} mb-3`}>
-      {!isUser && (
-        <div className={[
-          'w-6 h-6 rounded-full flex items-center justify-center text-[9px] font-bold mr-2 mt-0.5 shrink-0',
-          isStub
-            ? 'bg-amber-900/30 border border-amber-600/40 text-amber-400'
-            : 'bg-ind-accent/20 border border-ind-accent/40 text-ind-accent',
-        ].join(' ')}>
-          {isStub ? '⚠' : 'AI'}
+    <div className={`flex flex-col ${isUser ? 'items-end' : 'items-start'} mb-3`}>
+      <div className={`flex ${isUser ? 'justify-end' : 'justify-start'} w-full`}>
+        {!isUser && (
+          <div className={[
+            'w-6 h-6 rounded-full flex items-center justify-center text-[9px] font-bold mr-2 mt-0.5 shrink-0',
+            isStub
+              ? 'bg-amber-900/30 border border-amber-600/40 text-amber-400'
+              : 'bg-ind-accent/20 border border-ind-accent/40 text-ind-accent',
+          ].join(' ')}>
+            {isStub ? '⚠' : 'AI'}
+          </div>
+        )}
+        <div
+          className={[
+            'max-w-[85%] px-3 py-2 rounded-lg text-sm leading-relaxed whitespace-pre-wrap',
+            isUser
+              ? 'bg-ind-accent/10 text-ind-text border border-ind-accent/20 rounded-tr-none'
+              : isStub
+                ? 'bg-amber-950/30 text-amber-300 border border-amber-800/50 rounded-tl-none'
+                : 'bg-ind-surface text-ind-muted border border-ind-border rounded-tl-none',
+          ].join(' ')}
+        >
+          {msg.content}
         </div>
-      )}
-      <div
-        className={[
-          'max-w-[85%] px-3 py-2 rounded-lg text-sm leading-relaxed whitespace-pre-wrap',
-          isUser
-            ? 'bg-ind-accent/10 text-ind-text border border-ind-accent/20 rounded-tr-none'
-            : isStub
-              ? 'bg-amber-950/30 text-amber-300 border border-amber-800/50 rounded-tl-none'
-              : 'bg-ind-surface text-ind-muted border border-ind-border rounded-tl-none',
-        ].join(' ')}
-      >
-        {msg.content}
       </div>
+      {!isUser && !isStub && msg.sources && msg.sources.length > 0 && (
+        <SourcesFooter sources={msg.sources} />
+      )}
     </div>
   )
 }
@@ -104,6 +142,7 @@ export default function AgentChatDrawer() {
         axis2_summary: report.axis2_summary,
         axis3_summary: report.axis3_summary,
         interpretations: report.interpretations,
+        explanations: report.explanations,
         llm_provider_hint: getProviderHint(),
       } as Record<string, unknown>
       return sendChatMessage(question, ctx, history)
@@ -113,7 +152,7 @@ export default function AgentChatDrawer() {
       setHistory(prev => [
         ...prev,
         { role: 'user', content: question },
-        { role: 'assistant', content: data.answer, is_stub: data.is_stub },
+        { role: 'assistant', content: data.answer, is_stub: data.is_stub, sources: data.sources ?? [] },
       ])
     },
     onError: (err: unknown, { question }) => {
@@ -196,10 +235,21 @@ export default function AgentChatDrawer() {
           <div className="flex items-center justify-between px-4 py-3 bg-ind-surface border-b border-ind-border shrink-0">
             <div>
               <div className="text-sm font-bold text-ind-text">Agente Telecom AI</div>
-              <div className="text-[10px] text-ind-muted">
-                {report
-                  ? `Contexto: ${report.region_scope} · ${report.run_id.slice(0, 8)}…`
-                  : 'Nenhuma análise carregada'}
+              <div className="text-[10px] text-ind-muted flex items-center gap-2">
+                <span>
+                  {report
+                    ? `Contexto: ${report.region_scope} · ${report.run_id.slice(0, 8)}…`
+                    : 'Nenhuma análise carregada'}
+                </span>
+                {report && (
+                  <Link
+                    to="/rastreabilidade"
+                    onClick={() => setOpen(false)}
+                    className="text-ind-accent hover:underline whitespace-nowrap"
+                  >
+                    ver rastreabilidade →
+                  </Link>
+                )}
               </div>
             </div>
             {history.length > 0 && (

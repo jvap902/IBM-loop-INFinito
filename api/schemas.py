@@ -288,6 +288,38 @@ class ToolCatalogueResponse(BaseModel):
 
 # ── Agent BFF ──────────────────────────────────────────────────────────────
 
+class SourceItem(BaseModel):
+    """A single context section that was included in the LLM prompt for a chat answer."""
+
+    section: Annotated[str, Field(description="Human-readable section label, e.g. 'Eixo 2 — Expansão'.")]
+    values: Annotated[list[str], Field(
+        description="Key data points from the section, e.g. ['13 clusters', 'TAM total R$ 4.2M'].",
+        default_factory=list,
+    )]
+
+
+class ExplanationsBlock(BaseModel):
+    """SHAP / Z-score explanation payloads for all three analytical axes.
+
+    Each field holds the raw explanation dict returned by the corresponding
+    tool and logged to the audit trail.  ``None`` means the axis was not
+    executed or did not produce an explanation.
+    """
+
+    axis1: Annotated[Optional[dict], Field(
+        default=None,
+        description="SHAP explanation payload for Axis 1 (anomaly detection).",
+    )] = None
+    axis2: Annotated[Optional[dict], Field(
+        default=None,
+        description="SHAP/Z-score explanation payload for Axis 2 (expansion clustering).",
+    )] = None
+    axis3: Annotated[Optional[dict], Field(
+        default=None,
+        description="SHAP explanation payload for Axis 3 (market segmentation).",
+    )] = None
+
+
 class InterpretationsBlock(BaseModel):
     """Business-language explanations generated for each analytical axis."""
 
@@ -381,6 +413,10 @@ class AgentRunResponse(BaseModel):
     summary: AgentRunSummary
     interpretations: Annotated[Optional[InterpretationsBlock], Field(
         description="Business-language interpretations generated for each analytical axis.",
+    )] = None
+    explanations: Annotated[Optional[ExplanationsBlock], Field(
+        default=None,
+        description="SHAP / Z-score feature explanation payloads for each axis.",
     )] = None
     investment_hypotheses: Annotated[list[dict], Field(
         description="Structured investment hypotheses with TAM, priority class, rationale, and interpretation.",

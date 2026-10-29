@@ -7,8 +7,9 @@ const links = [
   { to: '/axis1',    label: 'Manutenção Necessária',      icon: '⬡' },
   { to: '/axis2',    label: 'Oportunidades de Expansão',  icon: '⬡' },
   { to: '/axis3',    label: 'Segmentação de Mercado',     icon: '⬡' },
-  { to: '/reports',  label: 'Relatórios',             icon: '🗎' },
-  { to: '/audit',    label: 'Auditoria',              icon: '≡' },
+  { to: '/reports',        label: 'Relatórios',             icon: '🗎' },
+  { to: '/rastreabilidade', label: 'Rastreabilidade',        icon: '🔍' },
+  { to: '/audit',           label: 'Auditoria',              icon: '≡' },
 ]
 
 export default function Sidebar() {

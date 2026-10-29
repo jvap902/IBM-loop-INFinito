@@ -23,6 +23,7 @@ from pydantic import BaseModel, Field
 from typing import Annotated, Optional
 
 from api.auth import require_api_key
+from api.schemas import SourceItem
 
 logger = logging.getLogger(__name__)
 
@@ -63,6 +64,10 @@ class AgentChatResponse(BaseModel):
     is_stub: Annotated[bool, Field(
         description="True when no real LLM is configured — answer is a guidance message.",
     )] = False
+    sources: Annotated[list[SourceItem], Field(
+        description="Context sections that were injected into the LLM prompt for this answer.",
+        default_factory=list,
+    )]
 
 
 # ── System prompt ──────────────────────────────────────────────────────────
@@ -187,7 +192,151 @@ def _build_context(report: dict) -> str:
     if exec_summ:
         lines += ["", "=== SUMÁRIO EXECUTIVO DO AGENTE ===", exec_summ[:800]]
 
+    # SHAP / Z-score feature explanations
+    explanations = report.get("explanations") or {}
+
+    exp1 = explanations.get("axis1") or {}
+    if exp1.get("status") == "ok":
+        top = (exp1.get("top_features") or [])[:3]
+        if top:
+            lines += [
+                "",
+                "=== SHAP — EIXO 1 (features que mais contribuíram para anomalias) ===",
+                f"Método: {exp1.get('method', 'N/D')} | Hexágonos explicados: {exp1.get('n_explained', 'N/D')}",
+            ]
+            for f in top:
+                lines.append(f"  · {f['feature']}: {f['shap_value']:.4f}")
+
+    exp2 = explanations.get("axis2") or {}
+    if exp2.get("status") == "ok":
+        clusters_exp = exp2.get("clusters") or {}
+        if clusters_exp:
+            lines += [
+                "",
+                "=== SHAP — EIXO 2 (Z-score por cluster de expansão) ===",
+                f"Método: {exp2.get('method', 'N/D')}",
+            ]
+            for cluster_key, cdata in list(clusters_exp.items())[:3]:
+                top_f = (cdata.get("top_features") or [])[:3]
+                lines.append(f"  Cluster {cluster_key}:")
+                for f in top_f:
+                    lines.append(
+                        f"    · {f['feature']}: z={f['z_score']:.4f} "
+                        f"(cluster={f.get('cluster_mean', 0):.2f}, global={f.get('global_mean', 0):.2f})"
+                    )
+
+    exp3 = explanations.get("axis3") or {}
+    if exp3.get("status") == "ok":
+        segments_exp = exp3.get("segments") or {}
+        if segments_exp:
+            lines += [
+                "",
+                "=== SHAP — EIXO 3 (features que mais contribuíram para segmentação) ===",
+                f"Método: {exp3.get('method', 'N/D')} | Amostras explicadas: {exp3.get('n_explained', 'N/D')}",
+            ]
+            for seg_key, sdata in segments_exp.items():
+                top_f = (sdata.get("top_features") or [])[:3]
+                lines.append(f"  Segmento {seg_key}:")
+                for f in top_f:
+                    lines.append(f"    · {f['feature']}: {f['shap_value']:.4f}")
+
     return "\n".join(lines)
+
+
+# ── Helper: build sources list from report_json ───────────────────────────
+
+def _build_sources(report: dict) -> list[SourceItem]:
+    """Return one SourceItem per non-empty report section used in the LLM context."""
+    items: list[SourceItem] = []
+
+    region = report.get("region_scope")
+    axes = report.get("axes_executed") or []
+    if region:
+        items.append(SourceItem(
+            section="Região & Escopo",
+            values=[f"Região: {region}", f"Eixos: {', '.join(axes)}"],
+        ))
+
+    summary = report.get("summary") or {}
+    if summary:
+        items.append(SourceItem(
+            section="Resumo Geral",
+            values=[
+                f"{summary.get('n_critical_hexagons', 0)} hexágonos críticos",
+                f"{summary.get('n_expansion_clusters', 0)} clusters de expansão",
+                f"TAM total R$ {summary.get('total_tam_brl', 0):,.0f}",
+            ],
+        ))
+
+    a1 = report.get("axis1_summary") or {}
+    if a1:
+        items.append(SourceItem(
+            section="Eixo 1 — Infraestrutura",
+            values=[
+                f"{a1.get('n_critical', 0)} críticos",
+                f"taxa anomalia {(a1.get('anomaly_rate', 0)*100):.1f}%",
+                f"{a1.get('total_hexagons_scored', 0):,} hexágonos",
+            ],
+        ))
+
+    a2 = report.get("axis2_summary") or {}
+    if a2:
+        clusters_non_noise = [c for c in (a2.get("clusters") or []) if not c.get("is_noise")]
+        items.append(SourceItem(
+            section="Eixo 2 — Expansão",
+            values=[
+                f"{a2.get('n_clusters', 0)} clusters",
+                f"ruído {(a2.get('noise_rate', 0)*100):.1f}%",
+                f"{len(clusters_non_noise)} clusters reais",
+            ],
+        ))
+
+    a3 = report.get("axis3_summary") or {}
+    if a3:
+        segs = a3.get("segment_profiles") or []
+        items.append(SourceItem(
+            section="Eixo 3 — Segmentação",
+            values=[
+                f"{a3.get('n_segments', 0)} segmentos",
+                f"silhouette {a3.get('silhouette_score_global') or 'N/D'}",
+                f"{len(segs)} perfis",
+            ],
+        ))
+
+    hyps = report.get("investment_hypotheses") or []
+    if hyps:
+        p1 = sum(1 for h in hyps if h.get("priority_class") == "P1")
+        items.append(SourceItem(
+            section="Hipóteses de Investimento",
+            values=[
+                f"{len(hyps)} hipóteses",
+                f"{p1} P1 (emergência)",
+                f"TAM maior: R$ {max((h.get('tam_estimate_brl', 0) for h in hyps), default=0):,.0f}",
+            ],
+        ))
+
+    interp = report.get("interpretations") or {}
+    if interp.get("executive_summary"):
+        items.append(SourceItem(
+            section="Sumário Executivo",
+            values=["interpretação do agente incluída"],
+        ))
+
+    explanations = report.get("explanations") or {}
+    shap_axes: list[str] = []
+    if (explanations.get("axis1") or {}).get("status") == "ok":
+        shap_axes.append("Eixo 1")
+    if (explanations.get("axis2") or {}).get("status") == "ok":
+        shap_axes.append("Eixo 2")
+    if (explanations.get("axis3") or {}).get("status") == "ok":
+        shap_axes.append("Eixo 3")
+    if shap_axes:
+        items.append(SourceItem(
+            section="SHAP / Features Explicativas",
+            values=[f"disponível para: {', '.join(shap_axes)}"],
+        ))
+
+    return items
 
 
 # ── Route ──────────────────────────────────────────────────────────────────
@@ -217,7 +366,8 @@ async def agent_chat(
     llm = get_llm_provider(llm_provider_name)
 
     if isinstance(llm, StubProvider):
-        return AgentChatResponse(answer=_STUB_ANSWER, is_stub=True)
+        sources = _build_sources(request.report_context)
+        return AgentChatResponse(answer=_STUB_ANSWER, is_stub=True, sources=sources)
 
     # Build context from the provided report
     try:
@@ -256,4 +406,5 @@ async def agent_chat(
             detail=f"LLM call failed: {exc}",
         ) from exc
 
-    return AgentChatResponse(answer=answer, is_stub=False)
+    sources = _build_sources(request.report_context)
+    return AgentChatResponse(answer=answer, is_stub=False, sources=sources)

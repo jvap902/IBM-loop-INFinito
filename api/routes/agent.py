@@ -24,7 +24,8 @@ from pathlib import Path
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from api.auth import require_api_key
-from api.schemas import AgentRunRequest, AgentRunResponse, AgentRunSummary, InterpretationsBlock
+from audit.logger import get_audit_logger
+from api.schemas import AgentRunRequest, AgentRunResponse, AgentRunSummary, ExplanationsBlock, InterpretationsBlock
 
 logger = logging.getLogger(__name__)
 
@@ -198,6 +199,32 @@ async def run_agent(
         except Exception:
             interp_block = None
 
+    # Extract SHAP/Z-score explanations from the audit trail for this run.
+    # The tools log explanation payloads as tool_call events; we read them
+    # back here so the frontend gets them without a separate audit query.
+    expl_axis1: dict | None = None
+    expl_axis2: dict | None = None
+    expl_axis3: dict | None = None
+    try:
+        events = get_audit_logger().read_events(
+            run_id=run_id,
+            event_type="tool_call",
+            limit=10,
+        )
+        for evt in events:
+            if evt.tool_name == "axis1_run" and evt.explanation is not None:
+                expl_axis1 = evt.explanation
+            elif evt.tool_name == "axis2_run" and evt.explanation is not None:
+                expl_axis2 = evt.explanation
+            elif evt.tool_name == "axis3_run" and evt.explanation is not None:
+                expl_axis3 = evt.explanation
+    except Exception:
+        logger.warning('{"event": "explanations_read_error", "run_id": "%s"}', run_id)
+
+    expl_block: ExplanationsBlock | None = None
+    if any(v is not None for v in (expl_axis1, expl_axis2, expl_axis3)):
+        expl_block = ExplanationsBlock(axis1=expl_axis1, axis2=expl_axis2, axis3=expl_axis3)
+
     response = AgentRunResponse(
         run_id=run_id,
         region_scope=str(final_state.get("region_scope", request.region)),
@@ -205,6 +232,7 @@ async def run_agent(
         duration_seconds=duration,
         summary=summary,
         interpretations=interp_block,
+        explanations=expl_block,
         investment_hypotheses=report_json.get("investment_hypotheses", []),
         axis1_summary=report_json.get("axis1_summary"),
         axis2_summary=report_json.get("axis2_summary"),

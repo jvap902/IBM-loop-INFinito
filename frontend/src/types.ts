@@ -42,6 +42,48 @@ export interface InterpretationsBlock {
   axis3_interpretation: string
 }
 
+// ── SHAP / Explainability types ────────────────────────────────────────────
+
+export interface ShapFeature {
+  feature: string
+  shap_value: number
+}
+
+export interface ShapClusterFeature {
+  feature: string
+  z_score: number
+  cluster_mean: number
+  global_mean: number
+}
+
+export interface ShapAxis1Explanation {
+  status: string
+  method: string
+  n_explained: number
+  top_features: ShapFeature[]
+  global_importance: Record<string, number>
+}
+
+export interface ShapAxis2Explanation {
+  status: string
+  method: string
+  n_clusters_explained: number
+  clusters: Record<string, { cluster_id: number; n_hexagons: number; top_features: ShapClusterFeature[] }>
+}
+
+export interface ShapAxis3Explanation {
+  status: string
+  method: string
+  n_explained: number
+  segments: Record<string, { segment_id: number; n_samples_explained: number; top_features: ShapFeature[] }>
+}
+
+export interface ExplanationsBlock {
+  axis1?: ShapAxis1Explanation | null
+  axis2?: ShapAxis2Explanation | null
+  axis3?: ShapAxis3Explanation | null
+}
+
 export interface AgentRunResponse {
   run_id: string
   region_scope: string
@@ -54,6 +96,7 @@ export interface AgentRunResponse {
   axis2_summary: Axis2Summary | null
   axis3_summary: Axis3Summary | null
   errors: ErrorEntry[]
+  explanations?: ExplanationsBlock | null
 }
 
 // ── Axis-level types ───────────────────────────────────────────────────────
