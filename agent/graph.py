@@ -49,6 +49,7 @@ from langgraph.graph import StateGraph, END  # type: ignore
 
 from agent.state import AgentState
 from agent.llm_provider import get_llm_provider
+from agent.region_resolver import resolve_region
 from agent.tool_registry import ToolRegistry, get_tool_registry
 from audit.logger import get_audit_logger
 
@@ -262,13 +263,16 @@ def _make_axis_runner(axis_name: str, tool_id: str):
             return {f"{axis_name}_result": None, "errors": []}
 
         region = state.get("region_scope", None)
-        region_filter: Optional[list[str]] = None
-        if isinstance(region, list):
-            region_filter = region
-        elif isinstance(region, str) and region not in ("all", "", None):
-            # If it looks like an H3 ID use it as filter; otherwise leave None
-            if len(region) >= 7:
-                region_filter = [region]
+        try:
+            region_filter = resolve_region(region) if region else None
+        except ValueError as exc:
+            error_msg = f"{axis_name} invalid region: {exc}"
+            logger.error("[%s] %s", axis_name, error_msg)
+            return {
+                f"{axis_name}_result": None,
+                "errors": [{"node": axis_name, "error": error_msg}],
+                "audit_trail": [],
+            }
 
         params: dict[str, Any] = {}
         if region_filter:

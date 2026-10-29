@@ -236,7 +236,7 @@ def registry() -> ToolRegistry:
 def _base_state(**overrides) -> AgentState:
     """Build a minimal AgentState for testing."""
     state: AgentState = {
-        "region_scope": "BR-SP-test",
+        "region_scope": "BR-SP",
         "axes_requested": ["axis1", "axis2", "axis3"],
         "force": True,
         "run_id": str(uuid.uuid4()),
@@ -539,7 +539,7 @@ class TestFullWorkflow:
 
         compiled = build_graph(registry=registry)
         initial: AgentState = {
-            "region_scope": "BR-SP-e2e",
+            "region_scope": "BR-SP",
             "axes_requested": ["axis1", "axis2", "axis3"],
             "force": True,
             "run_id": str(uuid.uuid4()),
@@ -590,7 +590,7 @@ class TestFullWorkflow:
 
         compiled = build_graph(registry=registry)
         initial: AgentState = {
-            "region_scope": "BR-RJ-partial",
+            "region_scope": "BR-RJ",
             "axes_requested": ["axis2"],
             "force": True,
             "run_id": str(uuid.uuid4()),
@@ -626,7 +626,7 @@ class TestFullWorkflow:
 
         compiled = build_graph(registry=registry)
         initial: AgentState = {
-            "region_scope": "BR-MG-forced",
+            "region_scope": "BR-MG",
             "axes_requested": ["axis1", "axis2", "axis3"],
             "force": True,
             "run_id": str(uuid.uuid4()),
@@ -655,7 +655,7 @@ class TestFullWorkflow:
         compiled = build_graph(registry=registry)
         run_id = str(uuid.uuid4())
         initial: AgentState = {
-            "region_scope": "BR-audit-test",
+            "region_scope": "BR-SP",
             "axes_requested": ["axis1", "axis2", "axis3"],
             "force": True,
             "run_id": run_id,

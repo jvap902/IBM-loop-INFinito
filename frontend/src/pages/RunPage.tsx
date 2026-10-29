@@ -73,7 +73,7 @@ export default function RunPage() {
     mutate({ region, axes: selectedAxes, force, llm_provider: llm })
   }
 
-  const apiError = error as { response?: { data?: { detail?: string } }; message?: string } | null
+  const apiError = error as { response?: { data?: { detail?: string | Array<{ msg: string }> } }; message?: string } | null
 
   return (
     <div className="p-6 max-w-2xl mx-auto">
@@ -118,11 +118,74 @@ export default function RunPage() {
             type="text"
             value={region}
             onChange={(e) => setRegion(e.target.value)}
-            placeholder="all · BR-SP · 855198c7fffffff"
+            placeholder="all · SP · BR-SP · Sudeste · 855198c7fffffff"
+            list="region-suggestions"
             className="w-full bg-ind-bg border border-ind-border rounded px-3 py-2 text-ind-text text-sm font-mono focus:outline-none focus:border-ind-accent"
           />
+          <datalist id="region-suggestions">
+            <option value="all" />
+            <option value="Norte" />
+            <option value="Nordeste" />
+            <option value="Centro-Oeste" />
+            <option value="Sudeste" />
+            <option value="Sul" />
+            <option value="AC" />
+            <option value="AL" />
+            <option value="AP" />
+            <option value="AM" />
+            <option value="BA" />
+            <option value="CE" />
+            <option value="DF" />
+            <option value="ES" />
+            <option value="GO" />
+            <option value="MA" />
+            <option value="MT" />
+            <option value="MS" />
+            <option value="MG" />
+            <option value="PA" />
+            <option value="PB" />
+            <option value="PR" />
+            <option value="PE" />
+            <option value="PI" />
+            <option value="RJ" />
+            <option value="RN" />
+            <option value="RS" />
+            <option value="RO" />
+            <option value="RR" />
+            <option value="SC" />
+            <option value="SP" />
+            <option value="SE" />
+            <option value="TO" />
+            <option value="BR-AC" />
+            <option value="BR-AL" />
+            <option value="BR-AP" />
+            <option value="BR-AM" />
+            <option value="BR-BA" />
+            <option value="BR-CE" />
+            <option value="BR-DF" />
+            <option value="BR-ES" />
+            <option value="BR-GO" />
+            <option value="BR-MA" />
+            <option value="BR-MT" />
+            <option value="BR-MS" />
+            <option value="BR-MG" />
+            <option value="BR-PA" />
+            <option value="BR-PB" />
+            <option value="BR-PR" />
+            <option value="BR-PE" />
+            <option value="BR-PI" />
+            <option value="BR-RJ" />
+            <option value="BR-RN" />
+            <option value="BR-RS" />
+            <option value="BR-RO" />
+            <option value="BR-RR" />
+            <option value="BR-SC" />
+            <option value="BR-SP" />
+            <option value="BR-SE" />
+            <option value="BR-TO" />
+          </datalist>
           <p className="text-ind-muted text-xs mt-1">
-            Use <code className="font-mono bg-ind-bg px-1 rounded">all</code> para o dataset completo, um label de região (ex: <code className="font-mono bg-ind-bg px-1 rounded">BR-SP</code>), ou um H3 parent cell ID (res 5/6).
+            Use <code className="font-mono bg-ind-bg px-1 rounded">all</code> para o dataset completo, sigla do estado (<code className="font-mono bg-ind-bg px-1 rounded">SP</code> ou <code className="font-mono bg-ind-bg px-1 rounded">BR-SP</code>), nome completo (<code className="font-mono bg-ind-bg px-1 rounded">São Paulo</code>), macro-região (<code className="font-mono bg-ind-bg px-1 rounded">Sudeste</code>), ou H3 parent cell ID (res 5/6).
           </p>
         </div>
 
@@ -195,7 +258,11 @@ export default function RunPage() {
           <div className="bg-red-950/50 border border-red-800 rounded-lg p-4 text-sm">
             <div className="text-red-400 font-semibold mb-1">Falha na execução</div>
             <div className="text-red-300">
-              {apiError.response?.data?.detail ?? apiError.message ?? 'Erro desconhecido'}
+              {(() => {
+                const detail = apiError.response?.data?.detail;
+                if (Array.isArray(detail)) return detail.map((e) => e.msg).join('; ');
+                return detail ?? apiError.message ?? 'Erro desconhecido';
+              })()}
             </div>
           </div>
         )}

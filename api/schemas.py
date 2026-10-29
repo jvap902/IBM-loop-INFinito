@@ -16,7 +16,10 @@ from __future__ import annotations
 import uuid
 from typing import Annotated, Optional
 
+import h3
 from pydantic import BaseModel, Field, field_validator, model_validator
+
+from agent.region_resolver import resolve_region
 
 # ── Shared / primitive types ───────────────────────────────────────────────
 
@@ -316,11 +319,29 @@ class AgentRunRequest(BaseModel):
     region: Annotated[str, Field(
         default="all",
         description=(
-            "Region label (e.g. 'BR-SP') or H3 parent cell ID at resolution 5/6. "
-            "Use 'all' to analyse the full Gold Feature Store."
+            "Region scope for the analysis. Accepted formats: "
+            "'all' (no filter), state abbreviation (e.g. 'SP', 'BR-SP'), "
+            "state full name (e.g. 'São Paulo'), macro-region name "
+            "(e.g. 'Sudeste'), or a raw H3 res-5 cell ID "
+            "(e.g. '855198c7fffffff')."
         ),
-        examples=["BR-SP", "all", "855198c7fffffff"],
+        examples=["all", "SP", "BR-SP", "São Paulo", "Sudeste", "855198c7fffffff"],
     )] = "all"
+
+    @field_validator("region", mode="before")
+    @classmethod
+    def validate_region(cls, v: str) -> str:
+        if not isinstance(v, str):
+            return v
+        stripped = v.strip()
+        if not stripped or stripped.lower() == "all":
+            return v
+        if h3.is_valid_cell(stripped):
+            return v
+        # Delegate to resolve_region — raises ValueError for unknown inputs
+        resolve_region(stripped)
+        return v
+
     axes: Annotated[list[str], Field(
         default=["axis1", "axis2", "axis3"],
         description="List of axes to execute. Valid values: axis1, axis2, axis3.",
