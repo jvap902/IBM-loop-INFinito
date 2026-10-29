@@ -1,0 +1,130 @@
+{
+  "run_id": "05400dba-f178-4120-a996-95ffa1ba5391",
+  "region_scope": "Sudeste",
+  "axes_executed": [
+    "axis1",
+    "axis2",
+    "axis3"
+  ],
+  "duration_seconds": 7.967,
+  "summary": {
+    "n_critical_hexagons": 5,
+    "n_expansion_clusters": 0,
+    "n_market_segments": 5,
+    "n_investment_hypotheses": 0,
+    "total_tam_brl": 0.0,
+    "capex_proxy_brl": 0.0,
+    "p1_clusters": 0,
+    "p2_clusters": 0
+  },
+  "interpretations": null,
+  "investment_hypotheses": [],
+  "axis1_summary": {
+    "n_critical": 5,
+    "total_hexagons_scored": 94,
+    "anomaly_rate": 0.053191,
+    "duration_seconds": 2.448,
+    "top_critical": [
+      {
+        "h3_id": "88a88b1955fffff",
+        "lat_centroid": -17.343333,
+        "lon_centroid": -44.167841,
+        "anomaly_score": 1.0,
+        "is_critical": 1,
+        "lof_score": 0.699544,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "88a8895581fffff",
+        "lat_centroid": -17.739173,
+        "lon_centroid": -45.102932,
+        "anomaly_score": 0.986355,
+        "is_critical": 1,
+        "lof_score": 0.650757,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "88a8f019bdfffff",
+        "lat_centroid": -18.824924,
+        "lon_centroid": -47.359125,
+        "anomaly_score": 0.939462,
+        "is_critical": 1,
+        "lof_score": 0.766862,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "888134b09bfffff",
+        "lat_centroid": -16.392148,
+        "lon_centroid": -40.69122,
+        "anomaly_score": 0.904518,
+        "is_critical": 1,
+        "lof_score": 1.0,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "8881254cddfffff",
+        "lat_centroid": -15.871012,
+        "lon_centroid": -43.944609,
+        "anomaly_score": 0.85551,
+        "is_critical": 1,
+        "lof_score": 0.571878,
+        "cloudflare_outage_overlap": 0
+      }
+    ]
+  },
+  "axis2_summary": null,
+  "axis3_summary": {
+    "n_segments": 5,
+    "total_hexagons_segmented": 94,
+    "silhouette_score_global": 0.205276,
+    "duration_seconds": 2.423,
+    "segment_profiles": [
+      {
+        "segment_id": 2,
+        "segment_name": "Alta Vulnerabilidade Concorrencia",
+        "hexagon_count": 32,
+        "hexagon_fraction": 0.340426,
+        "avg_centroid_distance": 1.548804,
+        "avg_silhouette": 0.176481
+      },
+      {
+        "segment_id": 1,
+        "segment_name": "Conectividade Essencial",
+        "hexagon_count": 21,
+        "hexagon_fraction": 0.223404,
+        "avg_centroid_distance": 1.485719,
+        "avg_silhouette": 0.240592
+      },
+      {
+        "segment_id": 0,
+        "segment_name": "Premium",
+        "hexagon_count": 18,
+        "hexagon_fraction": 0.191489,
+        "avg_centroid_distance": 1.630144,
+        "avg_silhouette": 0.194972
+      },
+      {
+        "segment_id": 3,
+        "segment_name": "Conectividade Essencial",
+        "hexagon_count": 13,
+        "hexagon_fraction": 0.138298,
+        "avg_centroid_distance": 1.48129,
+        "avg_silhouette": 0.227539
+      },
+      {
+        "segment_id": 4,
+        "segment_name": "Conectividade Essencial",
+        "hexagon_count": 10,
+        "hexagon_fraction": 0.106383,
+        "avg_centroid_distance": 1.51539,
+        "avg_silhouette": 0.212863
+      }
+    ]
+  },
+  "errors": [
+    {
+      "node": "axis2",
+      "error": "axis2 tool invocation failed: Tool 'axis2_run' returned HTTP 422: {\"detail\":\"[axis2] Noise rate 100.00% exceeds maximum 25%. Consider reducing min_cluster_size or reviewing input data quality.\"}"
+    }
+  ]
+}

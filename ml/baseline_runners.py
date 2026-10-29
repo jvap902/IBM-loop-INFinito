@@ -180,10 +180,7 @@ def run_axis2_baseline(
     -------
     BaselineResult dict.
     """
-    try:
-        import hdbscan  # noqa: PLC0415
-    except ImportError as exc:
-        raise ImportError("hdbscan is required: pip install hdbscan") from exc
+    from sklearn.cluster import HDBSCAN  # noqa: PLC0415
 
     cols = [c for c in AXIS2_FEATURES if c in gold_df.columns]
     if not cols:
@@ -192,7 +189,7 @@ def run_axis2_baseline(
     X_df = gold_df[cols].dropna().copy()
     X_scaled = StandardScaler().fit_transform(X_df.values.astype(float))
 
-    clusterer = hdbscan.HDBSCAN(min_cluster_size=min_cluster_size, gen_min_span_tree=False)
+    clusterer = HDBSCAN(min_cluster_size=min_cluster_size)
     labels = clusterer.fit_predict(X_scaled)
 
     unique_labels = set(labels)

@@ -177,15 +177,13 @@ def run(
             X_reduced = X_scaled
 
     # ── 4. HDBSCAN clustering ──────────────────────────────────────────────
-    try:
-        import hdbscan  # noqa: PLC0415
-    except ImportError as exc:
-        raise ImportError("hdbscan is required: pip install hdbscan") from exc
+    # sklearn.cluster.HDBSCAN uses exact nearest-neighbour search by default,
+    # making it fully deterministic without requiring a random_state seed.
+    from sklearn.cluster import HDBSCAN  # noqa: PLC0415
 
-    clusterer = hdbscan.HDBSCAN(
+    clusterer = HDBSCAN(
         min_cluster_size=hdbscan_min_cluster_size,
         min_samples=hdbscan_min_samples,
-        gen_min_span_tree=False,
     )
     labels = clusterer.fit_predict(X_reduced)
 
