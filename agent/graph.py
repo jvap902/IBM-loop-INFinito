@@ -510,6 +510,16 @@ def report_writer(state: AgentState) -> dict[str, Any]:
     axes_selected = state.get("axes_selected", [])
     errors = state.get("errors") or []
 
+    # ── User prompt (on-demand reports only) ──────────────────────────────
+    # When present, this free-text instruction from the user is injected into
+    # the executive summary and carried into LLM system prompts.  Absent for
+    # normal full-pipeline runs — no behaviour change in that case.
+    user_prompt: Optional[str] = state.get("user_prompt") or None
+    prompt_instruction: str = (
+        f"> **Instrução do usuário:** {user_prompt}\n\n"
+        if user_prompt else ""
+    )
+
     # ── Section helpers ────────────────────────────────────────────────────
 
     def _sec(n: int, title: str, body: str) -> str:
@@ -527,6 +537,7 @@ def report_writer(state: AgentState) -> dict[str, Any]:
     p2_count = sum(1 for h in hypotheses if "P2" in h.get("priority_class", ""))
 
     exec_summary = (
+        f"{prompt_instruction}"
         f"Análise operacional para a região **{region}** executada em {now_str}. "
         f"Eixos analisados: `{', '.join(axes_selected)}`. "
         f"\n\n"
@@ -783,7 +794,11 @@ def report_writer(state: AgentState) -> dict[str, Any]:
         run_id=run_id,
         agent_id="operational",
         tool_name="report_writer",
-        tool_input={"region": region, "axes": axes_selected},
+        tool_input={
+            "region": region,
+            "axes": axes_selected,
+            "user_prompt": user_prompt,
+        },
         tool_output_summary={
             "report_sections": 7,
             "n_hypotheses": len(hypotheses),

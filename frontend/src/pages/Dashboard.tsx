@@ -1,4 +1,6 @@
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useQueryClient } from '@tanstack/react-query'
 import { useReportStore } from '../stores/reportStore'
 import KpiCard from '../components/KpiCard'
 import HexMap from '../components/HexMap'
@@ -6,6 +8,8 @@ import TamBarChart from '../components/TamBarChart'
 import SegmentPieChart from '../components/SegmentPieChart'
 import InvestmentTable from '../components/InvestmentTable'
 import InterpretationCard from '../components/InterpretationCard'
+import NovoRelatorioModal from '../components/NovoRelatorioModal'
+import ReportToast from '../components/ReportToast'
 
 const fmtBrl = (v: number) =>
   'R$ ' + v.toLocaleString('pt-BR', { maximumFractionDigits: 2 })
@@ -33,6 +37,16 @@ function Card({ title, children }: { title: string; children: React.ReactNode })
 export default function Dashboard() {
   const report = useReportStore((s) => s.report)
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
+
+  const [showModal, setShowModal] = useState(false)
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
+
+  const handleReportSuccess = (filename: string) => {
+    setShowModal(false)
+    setToast({ message: `Relatório "${filename}" gerado com sucesso.`, type: 'success' })
+    queryClient.invalidateQueries({ queryKey: ['reports-list'] })
+  }
 
   if (!report) {
     return (
@@ -198,6 +212,34 @@ export default function Dashboard() {
         <span>P1: {summary.p1_clusters} · P2: {summary.p2_clusters}</span>
         <span>CAPEX proxy: {fmtBrl(summary.capex_proxy_brl)}</span>
       </div>
+
+      {/* Generate new report */}
+      <div className="mt-4 flex justify-end">
+        <button
+          onClick={() => setShowModal(true)}
+          className="flex items-center gap-2 px-4 py-2 rounded border border-ind-border text-ind-muted text-sm hover:text-ind-text hover:border-ind-accent hover:bg-ind-accent/5 transition-colors"
+        >
+          <span className="text-base leading-none">🗎</span>
+          Novo Relatório
+        </button>
+      </div>
+
+      {/* Modal */}
+      <NovoRelatorioModal
+        isOpen={showModal}
+        runId={run_id}
+        onClose={() => setShowModal(false)}
+        onSuccess={handleReportSuccess}
+      />
+
+      {/* Toast */}
+      {toast && (
+        <ReportToast
+          message={toast.message}
+          type={toast.type}
+          onDismiss={() => setToast(null)}
+        />
+      )}
     </div>
   )
 }

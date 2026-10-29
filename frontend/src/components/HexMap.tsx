@@ -28,7 +28,7 @@ export default function HexMap({ axis1Results, axis2Clusters, axis3Results, heig
   const wrapperRef = useRef<HTMLDivElement>(null)
 
   return (
-    <div ref={wrapperRef} style={{ height, minHeight: height === '100%' ? 0 : height }} className="rounded border border-ind-border overflow-hidden flex flex-col">
+    <div ref={wrapperRef} style={{ height, minHeight: height === '100%' ? 0 : height, isolation: 'isolate' }} className="rounded border border-ind-border overflow-hidden flex flex-col">
       <div style={{ flex: 1, minHeight: 0 }}>
       <MapContainer
         center={BRAZIL_CENTER}

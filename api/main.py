@@ -30,6 +30,7 @@ from api.routes.audit import router as audit_router
 from api.routes.agent import router as agent_router
 from api.routes.chat import router as chat_router
 from api.routes.reports import router as reports_router
+from api.routes.report_gen import router as report_gen_router
 from api.schemas import HealthResponse
 
 # ── Structured JSON logging ────────────────────────────────────────────────
@@ -164,6 +165,9 @@ def create_app() -> FastAPI:
 
     # ── Reports route under /v1 prefix ─────────────────────────────────────
     app.include_router(reports_router, prefix="/v1")
+
+    # ── On-demand report generation under /v1 prefix ───────────────────────
+    app.include_router(report_gen_router, prefix="/v1")
 
     logger.info(
         '{"event": "startup", "api_version": "%s", "log_level": "%s"}',
