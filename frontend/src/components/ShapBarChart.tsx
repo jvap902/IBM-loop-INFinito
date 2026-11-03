@@ -1,4 +1,5 @@
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts'
+import { getFeatureLabel } from '../constants/featureLabels'
 
 interface ShapBarChartProps {
   features: Array<{ feature: string; value: number }>
@@ -14,10 +15,10 @@ export default function ShapBarChart({
   colorNegative = '#64748b',
 }: ShapBarChartProps) {
   if (features.length === 0) {
-    return <p className="text-ind-muted text-xs">Dados SHAP não disponíveis</p>
+    return <p className="text-ind-muted text-xs">Dados de importância de variáveis não disponíveis</p>
   }
 
-  const data = features.map((f) => ({ feature: f.feature, value: f.value }))
+  const data = features.map((f) => ({ feature: getFeatureLabel(f.feature), value: f.value }))
 
   return (
     <div>

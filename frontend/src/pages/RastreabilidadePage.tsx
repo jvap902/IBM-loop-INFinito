@@ -141,19 +141,15 @@ export default function RastreabilidadePage() {
         </dl>
       </div>
 
-      {/* ── Axis 1 — SHAP Features ───────────────────────────────────────── */}
+      {/* ── Axis 1 — Anomalias de Infraestrutura ─────────────────────────── */}
       <SectionCard
-        title="Eixo 1 — Features SHAP (Anomalias de Infraestrutura)"
-        badge="IsolationForest / LOF"
+        title="Eixo 1 — Anomalias de Infraestrutura"
+        badge="Detecção Automática"
         badgeColor="bg-red-900/30 text-red-400"
         accentColor="border-ind-danger"
       >
         {explanations?.axis1?.status === 'ok' ? (
           <>
-            <div className="flex flex-wrap gap-4 text-[11px] text-ind-muted mb-3">
-              <span>Método: <span className="text-ind-text">{explanations.axis1.method}</span></span>
-              <span>Amostras explicadas: <span className="text-ind-text">{explanations.axis1.n_explained}</span></span>
-            </div>
             <ShapBarChart
               features={(explanations.axis1.top_features ?? []).map(f => ({
                 feature: f.feature,
@@ -169,7 +165,7 @@ export default function RastreabilidadePage() {
             text={
               explanations?.axis1
                 ? `Dados indisponíveis — status: ${explanations.axis1.status}`
-                : 'Dados SHAP do Eixo 1 não disponíveis nesta execução.'
+                : 'Dados de análise de anomalias não disponíveis nesta execução.'
             }
           />
         )}
@@ -178,16 +174,12 @@ export default function RastreabilidadePage() {
       {/* ── Axis 2 — Features por Cluster ────────────────────────────────── */}
       <SectionCard
         title="Eixo 2 — Features por Cluster (Oportunidades de Expansão)"
-        badge="HDBSCAN / Z-Score"
+        badge="Agrupamento Geográfico"
         badgeColor="bg-blue-900/30 text-blue-400"
         accentColor="border-ind-cluster"
       >
         {explanations?.axis2?.status === 'ok' ? (
           <div className="space-y-3">
-            <div className="text-[11px] text-ind-muted mb-2">
-              Método: <span className="text-ind-text">{explanations.axis2.method}</span>
-              <span className="ml-4">Clusters explicados: <span className="text-ind-text">{explanations.axis2.n_clusters_explained}</span></span>
-            </div>
             {rawClusters.length === 0 ? (
               <UnavailableNote text="Nenhum cluster válido encontrado no Eixo 2." />
             ) : (
@@ -211,25 +203,21 @@ export default function RastreabilidadePage() {
             text={
               explanations?.axis2
                 ? `Dados indisponíveis — status: ${explanations.axis2.status}`
-                : 'Dados Z-Score do Eixo 2 não disponíveis nesta execução.'
+                : 'Dados de agrupamento não disponíveis nesta execução.'
             }
           />
         )}
       </SectionCard>
 
-      {/* ── Axis 3 — SHAP por Segmento ───────────────────────────────────── */}
+      {/* ── Axis 3 — Segmentação de Mercado ──────────────────────────────── */}
       <SectionCard
-        title="Eixo 3 — Features SHAP por Segmento (Segmentação de Mercado)"
-        badge="K-Means / SHAP"
+        title="Eixo 3 — Segmentação de Mercado"
+        badge="Perfil de Mercado"
         badgeColor="bg-green-900/30 text-green-400"
         accentColor="border-ind-segment"
       >
         {explanations?.axis3?.status === 'ok' ? (
           <>
-            <div className="text-[11px] text-ind-muted mb-3">
-              Método: <span className="text-ind-text">{explanations.axis3.method}</span>
-              <span className="ml-4">Amostras explicadas: <span className="text-ind-text">{explanations.axis3.n_explained}</span></span>
-            </div>
             <div className="space-y-4">
               {Object.entries(explanations.axis3.segments ?? {}).map(([segKey, segData]) => {
                 const segName = seg3ProfileMap[segData.segment_id] ?? `Segmento ${segData.segment_id}`
@@ -237,7 +225,6 @@ export default function RastreabilidadePage() {
                   <div key={segKey}>
                     <p className="text-[11px] text-ind-muted mb-1">
                       <span className="text-ind-text font-medium">{segName}</span>
-                      <span className="ml-2">(n = {segData.n_samples_explained})</span>
                     </p>
                     <ShapBarChart
                       features={(segData.top_features ?? []).map(f => ({
@@ -258,7 +245,7 @@ export default function RastreabilidadePage() {
             text={
               explanations?.axis3
                 ? `Dados indisponíveis — status: ${explanations.axis3.status}`
-                : 'Dados SHAP do Eixo 3 não disponíveis nesta execução.'
+                : 'Dados de perfil de mercado não disponíveis nesta execução.'
             }
           />
         )}
