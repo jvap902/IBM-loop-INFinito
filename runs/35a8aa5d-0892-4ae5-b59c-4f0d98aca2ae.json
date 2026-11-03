@@ -1,0 +1,603 @@
+{
+  "run_id": "35a8aa5d-0892-4ae5-b59c-4f0d98aca2ae",
+  "region_scope": "all",
+  "axes_executed": [
+    "axis1",
+    "axis2",
+    "axis3"
+  ],
+  "duration_seconds": 12.246,
+  "summary": {
+    "n_critical_hexagons": 53,
+    "n_expansion_clusters": 3,
+    "n_market_segments": 3,
+    "n_investment_hypotheses": 3,
+    "total_tam_brl": 8733868.86,
+    "capex_proxy_brl": 1310080.329,
+    "p1_clusters": 0,
+    "p2_clusters": 1
+  },
+  "interpretations": null,
+  "investment_hypotheses": [
+    {
+      "cluster_id": 0,
+      "priority_class": "P2_EXPANSION_CHURN_RISK",
+      "tam_estimate_brl": 3670068.48,
+      "avg_n_dom": 121.2471,
+      "avg_d_down_mbps": 118.6287,
+      "avg_hhi": 1968.0497,
+      "cluster_size_hexagons": 518,
+      "arpu_assumed_brl": 89.9,
+      "penetration_rate_assumed": 0.35,
+      "rationale": "Cluster 0: mercado competitivo (HHI=1968) com demanda por expansão. Risco de churn identificado pelo Eixo 3.",
+      "place_name": null,
+      "lat_centroid": 0.0,
+      "lon_centroid": 0.0
+    },
+    {
+      "cluster_id": 1,
+      "priority_class": "P3_STANDARD_EXPANSION",
+      "tam_estimate_brl": 2928059.51,
+      "avg_n_dom": 75.1244,
+      "avg_d_down_mbps": 43.3971,
+      "avg_hhi": 4190.3447,
+      "cluster_size_hexagons": 667,
+      "arpu_assumed_brl": 89.9,
+      "penetration_rate_assumed": 0.35,
+      "rationale": "Cluster 1: oportunidade de expansão padrão sem sinais críticos imediatos.",
+      "place_name": null,
+      "lat_centroid": 0.0,
+      "lon_centroid": 0.0
+    },
+    {
+      "cluster_id": 2,
+      "priority_class": "P3_STANDARD_EXPANSION",
+      "tam_estimate_brl": 2135740.87,
+      "avg_n_dom": 44.8454,
+      "avg_d_down_mbps": 17.7117,
+      "avg_hhi": 5514.8789,
+      "cluster_size_hexagons": 815,
+      "arpu_assumed_brl": 89.9,
+      "penetration_rate_assumed": 0.35,
+      "rationale": "Cluster 2: oportunidade de expansão padrão sem sinais críticos imediatos.",
+      "place_name": null,
+      "lat_centroid": 0.0,
+      "lon_centroid": 0.0
+    }
+  ],
+  "axis1_summary": {
+    "n_critical": 53,
+    "total_hexagons_scored": 2000,
+    "anomaly_rate": 0.0265,
+    "duration_seconds": 0.278,
+    "top_critical": [
+      {
+        "h3_id": "8a2a000031bfffff",
+        "lat_centroid": 0.0,
+        "lon_centroid": 0.0,
+        "anomaly_score": 1.0,
+        "is_critical": 1,
+        "lof_score": 0.606312,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "8a2a0000713fffff",
+        "lat_centroid": 0.0,
+        "lon_centroid": 0.0,
+        "anomaly_score": 0.920948,
+        "is_critical": 1,
+        "lof_score": 0.601559,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "8a2a00003b6fffff",
+        "lat_centroid": 0.0,
+        "lon_centroid": 0.0,
+        "anomaly_score": 0.909992,
+        "is_critical": 1,
+        "lof_score": 0.6399,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "8a2a0000660fffff",
+        "lat_centroid": 0.0,
+        "lon_centroid": 0.0,
+        "anomaly_score": 0.907202,
+        "is_critical": 1,
+        "lof_score": 0.291951,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "8a2a00000b2fffff",
+        "lat_centroid": 0.0,
+        "lon_centroid": 0.0,
+        "anomaly_score": 0.90683,
+        "is_critical": 1,
+        "lof_score": 0.50613,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "8a2a000048dfffff",
+        "lat_centroid": 0.0,
+        "lon_centroid": 0.0,
+        "anomaly_score": 0.872757,
+        "is_critical": 1,
+        "lof_score": 0.570416,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "8a2a0000549fffff",
+        "lat_centroid": 0.0,
+        "lon_centroid": 0.0,
+        "anomaly_score": 0.856786,
+        "is_critical": 1,
+        "lof_score": 0.609114,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "8a2a00002fefffff",
+        "lat_centroid": 0.0,
+        "lon_centroid": 0.0,
+        "anomaly_score": 0.846658,
+        "is_critical": 1,
+        "lof_score": 0.124142,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "8a2a00001a3fffff",
+        "lat_centroid": 0.0,
+        "lon_centroid": 0.0,
+        "anomaly_score": 0.832066,
+        "is_critical": 1,
+        "lof_score": 0.339856,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "8a2a000022ffffff",
+        "lat_centroid": 0.0,
+        "lon_centroid": 0.0,
+        "anomaly_score": 0.827454,
+        "is_critical": 1,
+        "lof_score": 0.368783,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "8a2a00003f4fffff",
+        "lat_centroid": 0.0,
+        "lon_centroid": 0.0,
+        "anomaly_score": 0.825463,
+        "is_critical": 1,
+        "lof_score": 0.102049,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "8a2a0000425fffff",
+        "lat_centroid": 0.0,
+        "lon_centroid": 0.0,
+        "anomaly_score": 0.823867,
+        "is_critical": 1,
+        "lof_score": 0.189814,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "8a2a0000688fffff",
+        "lat_centroid": 0.0,
+        "lon_centroid": 0.0,
+        "anomaly_score": 0.803005,
+        "is_critical": 1,
+        "lof_score": 0.109857,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "8a2a000049afffff",
+        "lat_centroid": 0.0,
+        "lon_centroid": 0.0,
+        "anomaly_score": 0.79994,
+        "is_critical": 1,
+        "lof_score": 0.10099,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "8a2a000028dfffff",
+        "lat_centroid": 0.0,
+        "lon_centroid": 0.0,
+        "anomaly_score": 0.79909,
+        "is_critical": 1,
+        "lof_score": 0.096115,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "8a2a0000723fffff",
+        "lat_centroid": 0.0,
+        "lon_centroid": 0.0,
+        "anomaly_score": 0.790014,
+        "is_critical": 1,
+        "lof_score": 0.0609,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "8a2a00007b6fffff",
+        "lat_centroid": 0.0,
+        "lon_centroid": 0.0,
+        "anomaly_score": 0.779158,
+        "is_critical": 1,
+        "lof_score": 0.05816,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "8a2a0000497fffff",
+        "lat_centroid": 0.0,
+        "lon_centroid": 0.0,
+        "anomaly_score": 0.774427,
+        "is_critical": 1,
+        "lof_score": 0.138241,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "8a2a00007a3fffff",
+        "lat_centroid": 0.0,
+        "lon_centroid": 0.0,
+        "anomaly_score": 0.765917,
+        "is_critical": 1,
+        "lof_score": 0.193582,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "8a2a0000650fffff",
+        "lat_centroid": 0.0,
+        "lon_centroid": 0.0,
+        "anomaly_score": 0.757584,
+        "is_critical": 1,
+        "lof_score": 0.230654,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "8a2a00007b0fffff",
+        "lat_centroid": 0.0,
+        "lon_centroid": 0.0,
+        "anomaly_score": 0.755459,
+        "is_critical": 1,
+        "lof_score": 0.055793,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "8a2a00004b6fffff",
+        "lat_centroid": 0.0,
+        "lon_centroid": 0.0,
+        "anomaly_score": 0.752682,
+        "is_critical": 1,
+        "lof_score": 0.105499,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "8a2a0000071fffff",
+        "lat_centroid": 0.0,
+        "lon_centroid": 0.0,
+        "anomaly_score": 0.75121,
+        "is_critical": 1,
+        "lof_score": 0.090014,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "8a2a00004aefffff",
+        "lat_centroid": 0.0,
+        "lon_centroid": 0.0,
+        "anomaly_score": 0.75113,
+        "is_critical": 1,
+        "lof_score": 0.230856,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "8a2a00004f8fffff",
+        "lat_centroid": 0.0,
+        "lon_centroid": 0.0,
+        "anomaly_score": 0.744445,
+        "is_critical": 1,
+        "lof_score": 0.042916,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "8a2a00000b0fffff",
+        "lat_centroid": 0.0,
+        "lon_centroid": 0.0,
+        "anomaly_score": 0.744207,
+        "is_critical": 1,
+        "lof_score": 0.046779,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "8a2a0000289fffff",
+        "lat_centroid": 0.0,
+        "lon_centroid": 0.0,
+        "anomaly_score": 0.723756,
+        "is_critical": 1,
+        "lof_score": 0.05031,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "8a2a000057bfffff",
+        "lat_centroid": 0.0,
+        "lon_centroid": 0.0,
+        "anomaly_score": 0.722039,
+        "is_critical": 1,
+        "lof_score": 0.030316,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "8a2a0000118fffff",
+        "lat_centroid": 0.0,
+        "lon_centroid": 0.0,
+        "anomaly_score": 0.712811,
+        "is_critical": 1,
+        "lof_score": 0.026209,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "8a2a000039cfffff",
+        "lat_centroid": 0.0,
+        "lon_centroid": 0.0,
+        "anomaly_score": 0.705333,
+        "is_critical": 1,
+        "lof_score": 0.121453,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "8a2a00005a0fffff",
+        "lat_centroid": 0.0,
+        "lon_centroid": 0.0,
+        "anomaly_score": 0.704891,
+        "is_critical": 1,
+        "lof_score": 0.16777,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "8a2a0000525fffff",
+        "lat_centroid": 0.0,
+        "lon_centroid": 0.0,
+        "anomaly_score": 0.704325,
+        "is_critical": 1,
+        "lof_score": 0.321877,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "8a2a000067dfffff",
+        "lat_centroid": 0.0,
+        "lon_centroid": 0.0,
+        "anomaly_score": 0.699738,
+        "is_critical": 1,
+        "lof_score": 0.075418,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "8a2a0000364fffff",
+        "lat_centroid": 0.0,
+        "lon_centroid": 0.0,
+        "anomaly_score": 0.698072,
+        "is_critical": 1,
+        "lof_score": 0.023807,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "8a2a000004bfffff",
+        "lat_centroid": 0.0,
+        "lon_centroid": 0.0,
+        "anomaly_score": 0.697716,
+        "is_critical": 1,
+        "lof_score": 0.205045,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "8a2a00006bafffff",
+        "lat_centroid": 0.0,
+        "lon_centroid": 0.0,
+        "anomaly_score": 0.691988,
+        "is_critical": 1,
+        "lof_score": 0.086578,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "8a2a00001a5fffff",
+        "lat_centroid": 0.0,
+        "lon_centroid": 0.0,
+        "anomaly_score": 0.68861,
+        "is_critical": 1,
+        "lof_score": 0.047124,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "8a2a00001b9fffff",
+        "lat_centroid": 0.0,
+        "lon_centroid": 0.0,
+        "anomaly_score": 0.686434,
+        "is_critical": 1,
+        "lof_score": 0.30233,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "8a2a00000e2fffff",
+        "lat_centroid": 0.0,
+        "lon_centroid": 0.0,
+        "anomaly_score": 0.684089,
+        "is_critical": 1,
+        "lof_score": 0.009628,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "8a2a0000621fffff",
+        "lat_centroid": 0.0,
+        "lon_centroid": 0.0,
+        "anomaly_score": 0.682988,
+        "is_critical": 1,
+        "lof_score": 0.241191,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "8a2a000019cfffff",
+        "lat_centroid": 0.0,
+        "lon_centroid": 0.0,
+        "anomaly_score": 0.675841,
+        "is_critical": 1,
+        "lof_score": 0.287091,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "8a2a00002cefffff",
+        "lat_centroid": 0.0,
+        "lon_centroid": 0.0,
+        "anomaly_score": 0.67322,
+        "is_critical": 1,
+        "lof_score": 0.035281,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "8a2a00005d9fffff",
+        "lat_centroid": 0.0,
+        "lon_centroid": 0.0,
+        "anomaly_score": 0.672481,
+        "is_critical": 1,
+        "lof_score": 0.079546,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "8a2a00001e1fffff",
+        "lat_centroid": 0.0,
+        "lon_centroid": 0.0,
+        "anomaly_score": 0.672234,
+        "is_critical": 1,
+        "lof_score": 0.256081,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "8a2a0000513fffff",
+        "lat_centroid": 0.0,
+        "lon_centroid": 0.0,
+        "anomaly_score": 0.671295,
+        "is_critical": 1,
+        "lof_score": 0.209275,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "8a2a000007dfffff",
+        "lat_centroid": 0.0,
+        "lon_centroid": 0.0,
+        "anomaly_score": 0.669012,
+        "is_critical": 1,
+        "lof_score": 0.002477,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "8a2a00005d7fffff",
+        "lat_centroid": 0.0,
+        "lon_centroid": 0.0,
+        "anomaly_score": 0.667498,
+        "is_critical": 1,
+        "lof_score": 0.177366,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "8a2a0000547fffff",
+        "lat_centroid": 0.0,
+        "lon_centroid": 0.0,
+        "anomaly_score": 0.662722,
+        "is_critical": 1,
+        "lof_score": 0.031276,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "8a2a00004d7fffff",
+        "lat_centroid": 0.0,
+        "lon_centroid": 0.0,
+        "anomaly_score": 0.661389,
+        "is_critical": 1,
+        "lof_score": 0.0,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "8a2a000054efffff",
+        "lat_centroid": 0.0,
+        "lon_centroid": 0.0,
+        "anomaly_score": 0.659578,
+        "is_critical": 1,
+        "lof_score": 0.002195,
+        "cloudflare_outage_overlap": 0
+      }
+    ]
+  },
+  "axis2_summary": {
+    "n_clusters": 3,
+    "total_hexagons_processed": 2000,
+    "noise_rate": 0.0,
+    "duration_seconds": 10.725,
+    "clusters": [
+      {
+        "cluster_id": 1,
+        "cluster_size": 667,
+        "lat_centroid": 0.0,
+        "lon_centroid": 0.0,
+        "avg_d_down": 43.3971,
+        "avg_n_dom": 75.1244,
+        "avg_HHI": 4190.3447,
+        "tam_estimate": 50107.97,
+        "is_noise": 0,
+        "place_name": null
+      },
+      {
+        "cluster_id": 2,
+        "cluster_size": 815,
+        "lat_centroid": 0.0,
+        "lon_centroid": 0.0,
+        "avg_d_down": 17.7117,
+        "avg_n_dom": 44.8454,
+        "avg_HHI": 5514.8789,
+        "tam_estimate": 36549.0,
+        "is_noise": 0,
+        "place_name": null
+      },
+      {
+        "cluster_id": 0,
+        "cluster_size": 518,
+        "lat_centroid": 0.0,
+        "lon_centroid": 0.0,
+        "avg_d_down": 118.6287,
+        "avg_n_dom": 121.2471,
+        "avg_HHI": 1968.0497,
+        "tam_estimate": 62806.0,
+        "is_noise": 0,
+        "place_name": null
+      }
+    ]
+  },
+  "axis3_summary": {
+    "n_segments": 3,
+    "total_hexagons_segmented": 2000,
+    "silhouette_score_global": 0.47976,
+    "duration_seconds": 0.164,
+    "segment_profiles": [
+      {
+        "segment_id": 2,
+        "segment_name": "Conectividade Essencial",
+        "hexagon_count": 1194,
+        "hexagon_fraction": 0.597,
+        "avg_centroid_distance": 1.010063,
+        "avg_silhouette": 0.454714
+      },
+      {
+        "segment_id": 1,
+        "segment_name": "Premium",
+        "hexagon_count": 529,
+        "hexagon_fraction": 0.2645,
+        "avg_centroid_distance": 1.079656,
+        "avg_silhouette": 0.616369
+      },
+      {
+        "segment_id": 0,
+        "segment_name": "Alta Vulnerabilidade Concorrencia",
+        "hexagon_count": 277,
+        "hexagon_fraction": 0.1385,
+        "avg_centroid_distance": 1.20087,
+        "avg_silhouette": 0.326833
+      }
+    ]
+  },
+  "errors": []
+}

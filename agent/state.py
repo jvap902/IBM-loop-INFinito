@@ -30,6 +30,11 @@ class AgentState(TypedDict, total=False):
         When True the gap_detector skips freshness checks and always runs.
     run_id
         UUID assigned to this agent execution (propagated to all audit events).
+    user_prompt
+        Optional free-text instruction supplied by the user when generating an
+        on-demand report from an existing run (``POST /v1/agent/report``).
+        When present, the ``report_writer`` node injects it into the LLM system
+        prompt to guide the synthesis.  Absent for normal full-pipeline runs.
 
     gap_report
         Dict produced by gap_detector describing stale or missing regions.
@@ -69,6 +74,7 @@ class AgentState(TypedDict, total=False):
     axes_requested: list[str]
     force: bool
     run_id: str
+    user_prompt: Optional[str]
 
     # ── Gap detection ─────────────────────────────────────────────────────
     gap_report: dict[str, Any]

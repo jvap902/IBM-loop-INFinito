@@ -1,0 +1,95 @@
+{
+  "run_id": "2b847072-ffff-4adf-8e55-413830f0adeb",
+  "region_scope": "RS",
+  "axes_executed": [
+    "axis1",
+    "axis2",
+    "axis3"
+  ],
+  "duration_seconds": 3.07,
+  "summary": {
+    "n_critical_hexagons": 2,
+    "n_expansion_clusters": 0,
+    "n_market_segments": 4,
+    "n_investment_hypotheses": 0,
+    "total_tam_brl": 0.0,
+    "capex_proxy_brl": 0.0,
+    "p1_clusters": 0,
+    "p2_clusters": 0
+  },
+  "interpretations": null,
+  "investment_hypotheses": [],
+  "axis1_summary": {
+    "n_critical": 2,
+    "total_hexagons_scored": 29,
+    "anomaly_rate": 0.068966,
+    "duration_seconds": 1.044,
+    "top_critical": [
+      {
+        "h3_id": "88a8249523fffff",
+        "lat_centroid": -27.902799,
+        "lon_centroid": -51.179107,
+        "anomaly_score": 1.0,
+        "is_critical": 1,
+        "lof_score": 1.0,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "88a92a0f27fffff",
+        "lat_centroid": -30.69149,
+        "lon_centroid": -52.047422,
+        "anomaly_score": 0.86238,
+        "is_critical": 1,
+        "lof_score": 0.332419,
+        "cloudflare_outage_overlap": 0
+      }
+    ]
+  },
+  "axis2_summary": null,
+  "axis3_summary": {
+    "n_segments": 4,
+    "total_hexagons_segmented": 29,
+    "silhouette_score_global": 0.235322,
+    "duration_seconds": 0.868,
+    "segment_profiles": [
+      {
+        "segment_id": 2,
+        "segment_name": "Alta Vulnerabilidade Concorrencia",
+        "hexagon_count": 9,
+        "hexagon_fraction": 0.310345,
+        "avg_centroid_distance": 1.595652,
+        "avg_silhouette": 0.150211
+      },
+      {
+        "segment_id": 3,
+        "segment_name": "Conectividade Essencial",
+        "hexagon_count": 10,
+        "hexagon_fraction": 0.344828,
+        "avg_centroid_distance": 1.494651,
+        "avg_silhouette": 0.308736
+      },
+      {
+        "segment_id": 1,
+        "segment_name": "Conectividade Essencial",
+        "hexagon_count": 7,
+        "hexagon_fraction": 0.241379,
+        "avg_centroid_distance": 1.592144,
+        "avg_silhouette": 0.207122
+      },
+      {
+        "segment_id": 0,
+        "segment_name": "Premium",
+        "hexagon_count": 3,
+        "hexagon_fraction": 0.103448,
+        "avg_centroid_distance": 1.257548,
+        "avg_silhouette": 0.31174
+      }
+    ]
+  },
+  "errors": [
+    {
+      "node": "axis2",
+      "error": "axis2 tool invocation failed: Tool 'axis2_run' returned HTTP 422: {\"detail\":\"[axis2] Noise rate 100.00% exceeds maximum 25%. Consider reducing min_cluster_size or reviewing input data quality.\"}"
+    }
+  ]
+}

@@ -1,4 +1,5 @@
 import client from './client'
+import type { AgentReportRequest, AgentReportResponse } from '../types'
 
 export interface ReportMeta {
   filename: string
@@ -28,4 +29,9 @@ export async function getReport(filename: string): Promise<ReportContentResponse
 
 export async function deleteReport(filename: string): Promise<void> {
   await client.delete(`/reports/${encodeURIComponent(filename)}`)
+}
+
+export async function generateReport(params: AgentReportRequest): Promise<AgentReportResponse> {
+  const { data } = await client.post<AgentReportResponse>('/agent/report', params)
+  return data
 }

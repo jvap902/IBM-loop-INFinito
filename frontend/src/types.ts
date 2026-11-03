@@ -182,6 +182,19 @@ export interface ErrorEntry {
   [key: string]: unknown
 }
 
+// ── On-demand report generation ────────────────────────────────────────────
+
+export interface AgentReportRequest {
+  run_id: string
+  user_prompt: string
+  llm_provider: AgentRunRequest['llm_provider']
+}
+
+export interface AgentReportResponse {
+  filename: string
+  content: string
+}
+
 export interface Axis1RunRequest {
   region_filter?: string[] | null
   h3_resolution: 8 | 9

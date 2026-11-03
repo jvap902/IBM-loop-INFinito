@@ -401,6 +401,45 @@ class AgentRunResponse(BaseModel):
     )]
 
 
+# ── On-demand report generation ────────────────────────────────────────────
+
+class AgentReportRequest(BaseModel):
+    """Request body for ``POST /v1/agent/report``.
+
+    Generates a new Markdown report from an existing agent run, guided by a
+    free-text user prompt.  The ML axes are *not* re-executed; the endpoint
+    loads the persisted run context from ``runs/{run_id}.json`` and calls
+    ``report_writer`` directly.
+
+    Requires ``X-API-Key`` header.
+    """
+
+    run_id: Annotated[str, Field(
+        description="UUID of a previously persisted agent run (must exist in runs/).",
+        examples=["3f2a1b4c-dead-beef-cafe-000000000000"],
+    )]
+    user_prompt: Annotated[str, Field(
+        description=(
+            "Free-text instruction that guides the LLM report synthesis.  "
+            "Example: 'Focus on P1 clusters in the Southeast and highlight CAPEX risk.'"
+        ),
+        min_length=1,
+        max_length=2000,
+    )]
+    llm_provider: Annotated[str, Field(
+        default="stub",
+        description="LLM provider: 'stub' (no credentials), 'watsonx', 'openai', or 'gemini'.",
+        examples=["stub", "watsonx", "openai", "gemini"],
+    )] = "stub"
+
+
+class AgentReportResponse(BaseModel):
+    """Response body for ``POST /v1/agent/report``."""
+
+    filename: Annotated[str, Field(description="Name of the generated .md file saved in reports/.")]
+    content: Annotated[str, Field(description="Full Markdown content of the generated report.")]
+
+
 # ── Health ─────────────────────────────────────────────────────────────────
 
 class HealthResponse(BaseModel):
