@@ -199,25 +199,38 @@ async def run_agent(
         except Exception:
             interp_block = None
 
-    # Extract SHAP/Z-score explanations from the audit trail for this run.
-    # The tools log explanation payloads as tool_call events; we read them
-    # back here so the frontend gets them without a separate audit query.
+    # Extract SHAP/Z-score explanations from the audit trail.
+    # Each axis tool (axis1_run, axis2_run, axis3_run) generates its own
+    # run_id (independent from the agent run_id) and logs the explanation
+    # under that tool-level run_id.  We recover those run_ids from the
+    # axis results stored in final_state and query per-tool.
     expl_axis1: dict | None = None
     expl_axis2: dict | None = None
     expl_axis3: dict | None = None
     try:
-        events = get_audit_logger().read_events(
-            run_id=run_id,
-            event_type="tool_call",
-            limit=10,
-        )
-        for evt in events:
-            if evt.tool_name == "axis1_run" and evt.explanation is not None:
-                expl_axis1 = evt.explanation
-            elif evt.tool_name == "axis2_run" and evt.explanation is not None:
-                expl_axis2 = evt.explanation
-            elif evt.tool_name == "axis3_run" and evt.explanation is not None:
-                expl_axis3 = evt.explanation
+        audit = get_audit_logger()
+        _tool_run_ids: dict[str, str | None] = {
+            "axis1_run": (final_state.get("axis1_result") or {}).get("run_id"),
+            "axis2_run": (final_state.get("axis2_result") or {}).get("run_id"),
+            "axis3_run": (final_state.get("axis3_result") or {}).get("run_id"),
+        }
+        for tool_name, tool_run_id in _tool_run_ids.items():
+            if not tool_run_id:
+                continue
+            events = audit.read_events(
+                run_id=tool_run_id,
+                event_type="tool_call",
+                limit=5,
+            )
+            for evt in events:
+                if evt.tool_name == tool_name and evt.explanation is not None:
+                    if tool_name == "axis1_run":
+                        expl_axis1 = evt.explanation
+                    elif tool_name == "axis2_run":
+                        expl_axis2 = evt.explanation
+                    elif tool_name == "axis3_run":
+                        expl_axis3 = evt.explanation
+                    break
     except Exception:
         logger.warning('{"event": "explanations_read_error", "run_id": "%s"}', run_id)
 
