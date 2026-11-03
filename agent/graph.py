@@ -48,6 +48,7 @@ from typing import Any, Optional
 from langgraph.graph import StateGraph, END  # type: ignore
 
 from agent.state import AgentState
+from agent.interpreter import generate_interpretations
 from agent.llm_provider import get_llm_provider
 from agent.region_resolver import resolve_region
 from agent.tool_registry import ToolRegistry, get_tool_registry
@@ -520,6 +521,18 @@ def report_writer(state: AgentState) -> dict[str, Any]:
         if user_prompt else ""
     )
 
+    # ── Generate rich interpretations (LLM or stub) ────────────────────────
+    llm_provider = os.environ.get("LLM_PROVIDER", "stub")
+    interpretations = generate_interpretations(
+        region=region,
+        a1=a1,
+        a2=a2,
+        a3=a3,
+        hypotheses=hypotheses,
+        llm_provider=llm_provider,
+        user_prompt=user_prompt or "",
+    )
+
     # ── Section helpers ────────────────────────────────────────────────────
 
     def _sec(n: int, title: str, body: str) -> str:
@@ -538,9 +551,9 @@ def report_writer(state: AgentState) -> dict[str, Any]:
 
     exec_summary = (
         f"{prompt_instruction}"
-        f"Análise operacional para a região **{region}** executada em {now_str}. "
-        f"Eixos analisados: `{', '.join(axes_selected)}`. "
-        f"\n\n"
+        f"{interpretations['executive_summary']}\n\n"
+        f"---\n\n"
+        f"**Resumo quantitativo — {region} — {now_str}** | Eixos: `{', '.join(axes_selected)}`\n\n"
         f"- **{n_critical}** hexágonos com anomalias críticas de infraestrutura (Eixo 1)\n"
         f"- **{n_clusters}** clusters de expansão identificados (Eixo 2)\n"
         f"- **{n_segments}** segmentos de mercado mapeados (Eixo 3)\n"
@@ -563,6 +576,8 @@ def report_writer(state: AgentState) -> dict[str, Any]:
             for r in top_critical
         )
         axis1_body = (
+            f"{interpretations['axis1_interpretation']}\n\n"
+            f"---\n\n"
             f"- **Hexágonos analisados:** {total_scored:,}\n"
             f"- **Hexágonos críticos:** {n_critical} ({anomaly_rate*100:.2f}%)\n"
             f"- **Duração da análise:** {duration_a1:.2f}s\n"
@@ -588,6 +603,8 @@ def report_writer(state: AgentState) -> dict[str, Any]:
             if not c.get("is_noise")
         )
         axis2_body = (
+            f"{interpretations['axis2_interpretation']}\n\n"
+            f"---\n\n"
             f"- **Hexágonos processados:** {total_hex_a2:,}\n"
             f"- **Clusters identificados:** {n_clusters}\n"
             f"- **Taxa de ruído (HDBSCAN):** {noise_rate*100:.2f}%\n"
@@ -613,6 +630,8 @@ def report_writer(state: AgentState) -> dict[str, Any]:
             for p in a3.get("segment_profiles", [])
         )
         axis3_body = (
+            f"{interpretations['axis3_interpretation']}\n\n"
+            f"---\n\n"
             f"- **Hexágonos segmentados:** {total_hex_a3:,}\n"
             f"- **Segmentos identificados:** {n_segments}\n"
             f"- **Silhouette Score Global:** {sil_str}\n"
@@ -674,27 +693,7 @@ def report_writer(state: AgentState) -> dict[str, Any]:
     )
 
     # ── 7. Próximas Ações Recomendadas ────────────────────────────────────
-    actions_body = ""
-    if p1_count:
-        actions_body += (
-            f"### 7.1 Ações Imediatas (P1 — {p1_count} cluster(s))\n\n"
-            "- Acionar equipes de field service para inspeção dos hexágonos críticos identificados pelo Eixo 1.\n"
-            "- Cruzar com ordens de serviço abertas e histórico de reclamações ANATEL.\n"
-            "- Priorizar alocação de CAPEX nos clusters P1 identificados acima.\n\n"
-        )
-    if p2_count:
-        actions_body += (
-            f"### 7.2 Ações de Médio Prazo (P2 — {p2_count} cluster(s))\n\n"
-            "- Lançar campanhas promocionais segmentadas nos hexágonos de Alta Vulnerabilidade à Concorrência (Eixo 3).\n"
-            "- Avaliar expansão de cobertura nos clusters P2 para reduzir churn antes da entrada de concorrentes.\n"
-            "- Monitorar HHI trimestral para detectar movimentos competitivos.\n\n"
-        )
-    actions_body += (
-        "### 7.3 Monitoramento Contínuo\n\n"
-        "- Re-executar análise completa a cada 30 dias ou após grandes eventos de rede.\n"
-        "- Habilitar alertas automáticos quando anomaly_rate > 10% em qualquer cluster.\n"
-        "- Integrar resultados ao dashboard de BI para visualização geoespacial dos hexágonos H3.\n"
-    )
+    actions_body = interpretations["next_actions"]
 
     # ── Apêndice ───────────────────────────────────────────────────────────
     appendix = (

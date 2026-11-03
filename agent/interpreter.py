@@ -278,7 +278,13 @@ def _stub_executive_summary(
 
 # ── LLM: rich interpretations ──────────────────────────────────────────────
 
-def _llm_axis(llm: Any, axis_name: str, data: dict[str, Any], stub_fallback: str) -> str:
+def _llm_axis(
+    llm: Any,
+    axis_name: str,
+    data: dict[str, Any],
+    stub_fallback: str,
+    system_prompt: str = _SYSTEM_PROMPT,
+) -> str:
     """Generate LLM interpretation for a single axis result."""
     import json as _json
     prompt = (
@@ -289,7 +295,7 @@ def _llm_axis(llm: Any, axis_name: str, data: dict[str, Any], stub_fallback: str
         f"Use no máximo 4 parágrafos. Seja específico com os números dos dados."
     )
     try:
-        return llm.chat(prompt, system_prompt=_SYSTEM_PROMPT, temperature=0.3, max_tokens=600)
+        return llm.chat(prompt, system_prompt=system_prompt, temperature=0.3, max_tokens=600)
     except Exception as exc:
         logger.warning("[interpreter] LLM call failed for %s: %s — using stub", axis_name, exc)
         return stub_fallback
@@ -303,6 +309,8 @@ def _llm_executive_summary(
     hypotheses: list[dict[str, Any]],
     region: str,
     stub_fallback: str,
+    system_prompt: str = _SYSTEM_PROMPT,
+    user_prompt: str = "",
 ) -> str:
     import json as _json
     context = {
@@ -324,21 +332,97 @@ def _llm_executive_summary(
         "n_hypotheses": len(hypotheses),
         "p1_count": sum(1 for h in hypotheses if "P1" in h.get("priority_class", "")),
     }
+    user_instruction = (
+        f"\n\nInstrução específica do analista: {user_prompt}" if user_prompt else ""
+    )
     prompt = (
         f"Com base nos seguintes dados de análise de rede para a região {region}, "
         f"escreva um sumário executivo em português do Brasil — 3 parágrafos, "
         f"orientado a C-level, conectando os três eixos de análise (infraestrutura, "
-        f"expansão e segmentação) em uma narrativa coesa com recomendação de prioridade.\n\n"
+        f"expansão e segmentação) em uma narrativa coesa com recomendação de prioridade."
+        f"{user_instruction}\n\n"
         f"Dados:\n{_json.dumps(context, ensure_ascii=False, indent=2)}"
     )
     try:
-        return llm.chat(prompt, system_prompt=_SYSTEM_PROMPT, temperature=0.4, max_tokens=500)
+        return llm.chat(prompt, system_prompt=system_prompt, temperature=0.4, max_tokens=500)
     except Exception as exc:
         logger.warning("[interpreter] LLM executive summary failed: %s — using stub", exc)
         return stub_fallback
 
 
 # ── Public API ─────────────────────────────────────────────────────────────
+
+def _stub_next_actions(hypotheses: list[dict[str, Any]]) -> str:
+    """Deterministic next-actions text derived from priority classes."""
+    p1 = [h for h in hypotheses if "P1" in h.get("priority_class", "")]
+    p2 = [h for h in hypotheses if "P2" in h.get("priority_class", "")]
+    text = ""
+    if p1:
+        cluster_ids = ", ".join(str(h["cluster_id"]) for h in p1)
+        text += (
+            f"### 7.1 Ações Imediatas (P1 — {len(p1)} cluster(s): {cluster_ids})\n\n"
+            "- Acionar equipes de field service para inspeção dos hexágonos críticos identificados pelo Eixo 1.\n"
+            "- Cruzar com ordens de serviço abertas e histórico de reclamações ANATEL.\n"
+            "- Priorizar alocação de CAPEX nos clusters P1 identificados acima.\n\n"
+        )
+    if p2:
+        cluster_ids = ", ".join(str(h["cluster_id"]) for h in p2)
+        text += (
+            f"### 7.2 Ações de Médio Prazo (P2 — {len(p2)} cluster(s): {cluster_ids})\n\n"
+            "- Lançar campanhas promocionais segmentadas nos hexágonos de Alta Vulnerabilidade à Concorrência (Eixo 3).\n"
+            "- Avaliar expansão de cobertura nos clusters P2 para reduzir churn antes da entrada de concorrentes.\n"
+            "- Monitorar HHI trimestral para detectar movimentos competitivos.\n\n"
+        )
+    text += (
+        "### 7.3 Monitoramento Contínuo\n\n"
+        "- Re-executar análise completa a cada 30 dias ou após grandes eventos de rede.\n"
+        "- Habilitar alertas automáticos quando anomaly_rate > 10% em qualquer cluster.\n"
+        "- Integrar resultados ao dashboard de BI para visualização geoespacial dos hexágonos H3.\n"
+    )
+    return text
+
+
+def _llm_next_actions(
+    llm: Any,
+    hypotheses: list[dict[str, Any]],
+    region: str,
+    stub_fallback: str,
+    system_prompt: str = _SYSTEM_PROMPT,
+    user_prompt: str = "",
+) -> str:
+    """Generate LLM-driven next-action recommendations."""
+    import json as _json
+
+    p1_count = sum(1 for h in hypotheses if "P1" in h.get("priority_class", ""))
+    p2_count = sum(1 for h in hypotheses if "P2" in h.get("priority_class", ""))
+    top_hyps = [
+        {
+            "cluster_id": h["cluster_id"],
+            "priority_class": h["priority_class"],
+            "tam_estimate_brl": h.get("tam_estimate_brl", 0),
+            "avg_d_down_mbps": h.get("avg_d_down_mbps", 0),
+            "avg_hhi": h.get("avg_hhi", 0),
+        }
+        for h in hypotheses[:10]
+    ]
+    user_instruction = (
+        f"\n\nInstrução específica do analista: {user_prompt}" if user_prompt else ""
+    )
+    prompt = (
+        f"Com base nas hipóteses de investimento abaixo para a região {region} "
+        f"({p1_count} cluster(s) P1, {p2_count} cluster(s) P2), "
+        f"escreva recomendações de próximas ações em português do Brasil — "
+        f"organizadas por prioridade (imediata, médio prazo, monitoramento contínuo). "
+        f"Seja específico, acionável e orientado a decisão."
+        f"{user_instruction}\n\n"
+        f"Hipóteses:\n{_json.dumps(top_hyps, ensure_ascii=False, indent=2)}"
+    )
+    try:
+        return llm.chat(prompt, system_prompt=system_prompt, temperature=0.3, max_tokens=700)
+    except Exception as exc:
+        logger.warning("[interpreter] LLM next_actions failed: %s — using stub", exc)
+        return stub_fallback
+
 
 def generate_interpretations(
     region: str,
@@ -347,16 +431,34 @@ def generate_interpretations(
     a3: dict[str, Any],
     hypotheses: list[dict[str, Any]],
     llm_provider: str = "stub",
+    user_prompt: str = "",
 ) -> dict[str, Any]:
     """Generate business-language interpretations for all analysis results.
 
+    Parameters
+    ----------
+    region:
+        Human-readable region label used in narrative text.
+    a1, a2, a3:
+        Raw result dicts from each axis runner (may be empty dicts if axis
+        was not executed).
+    hypotheses:
+        Investment hypothesis list produced by result_interpreter.
+    llm_provider:
+        LLM backend to use: ``"stub"`` (deterministic, no credentials),
+        ``"watsonx"``, ``"openai"``, or ``"gemini"``.
+    user_prompt:
+        Optional free-text instruction from the user.  When non-empty, it is
+        appended to the LLM system prompt and injected into the per-section
+        user prompts so the LLM focuses its analysis on what was asked.
+
     Returns a dict with keys:
-        executive_summary   — top-level narrative for C-level consumption
-        axis1_interpretation — business interpretation of anomaly detection results
-        axis2_interpretation — business interpretation of expansion cluster results
-        axis3_interpretation — business interpretation of market segmentation results
+        executive_summary        — top-level narrative for C-level consumption
+        axis1_interpretation     — business interpretation of anomaly detection results
+        axis2_interpretation     — business interpretation of expansion cluster results
+        axis3_interpretation     — business interpretation of market segmentation results
         hypothesis_interpretations — list of per-hypothesis rich rationales
-                                     (same order as hypotheses input)
+        next_actions             — prioritised action recommendations (Section 7)
     """
     from agent.llm_provider import StubProvider, get_llm_provider
 
@@ -365,8 +467,8 @@ def generate_interpretations(
     is_stub = isinstance(llm, StubProvider) if llm else True
 
     logger.info(
-        "[interpreter] Generating interpretations — provider=%s, use_llm=%s",
-        llm_provider, not is_stub,
+        "[interpreter] Generating interpretations — provider=%s, use_llm=%s, has_user_prompt=%s",
+        llm_provider, not is_stub, bool(user_prompt),
     )
 
     # ── Stub interpretations (always computed as fallback) ──────────────────
@@ -375,6 +477,7 @@ def generate_interpretations(
     stub_a2 = _stub_axis2(a2) if a2 else "_Eixo 2 não executado._"
     stub_a3 = _stub_axis3(a3) if a3 else "_Eixo 3 não executado._"
     stub_hyps = [_stub_hypothesis(h) for h in hypotheses]
+    stub_actions = _stub_next_actions(hypotheses)
 
     if is_stub:
         return {
@@ -383,15 +486,43 @@ def generate_interpretations(
             "axis2_interpretation": stub_a2,
             "axis3_interpretation": stub_a3,
             "hypothesis_interpretations": stub_hyps,
+            "next_actions": stub_actions,
         }
+
+    # ── Build system prompt, augmented with user instruction if provided ────
+    effective_system_prompt = _SYSTEM_PROMPT
+    if user_prompt:
+        effective_system_prompt = (
+            _SYSTEM_PROMPT
+            + f"\n\nContexto adicional do analista: {user_prompt}"
+        )
 
     # ── LLM interpretations ─────────────────────────────────────────────────
     return {
         "executive_summary": _llm_executive_summary(
-            llm, a1, a2, a3, hypotheses, region, stub_exec
+            llm, a1, a2, a3, hypotheses, region, stub_exec,
+            system_prompt=effective_system_prompt,
+            user_prompt=user_prompt,
         ),
-        "axis1_interpretation": _llm_axis(llm, "Eixo 1 (Detecção de Anomalias)", a1, stub_a1) if a1 else stub_a1,
-        "axis2_interpretation": _llm_axis(llm, "Eixo 2 (Clustering de Expansão)", a2, stub_a2) if a2 else stub_a2,
-        "axis3_interpretation": _llm_axis(llm, "Eixo 3 (Segmentação de Mercado)", a3, stub_a3) if a3 else stub_a3,
-        "hypothesis_interpretations": stub_hyps,  # per-hypothesis LLM calls would be too slow; use deterministic
+        "axis1_interpretation": (
+            _llm_axis(llm, "Eixo 1 (Detecção de Anomalias)", a1, stub_a1,
+                      system_prompt=effective_system_prompt)
+            if a1 else stub_a1
+        ),
+        "axis2_interpretation": (
+            _llm_axis(llm, "Eixo 2 (Clustering de Expansão)", a2, stub_a2,
+                      system_prompt=effective_system_prompt)
+            if a2 else stub_a2
+        ),
+        "axis3_interpretation": (
+            _llm_axis(llm, "Eixo 3 (Segmentação de Mercado)", a3, stub_a3,
+                      system_prompt=effective_system_prompt)
+            if a3 else stub_a3
+        ),
+        "hypothesis_interpretations": stub_hyps,  # per-hypothesis LLM calls would be too slow
+        "next_actions": _llm_next_actions(
+            llm, hypotheses, region, stub_actions,
+            system_prompt=effective_system_prompt,
+            user_prompt=user_prompt,
+        ),
     }
