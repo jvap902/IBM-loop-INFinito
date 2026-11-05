@@ -93,8 +93,8 @@ class Axis1RunRequest(BaseToolRequest):
         float,
         Field(
             ge=0.01,
-            le=0.5,
-            description="IsolationForest contamination fraction (expected anomaly rate).",
+            le=0.15,
+            description="IsolationForest contamination fraction (expected anomaly rate). Capped at 0.15 to match the pipeline's validated anomaly-rate ceiling.",
         ),
     ] = 0.05
 
@@ -109,6 +109,10 @@ class Axis1HexagonResult(BaseModel):
     is_critical: Annotated[int, Field(ge=0, le=1, description="1 if the hexagon is flagged as critical, 0 otherwise.")]
     lof_score: Annotated[float, Field(ge=0.0, le=1.0, description="Normalised Local Outlier Factor score [0, 1].")]
     cloudflare_outage_overlap: Annotated[int, Field(ge=0, le=1, description="1 if this hexagon overlaps a known Cloudflare outage event.")]
+    place_name: Annotated[Optional[str], Field(
+        default=None,
+        description="Human-readable geographic location (city, state) resolved via reverse geocoding at the hexagon centroid.",
+    )] = None
 
 
 class Axis1RunResponse(BaseModel):
@@ -121,6 +125,14 @@ class Axis1RunResponse(BaseModel):
     n_critical: Annotated[int, Field(description="Number of hexagons flagged as critical.")]
     anomaly_rate: Annotated[float, Field(description="Fraction of hexagons that are critical.")]
     results: list[Axis1HexagonResult]
+    resolution_warning: Annotated[Optional[str], Field(
+        default=None,
+        description="Set when the requested h3_resolution was not found in the data and a fallback resolution was used.",
+    )] = None
+    cloudflare_data_available: Annotated[bool, Field(
+        default=False,
+        description="True when the Cloudflare Radar API was successfully queried and outage data was used to populate cloudflare_outage_overlap.",
+    )] = False
 
 
 # ── Axis 1 cross-validate ──────────────────────────────────────────────────

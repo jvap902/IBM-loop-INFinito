@@ -22,6 +22,9 @@ import os
 import time
 import uuid
 
+from dotenv import load_dotenv
+load_dotenv()
+
 from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 

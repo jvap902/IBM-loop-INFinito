@@ -14,6 +14,7 @@ the Operational Agent can discover available tools at startup.
 """
 from __future__ import annotations
 
+import datetime
 import logging
 import os
 import time
@@ -21,10 +22,10 @@ import uuid
 from typing import Optional
 
 try:
-    import reverse_geocoder as _rg
-    _RG_AVAILABLE = True
+    from shapely.geometry import shape as _shapely_shape, Point as _ShapelyPoint
+    _SHAPELY_AVAILABLE = True
 except ImportError:
-    _RG_AVAILABLE = False
+    _SHAPELY_AVAILABLE = False
 
 import h3
 import httpx
@@ -54,6 +55,7 @@ from api.schemas import (
 from ml.pipelines import pipeline_axis1, pipeline_axis2, pipeline_axis3
 from audit.logger import get_audit_logger
 from audit import explainability as _xai
+from agent.region_resolver import resolve_region
 
 logger = logging.getLogger(__name__)
 
@@ -64,13 +66,22 @@ router = APIRouter()
 _GOLD_PARQUET_PATH = os.getenv("GOLD_PARQUET_PATH", "data/gold/features.parquet")
 
 
-def _load_gold(region_filter: Optional[list[str]], h3_resolution: int) -> pd.DataFrame:
+def _load_gold(
+    region_filter: Optional[list[str]],
+    h3_resolution: int,
+) -> tuple[pd.DataFrame, Optional[str]]:
     """Load the Gold Feature Store Parquet and apply optional region filter.
 
     Parameters
     ----------
     region_filter : Optional list of parent H3 cell IDs (res 5 or 6).
     h3_resolution : Target resolution to filter by (8 or 9).
+
+    Returns
+    -------
+    (DataFrame, resolution_warning) where resolution_warning is None when the
+    requested resolution was found, or an explanatory string when a fallback
+    was used because the requested resolution was absent from the data.
 
     Raises
     ------
@@ -89,9 +100,20 @@ def _load_gold(region_filter: Optional[list[str]], h3_resolution: int) -> pd.Dat
 
     df = pd.read_parquet(_GOLD_PARQUET_PATH)
 
-    # Filter by H3 resolution column if present
+    # Filter by H3 resolution column if present; fall back gracefully when missing.
+    resolution_warning: Optional[str] = None
     if "h3_res" in df.columns:
-        df = df[df["h3_res"] == h3_resolution]
+        filtered = df[df["h3_res"] == h3_resolution]
+        if filtered.empty and not df.empty:
+            available = sorted(df["h3_res"].unique().tolist())
+            fallback = available[0]
+            resolution_warning = (
+                f"Resolução {h3_resolution} não encontrada nos dados; "
+                f"usando resolução {fallback} (disponível: {available})."
+            )
+            df = df[df["h3_res"] == fallback]
+        else:
+            df = filtered
 
     # Apply spatial region filter
     if region_filter:
@@ -116,7 +138,7 @@ def _load_gold(region_filter: Optional[list[str]], h3_resolution: int) -> pd.Dat
                    "overlap with the Gold Feature Store.",
         )
 
-    return df
+    return df, resolution_warning
 
 
 def _h3_centroid(h3_id: str) -> tuple[float, float]:
@@ -132,17 +154,101 @@ def _make_run_id() -> str:
     return str(uuid.uuid4())
 
 
+# Lazy-loaded, module-level cache: list of (state_name, sigla, shapely_shape)
+_BRAZIL_STATES: Optional[list[tuple[str, str, object]]] = None
+_BRAZIL_GEO_PATH = os.path.join(
+    os.path.dirname(__file__), "..", "..", "data", "geo", "brazil_states.geojson"
+)
+
+
+def _load_brazil_states() -> list[tuple[str, str, object]]:
+    """Load and cache Brazil state geometries from the bundled GeoJSON."""
+    global _BRAZIL_STATES
+    if _BRAZIL_STATES is not None:
+        return _BRAZIL_STATES
+    import json
+    try:
+        with open(_BRAZIL_GEO_PATH, encoding="utf-8") as f:
+            fc = json.load(f)
+        _BRAZIL_STATES = [
+            (
+                feat["properties"].get("name", ""),
+                feat["properties"].get("sigla", ""),
+                _shapely_shape(feat["geometry"]),
+            )
+            for feat in fc["features"]
+        ]
+    except Exception:
+        _BRAZIL_STATES = []
+    return _BRAZIL_STATES
+
+
 def _reverse_geocode(lat: float, lon: float) -> Optional[str]:
-    """Return 'City, State, CC' string for (lat, lon), or None if unavailable."""
-    if not _RG_AVAILABLE or lat == 0.0 and lon == 0.0:
+    """Return 'State, BR' string for (lat, lon) using local GeoJSON, or None."""
+    if not _SHAPELY_AVAILABLE or (lat == 0.0 and lon == 0.0):
         return None
     try:
-        results = _rg.search([(lat, lon)], mode=1, verbose=False)
-        r = results[0]
-        parts = [r.get("name", ""), r.get("admin1", ""), r.get("cc", "")]
-        return ", ".join(p for p in parts if p) or None
+        pt = _ShapelyPoint(lon, lat)
+        for name, sigla, geom in _load_brazil_states():
+            if geom.contains(pt):
+                return f"{name}, BR" if name else (f"{sigla}, BR" if sigla else None)
     except Exception:
-        return None
+        pass
+    return None
+
+
+async def _fetch_cloudflare_outage_cells(h3_resolution: int) -> tuple[set[str], bool]:
+    """Fetch recent Cloudflare Radar outage annotations and map them to H3 cells.
+
+    Returns
+    -------
+    (cell_set, data_available) where data_available is True only when the API
+    call succeeded.  Returns (set(), False) gracefully if the token is absent
+    or the request fails.
+    """
+    cf_token = os.getenv("CLOUDFLARE_API_TOKEN", "")
+    if not cf_token:
+        logger.debug("CLOUDFLARE_API_TOKEN not set — skipping outage fetch.")
+        return set(), False
+
+    date_range_days = int(os.getenv("CLOUDFLARE_DATE_RANGE_DAYS", "30"))
+    date_end = datetime.date.today()
+    date_start = date_end - datetime.timedelta(days=date_range_days)
+
+    cells: set[str] = set()
+    try:
+        async with httpx.AsyncClient(timeout=15.0) as client:
+            resp = await client.get(
+                "https://api.cloudflare.com/client/v4/radar/annotations/outages",
+                headers={"Authorization": f"Bearer {cf_token}"},
+                params={
+                    "dateStart": date_start.isoformat(),
+                    "dateEnd": date_end.isoformat(),
+                    "limit": 100,
+                },
+            )
+            if resp.status_code != 200:
+                logger.warning(
+                    "Cloudflare Radar returned HTTP %d — skipping outage overlay.",
+                    resp.status_code,
+                )
+                return set(), False
+
+            annotations = resp.json().get("result", {}).get("annotations", [])
+            for event in annotations:
+                for loc in event.get("locations", []):
+                    lat = loc.get("latitude")
+                    lon = loc.get("longitude")
+                    if lat is not None and lon is not None:
+                        try:
+                            cells.add(h3.latlng_to_cell(float(lat), float(lon), h3_resolution))
+                        except Exception:
+                            pass
+    except Exception as exc:
+        logger.warning("Cloudflare outage fetch failed: %s", exc)
+        return set(), False
+
+    return cells, True
 
 
 # ── GET /tools ─────────────────────────────────────────────────────────────
@@ -277,8 +383,25 @@ async def run_axis1(
 
     audit = get_audit_logger()
 
+    # Resolve human-readable region strings (e.g. "SP", "São Paulo", "Sudeste")
+    # to H3 res-5 cell ID lists before passing to _load_gold().
+    resolved_region_filter: Optional[list[str]] = None
+    if body.region_filter:
+        resolved_cells: set[str] = set()
+        for region_str in body.region_filter:
+            try:
+                cells = resolve_region(region_str)
+            except ValueError as exc:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=str(exc),
+                ) from exc
+            if cells:
+                resolved_cells.update(cells)
+        resolved_region_filter = sorted(resolved_cells) if resolved_cells else None
+
     try:
-        gold_df = _load_gold(body.region_filter, body.h3_resolution)
+        gold_df, resolution_warning = _load_gold(resolved_region_filter, body.h3_resolution)
     except HTTPException:
         raise
     except Exception as exc:
@@ -300,11 +423,15 @@ async def run_axis1(
     )
     iforest_ax1.fit(X_scaled_ax1)
 
+    # ── Fetch live Cloudflare outage cells for overlap tagging ────────────────
+    cf_cells, cf_available = await _fetch_cloudflare_outage_cells(body.h3_resolution)
+
     try:
         result_df = pipeline_axis1.run(
             gold_df=gold_df,
             contamination=body.contamination,
             anomaly_score_threshold=body.anomaly_threshold,
+            cloudflare_outage_h3_ids=cf_cells,
             enable_mlflow=False,
         )
     except ValueError as exc:
@@ -328,6 +455,7 @@ async def run_axis1(
             is_critical=int(row["is_critical"]),
             lof_score=float(row["lof_score"]),
             cloudflare_outage_overlap=int(row["cloudflare_outage_overlap"]),
+            place_name=_reverse_geocode(lat, lon),
         ))
 
     duration = round(time.perf_counter() - t0, 3)
@@ -374,6 +502,8 @@ async def run_axis1(
         n_critical=n_critical,
         anomaly_rate=round(n_critical / total_scored, 6) if total_scored else 0.0,
         results=rows,
+        resolution_warning=resolution_warning,
+        cloudflare_data_available=cf_available,
     )
 
 
@@ -404,7 +534,7 @@ async def crossvalidate_axis1(
 
     # ── 1. Run Axis 1 pipeline ─────────────────────────────────────────────
     try:
-        gold_df = _load_gold(body.region_filter, 8)
+        gold_df, _ = _load_gold(body.region_filter, 8)
     except HTTPException:
         raise
     except Exception as exc:
@@ -443,12 +573,11 @@ async def crossvalidate_axis1(
     else:
         logger.warning("run_id=%s CLOUDFLARE_API_TOKEN not set — skipping outage fetch.", run_id)
 
-    # ── 3. Compute overlap ─────────────────────────────────────────────────
+    # ── 3. Compute per-event overlap against already-scored critical hexagons ──
     overlap_events: list[OutageOverlapEntry] = []
     total_cf_cells_in_critical = 0
 
     for event in cf_outages:
-        # Cloudflare annotations carry lat/lon or location string — best effort H3 mapping
         locations = event.get("locations", [])
         event_h3_cells: set[str] = set()
         for loc in locations:
@@ -520,7 +649,7 @@ async def run_axis2(
     audit = get_audit_logger()
 
     try:
-        gold_df = _load_gold(body.region_filter, body.h3_resolution)
+        gold_df, _ = _load_gold(body.region_filter, body.h3_resolution)
     except HTTPException:
         raise
     except Exception as exc:
@@ -651,7 +780,7 @@ async def run_axis3(
     audit = get_audit_logger()
 
     try:
-        gold_df = _load_gold(body.region_filter, body.h3_resolution)
+        gold_df, _ = _load_gold(body.region_filter, body.h3_resolution)
     except HTTPException:
         raise
     except Exception as exc:
