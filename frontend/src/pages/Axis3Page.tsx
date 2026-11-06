@@ -113,8 +113,8 @@ export default function Axis3Page() {
         <div>
           <form onSubmit={handleSubmit}>
             <AxisForm title="Parâmetros" description="Configure o pipeline de segmentação.">
-              <FormField label="Filtrar por região (opcional)" hint="Deixe em branco para analisar todo o dataset. Para restringir a uma área, informe os códigos de região fornecidos pelo administrador.">
-                <TextInput value={regionFilter} onChange={setRegionFilter} placeholder="Ex.: 85283473fffffff" monospace />
+              <FormField label="Filtrar por região (opcional)" hint="Deixe em branco para o Brasil todo. Use código de estado (ex: SP), nome completo (ex: São Paulo), macro-região (ex: Sudeste) ou múltiplos valores separados por vírgula.">
+                <TextInput value={regionFilter} onChange={setRegionFilter} placeholder="Ex.: SP, Sudeste" />
               </FormField>
               <FormField label="Nível de detalhe geográfico" hint="Padrão é mais rápido. Detalhado revela problemas em áreas densas, mas demora mais.">
                 <SelectInput value={resolution} onChange={(v) => setResolution(parseInt(v) as 8 | 9)} options={[{ value: 8, label: 'Padrão (visão por bairro)' }, { value: 9, label: 'Detalhado (visão por quarteirão)' }]} />

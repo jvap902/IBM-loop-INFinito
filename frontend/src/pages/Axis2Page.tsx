@@ -86,16 +86,16 @@ export default function Axis2Page() {
         <div>
           <form onSubmit={handleSubmit}>
             <AxisForm title="Parâmetros" description="Configure o pipeline de clustering.">
-              <FormField label="Filtrar por região (opcional)" hint="Deixe em branco para analisar todo o dataset. Para restringir a uma área, informe os códigos de região fornecidos pelo administrador.">
-                <TextInput value={regionFilter} onChange={setRegionFilter} placeholder="Ex.: 85283473fffffff" monospace />
+              <FormField label="Filtrar por região (opcional)" hint="Deixe em branco para o Brasil todo. Use código de estado (ex: SP), nome completo (ex: São Paulo), macro-região (ex: Sudeste) ou múltiplos valores separados por vírgula.">
+                <TextInput value={regionFilter} onChange={setRegionFilter} placeholder="Ex.: SP, Sudeste" />
               </FormField>
               <FormField label="Nível de detalhe geográfico" hint="Padrão é mais rápido. Detalhado revela problemas em áreas densas, mas demora mais.">
                 <SelectInput value={resolution} onChange={(v) => setResolution(parseInt(v) as 8 | 9)} options={[{ value: 8, label: 'Padrão (visão por bairro)' }, { value: 9, label: 'Detalhado (visão por quarteirão)' }]} />
               </FormField>
-              <FormField label={`Tamanho Mínimo de Cluster: ${minClusterSize}`} hint="Número mínimo de hexágonos para formar um cluster (HDBSCAN). Valores altos exigem datasets grandes — use ≤ 50 para análises regionais filtradas. Padrão nacional: 50.">
-                <Slider min={2} max={200} step={1} value={minClusterSize} onChange={setMinClusterSize} format={(v) => String(Math.round(v))} />
+              <FormField label={`Tamanho Mínimo de Cluster: ${minClusterSize}`} hint="Número mínimo de hexágonos para formar um cluster (HDBSCAN). Muito baixo gera dezenas de micro-clusters; muito alto produz apenas 1 cluster ou nenhum. Use ≤ 50 para análises regionais filtradas. Padrão nacional: 50.">
+                <Slider min={5} max={200} step={1} value={minClusterSize} onChange={setMinClusterSize} format={(v) => String(Math.round(v))} />
               </FormField>
-              <Toggle value={skipUmap} onChange={setSkipUmap} label="Pular UMAP" description="Usa features escaladas diretamente (mais rápido)" />
+              <Toggle value={skipUmap} onChange={setSkipUmap} label="Pular UMAP" description="Usa features escaladas diretamente (mais rápido). Ajusta min_samples automaticamente para compensar o espaço de alta dimensão." />
               {err && <ErrorBanner message={err.response?.data?.detail ?? err.message ?? 'Erro desconhecido'} />}
               <RunButton isPending={isPending} />
             </AxisForm>

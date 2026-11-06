@@ -92,9 +92,9 @@ def _load_gold(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=(
-                f"Gold Feature Store not found at '{_GOLD_PARQUET_PATH}'. "
-                "Ensure GOLD_PARQUET_PATH points to a valid Parquet file and that "
-                "Sub-Task 1 (data ingestion) has been completed."
+                f"Gold Feature Store não encontrado em '{_GOLD_PARQUET_PATH}'. "
+                "Verifique se GOLD_PARQUET_PATH aponta para um arquivo Parquet válido e "
+                "se a ingestão de dados foi concluída."
             ),
         )
 
@@ -133,9 +133,9 @@ def _load_gold(
     if df.empty:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="The applied region_filter produced an empty dataset. "
-                   "Check that the provided H3 parent cell IDs are valid and "
-                   "overlap with the Gold Feature Store.",
+            detail="O filtro de região aplicado não retornou dados. "
+                   "Verifique se os valores informados são válidos (ex: SP, São Paulo, Sudeste) "
+                   "e correspondem a regiões presentes no dataset.",
         )
 
     return df, resolution_warning
