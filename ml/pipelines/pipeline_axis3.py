@@ -78,23 +78,23 @@ def validate_output(df: pd.DataFrame, k: int = K_DEFAULT) -> None:
                 "centroid_distance", "silhouette_score_local"}
     missing = required - set(df.columns)
     if missing:
-        raise ValueError(f"[axis3] Output missing required columns: {missing}")
+        raise ValueError(f"[axis3] Colunas obrigatórias ausentes no resultado: {missing}")
 
     null_cols = [c for c in ["h3_id", "segment_id", "segment_name", "centroid_distance"]
                  if df[c].isnull().any()]
     if null_cols:
-        raise ValueError(f"[axis3] Null values found in mandatory columns: {null_cols}")
+        raise ValueError(f"[axis3] Valores nulos encontrados em colunas obrigatórias: {null_cols}")
 
     n_segments = int(df["segment_id"].nunique())
     if n_segments != k:
         raise ValueError(
-            f"[axis3] Expected {k} segments, got {n_segments}. "
-            "Check K-Means convergence or feature data quality."
+            f"[axis3] Esperados {k} segmentos, encontrados {n_segments}. "
+            "Verifique a convergência do K-Means ou a qualidade dos dados."
         )
 
     sil_valid = df["silhouette_score_local"].dropna()
     if not sil_valid.empty and not sil_valid.between(-1.0, 1.0).all():
-        raise ValueError("[axis3] silhouette_score_local values outside [-1, 1].")
+        raise ValueError("[axis3] Valores de silhouette_score_local fora do intervalo [-1, 1].")
 
     logger.info(
         "[axis3] validate_output PASSED — %d rows, %d segments.",
@@ -185,11 +185,11 @@ def run(
     cols = [c for c in AXIS3_FEATURES if c in gold_df.columns]
     if not cols:
         raise ValueError(
-            f"[axis3] No Axis 3 features found in DataFrame. "
-            f"Expected at least one of {AXIS3_FEATURES}."
+            f"[axis3] Nenhuma feature do Eixo 3 encontrada no DataFrame. "
+            f"Esperada ao menos uma de {AXIS3_FEATURES}."
         )
     if h3_id_col not in gold_df.columns:
-        raise ValueError(f"[axis3] h3_id column '{h3_id_col}' not found in DataFrame.")
+        raise ValueError(f"[axis3] Coluna h3_id '{h3_id_col}' não encontrada no DataFrame.")
 
     work_df = gold_df[[h3_id_col] + cols].dropna(subset=cols).copy()
     n_rows = len(work_df)

@@ -10,6 +10,13 @@ import type { Axis2RunResponse, Axis2RunRequest } from '../types'
 const fmtBrl = (v: number | null) =>
   v == null ? '—' : 'R$ ' + v.toLocaleString('pt-BR', { maximumFractionDigits: 0 })
 
+function tamBadge(v: number | null) {
+  if (v == null) return null
+  if (v >= 1_000_000) return <span className="ml-1.5 inline-block px-1.5 py-0.5 rounded text-[9px] font-semibold bg-ind-accent/20 text-ind-accent">Alto</span>
+  if (v >= 100_000)  return <span className="ml-1.5 inline-block px-1.5 py-0.5 rounded text-[9px] font-semibold bg-yellow-800/40 text-yellow-300">Médio</span>
+  return null
+}
+
 function ClusterTable({ clusters }: { clusters: Axis2RunResponse['clusters'] }) {
   const real = clusters.filter((c) => c.is_noise === 0)
   return (
@@ -17,7 +24,7 @@ function ClusterTable({ clusters }: { clusters: Axis2RunResponse['clusters'] }) 
       <table className="w-full text-xs border-collapse">
         <thead>
           <tr className="border-b border-ind-border">
-            {['Cluster', 'Hexágonos', 'Vel↓ Mbps', 'Domic.', 'HHI', 'TAM'].map((h) => (
+            {['Cluster', 'Hexágonos', 'Veloc. Download (Mbps)', 'Domicílios', 'Concentração (HHI)', 'TAM Estimado'].map((h) => (
               <th key={h} className="px-3 py-2 text-left font-semibold uppercase tracking-wider text-ind-muted text-[10px]">{h}</th>
             ))}
           </tr>
@@ -27,13 +34,18 @@ function ClusterTable({ clusters }: { clusters: Axis2RunResponse['clusters'] }) 
             <tr key={c.cluster_id} className="border-b border-ind-border/40 hover:bg-ind-surface transition-colors">
               <td className="px-3 py-1.5">
                 <div className="font-mono text-ind-cluster font-semibold">C{c.cluster_id}</div>
-                {c.place_name && <div className="text-[10px] text-ind-muted mt-0.5">{c.place_name}</div>}
+                {c.place_name
+                  ? <div className="text-[10px] text-ind-muted mt-0.5">{c.place_name}</div>
+                  : <div className="text-[10px] text-ind-muted mt-0.5">{c.lat_centroid.toFixed(4)}, {c.lon_centroid.toFixed(4)}</div>
+                }
               </td>
               <td className="px-3 py-1.5">{c.cluster_size}</td>
               <td className="px-3 py-1.5">{c.avg_d_down?.toFixed(1) ?? '—'}</td>
               <td className="px-3 py-1.5">{c.avg_n_dom?.toFixed(0) ?? '—'}</td>
               <td className="px-3 py-1.5">{c.avg_HHI?.toFixed(0) ?? '—'}</td>
-              <td className="px-3 py-1.5 text-ind-accent font-semibold">{fmtBrl(c.tam_estimate)}</td>
+              <td className="px-3 py-1.5 text-ind-accent font-semibold">
+                {fmtBrl(c.tam_estimate)}{tamBadge(c.tam_estimate)}
+              </td>
             </tr>
           ))}
         </tbody>
@@ -74,16 +86,16 @@ export default function Axis2Page() {
         <div>
           <form onSubmit={handleSubmit}>
             <AxisForm title="Parâmetros" description="Configure o pipeline de clustering.">
-              <FormField label="Filtrar por região (opcional)" hint="Deixe em branco para analisar todo o dataset. Para restringir a uma área, informe os códigos de região fornecidos pelo administrador.">
-                <TextInput value={regionFilter} onChange={setRegionFilter} placeholder="Ex.: 85283473fffffff" monospace />
+              <FormField label="Filtrar por região (opcional)" hint="Deixe em branco para o Brasil todo. Use código de estado (ex: SP), nome completo (ex: São Paulo), macro-região (ex: Sudeste) ou múltiplos valores separados por vírgula.">
+                <TextInput value={regionFilter} onChange={setRegionFilter} placeholder="Ex.: SP, Sudeste" />
               </FormField>
               <FormField label="Nível de detalhe geográfico" hint="Padrão é mais rápido. Detalhado revela problemas em áreas densas, mas demora mais.">
                 <SelectInput value={resolution} onChange={(v) => setResolution(parseInt(v) as 8 | 9)} options={[{ value: 8, label: 'Padrão (visão por bairro)' }, { value: 9, label: 'Detalhado (visão por quarteirão)' }]} />
               </FormField>
-              <FormField label={`Tamanho Mínimo de Cluster: ${minClusterSize}`} hint="HDBSCAN min_cluster_size">
-                <Slider min={2} max={500} step={1} value={minClusterSize} onChange={setMinClusterSize} format={(v) => String(Math.round(v))} />
+              <FormField label={`Tamanho Mínimo de Cluster: ${minClusterSize}`} hint="Número mínimo de hexágonos para formar um cluster (HDBSCAN). Muito baixo gera dezenas de micro-clusters; muito alto produz apenas 1 cluster ou nenhum. Use ≤ 50 para análises regionais filtradas. Padrão nacional: 50.">
+                <Slider min={5} max={200} step={1} value={minClusterSize} onChange={setMinClusterSize} format={(v) => String(Math.round(v))} />
               </FormField>
-              <Toggle value={skipUmap} onChange={setSkipUmap} label="Pular UMAP" description="Usa features escaladas diretamente (mais rápido)" />
+              <Toggle value={skipUmap} onChange={setSkipUmap} label="Pular UMAP" description="Usa features escaladas diretamente (mais rápido). Ajusta min_samples automaticamente para compensar o espaço de alta dimensão." />
               {err && <ErrorBanner message={err.response?.data?.detail ?? err.message ?? 'Erro desconhecido'} />}
               <RunButton isPending={isPending} />
             </AxisForm>
@@ -93,10 +105,23 @@ export default function Axis2Page() {
         <div className="lg:col-span-2 space-y-4">
           {data ? (
             <>
+              {data.resolution_warning && (
+                <div className="bg-yellow-950/40 border border-yellow-700 rounded-lg p-3 text-xs text-yellow-300">
+                  <span className="font-semibold text-yellow-400">⚠ Aviso: </span>{data.resolution_warning}
+                </div>
+              )}
               <div className="grid grid-cols-3 gap-3">
-                <KpiCard label="Hexágonos Processados" value={data.total_hexagons_processed.toLocaleString('pt-BR')} />
-                <KpiCard label="Clusters de Expansão" value={data.n_clusters.toLocaleString('pt-BR')} sub={`Taxa ruído: ${(data.noise_rate * 100).toFixed(1)}%`} valueColor="text-ind-cluster" />
-                <KpiCard label="Duração" value={`${data.duration_seconds.toFixed(2)}s`} sub={`Run: ${data.run_id.slice(0, 8)}…`} />
+                {(() => {
+                  const realClusters = data.clusters.filter((c) => c.is_noise === 0)
+                  const totalTam = realClusters.reduce((s, c) => s + (c.tam_estimate ?? 0), 0)
+                  return (
+                    <>
+                      <KpiCard label="Hexágonos Processados" value={data.total_hexagons_processed.toLocaleString('pt-BR')} />
+                      <KpiCard label="Clusters de Expansão" value={data.n_clusters.toLocaleString('pt-BR')} sub={`Taxa ruído: ${(data.noise_rate * 100).toFixed(1)}%`} valueColor="text-ind-cluster" />
+                      <KpiCard label="TAM Total Estimado" value={fmtBrl(totalTam)} sub={`${realClusters.length} clusters encontrados`} valueColor="text-ind-accent" />
+                    </>
+                  )
+                })()}
               </div>
               <div className="bg-ind-surface border border-ind-border rounded-lg p-4">
                 <div className="text-xs font-semibold uppercase tracking-wider text-ind-muted mb-3 pb-2 border-b border-ind-border">TAM por Cluster</div>

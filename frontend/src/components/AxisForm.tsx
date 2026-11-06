@@ -117,14 +117,14 @@ export function Toggle({
   description?: string
 }) {
   return (
-    <label className="flex items-center gap-3 cursor-pointer">
+    <label className="flex items-start gap-3 cursor-pointer">
       <div
         onClick={() => onChange(!value)}
-        className={`w-10 h-5 rounded-full transition-colors relative cursor-pointer ${value ? 'bg-ind-accent' : 'bg-ind-border'}`}
+        className={`w-10 h-5 rounded-full transition-colors relative cursor-pointer shrink-0 mt-0.5 ${value ? 'bg-ind-accent' : 'bg-ind-border'}`}
       >
         <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white transition-transform ${value ? 'translate-x-5' : 'translate-x-0.5'}`} />
       </div>
-      <div>
+      <div className="min-w-0">
         <div className="text-ind-text text-sm">{label}</div>
         {description && <div className="text-ind-muted text-xs">{description}</div>}
       </div>

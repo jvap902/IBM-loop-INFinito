@@ -68,22 +68,22 @@ def validate_output(df: pd.DataFrame) -> None:
                 "cloudflare_outage_overlap"}
     missing = required - set(df.columns)
     if missing:
-        raise ValueError(f"[axis1] Output missing required columns: {missing}")
+        raise ValueError(f"[axis1] Colunas obrigatórias ausentes no resultado: {missing}")
 
     null_cols = [c for c in ["h3_id", "anomaly_score", "is_critical", "lof_score"]
                  if df[c].isnull().any()]
     if null_cols:
-        raise ValueError(f"[axis1] Null values found in mandatory columns: {null_cols}")
+        raise ValueError(f"[axis1] Valores nulos encontrados em colunas obrigatórias: {null_cols}")
 
     if not df["anomaly_score"].between(0.0, 1.0).all():
-        raise ValueError("[axis1] anomaly_score values outside [0, 1] range.")
+        raise ValueError("[axis1] Valores de anomaly_score fora do intervalo [0, 1].")
 
     anomaly_rate = float(df["is_critical"].mean())
     if not (ANOMALY_RATE_MIN <= anomaly_rate <= ANOMALY_RATE_MAX):
         raise ValueError(
-            f"[axis1] Anomaly rate {anomaly_rate:.2%} outside acceptable range "
+            f"[axis1] Taxa de anomalia {anomaly_rate:.2%} fora do intervalo aceitável "
             f"[{ANOMALY_RATE_MIN:.0%}, {ANOMALY_RATE_MAX:.0%}]. "
-            "Consider adjusting contamination parameter."
+            "Considere ajustar o parâmetro de contaminação."
         )
 
     logger.info(
@@ -129,11 +129,11 @@ def run(
     cols = [c for c in AXIS1_FEATURES if c in gold_df.columns]
     if not cols:
         raise ValueError(
-            f"[axis1] No Axis 1 features found in DataFrame. "
-            f"Expected at least one of {AXIS1_FEATURES}."
+            f"[axis1] Nenhuma feature do Eixo 1 encontrada no DataFrame. "
+            f"Esperada ao menos uma de {AXIS1_FEATURES}."
         )
     if h3_id_col not in gold_df.columns:
-        raise ValueError(f"[axis1] h3_id column '{h3_id_col}' not found in DataFrame.")
+        raise ValueError(f"[axis1] Coluna h3_id '{h3_id_col}' não encontrada no DataFrame.")
 
     work_df = gold_df[[h3_id_col] + cols].dropna(subset=cols).copy()
     n_rows = len(work_df)

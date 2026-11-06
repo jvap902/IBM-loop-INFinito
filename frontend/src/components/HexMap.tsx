@@ -2,6 +2,24 @@ import { useEffect, useRef } from 'react'
 import { MapContainer, TileLayer, CircleMarker, Popup, useMap } from 'react-leaflet'
 import type { Axis1HexagonResult, Axis2ClusterSummary, Axis3HexagonResult } from '../types'
 
+// Distinct colours for up to 10 K-Means segments
+const SEGMENT_COLOURS = [
+  '#22c55e', // S0 — green
+  '#3b82f6', // S1 — blue
+  '#f59e0b', // S2 — amber
+  '#ec4899', // S3 — pink
+  '#a78bfa', // S4 — purple
+  '#06b6d4', // S5 — cyan
+  '#f97316', // S6 — orange
+  '#84cc16', // S7 — lime
+  '#e11d48', // S8 — rose
+  '#14b8a6', // S9 — teal
+]
+
+function segmentColour(segmentId: number): string {
+  return SEGMENT_COLOURS[segmentId % SEGMENT_COLOURS.length]
+}
+
 // Forces Leaflet to recalculate tile layout after mount inside flex/grid containers
 function InvalidateSizeOnMount() {
   const map = useMap()
@@ -17,6 +35,7 @@ interface Props {
   axis1Results?: Axis1HexagonResult[]
   axis2Clusters?: Axis2ClusterSummary[]
   axis3Results?: Axis3HexagonResult[]
+  axis3VisibleSegments?: Set<number>
   height?: string
 }
 
@@ -24,7 +43,7 @@ interface Props {
 const BRAZIL_CENTER: [number, number] = [-14.235, -51.925]
 const BRAZIL_ZOOM = 4
 
-export default function HexMap({ axis1Results, axis2Clusters, axis3Results, height = '360px' }: Props) {
+export default function HexMap({ axis1Results, axis2Clusters, axis3Results, axis3VisibleSegments, height = '360px' }: Props) {
   const wrapperRef = useRef<HTMLDivElement>(null)
 
   return (
@@ -88,23 +107,27 @@ export default function HexMap({ axis1Results, axis2Clusters, axis3Results, heig
           </CircleMarker>
         ))}
 
-        {/* Axis 3 — market segments (green gradient by segment_id) */}
-        {axis3Results?.map((h) => (
-          <CircleMarker
-            key={h.h3_id}
-            center={[h.lat_centroid, h.lon_centroid]}
-            radius={4}
-            pathOptions={{ color: '#22c55e', fillColor: '#22c55e', fillOpacity: 0.5, weight: 1 }}
-          >
-            <Popup>
-              <div className="text-xs font-mono">
-                <div className="font-bold text-green-600">Segmento de Mercado</div>
-                <div className="text-gray-500 text-[11px] mb-1">{h.segment_name} (S{h.segment_id})</div>
-                <div>H3: {h.h3_id}</div>
-              </div>
-            </Popup>
-          </CircleMarker>
-        ))}
+        {/* Axis 3 — market segments (colour per segment_id, filtered by visibleSegments) */}
+        {axis3Results?.filter((h) => !axis3VisibleSegments || axis3VisibleSegments.has(h.segment_id)).map((h) => {
+          const col = segmentColour(h.segment_id)
+          return (
+            <CircleMarker
+              key={h.h3_id}
+              center={[h.lat_centroid, h.lon_centroid]}
+              radius={4}
+              pathOptions={{ color: col, fillColor: col, fillOpacity: 0.65, weight: 1 }}
+            >
+              <Popup>
+                <div className="text-xs font-mono">
+                  <div className="font-bold" style={{ color: col }}>Segmento S{h.segment_id}</div>
+                  <div className="text-gray-500 text-[11px] mb-1">{h.segment_name}</div>
+                  <div>H3: {h.h3_id}</div>
+                  {h.centroid_distance != null && <div>Dist. centróide: {h.centroid_distance.toFixed(3)}</div>}
+                </div>
+              </Popup>
+            </CircleMarker>
+          )
+        })}
       </MapContainer>
       </div>
 
@@ -122,12 +145,17 @@ export default function HexMap({ axis1Results, axis2Clusters, axis3Results, heig
             <span><span className="text-ind-text font-medium">Oportunidade de Expansão</span> — zona de alta demanda</span>
           </span>
         )}
-        {axis3Results && (
-          <span className="flex items-center gap-1.5">
-            <span className="inline-block w-3 h-3 rounded-full bg-green-500 shrink-0" />
-            <span><span className="text-ind-text font-medium">Segmento de Mercado</span> — perfil de clientes</span>
-          </span>
-        )}
+        {axis3Results && (() => {
+          // Build a deduplicated list of segments from the results
+          const seen = new Map<number, string>()
+          axis3Results.forEach((h) => { if (!seen.has(h.segment_id)) seen.set(h.segment_id, h.segment_name) })
+          return Array.from(seen.entries()).sort((a, b) => a[0] - b[0]).map(([id, name]) => (
+            <span key={id} className="flex items-center gap-1.5">
+              <span className="inline-block w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: segmentColour(id) }} />
+              <span><span className="text-ind-text font-medium">S{id}</span> — {name}</span>
+            </span>
+          ))
+        })()}
       </div>
     </div>
   )

@@ -66,6 +66,7 @@ export interface Axis1HexagonResult {
   is_critical: number
   lof_score: number
   cloudflare_outage_overlap: number
+  place_name?: string | null
 }
 
 export interface Axis1RunResponse {
@@ -76,6 +77,8 @@ export interface Axis1RunResponse {
   n_critical: number
   anomaly_rate: number
   results: Axis1HexagonResult[]
+  resolution_warning?: string | null
+  cloudflare_data_available?: boolean
 }
 
 export interface Axis1Summary {
@@ -105,6 +108,7 @@ export interface Axis2RunResponse {
   n_clusters: number
   noise_rate: number
   clusters: Axis2ClusterSummary[]
+  resolution_warning?: string | null
 }
 
 export interface Axis2Summary {
@@ -120,6 +124,7 @@ export interface Axis3SegmentProfile {
   hexagon_fraction: number
   avg_centroid_distance: number
   avg_silhouette: number | null
+  place_name?: string | null
 }
 
 export interface Axis3HexagonResult {
@@ -141,6 +146,7 @@ export interface Axis3RunResponse {
   silhouette_score_global: number | null
   segment_profiles: Axis3SegmentProfile[]
   results: Axis3HexagonResult[]
+  resolution_warning?: string | null
 }
 
 export interface Axis3Summary {

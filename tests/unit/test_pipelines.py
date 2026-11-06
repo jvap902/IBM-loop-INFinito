@@ -110,23 +110,23 @@ class TestAxis1Pipeline:
 
     def test_validate_output_rejects_missing_column(self, gold):
         out = axis1_run(gold, enable_mlflow=False)
-        with pytest.raises(ValueError, match="missing required columns"):
+        with pytest.raises(ValueError, match="Colunas obrigatórias ausentes"):
             axis1_validate(out.drop(columns=["anomaly_score"]))
 
     def test_validate_output_rejects_high_anomaly_rate(self, gold):
         out = axis1_run(gold, enable_mlflow=False).copy()
         out["is_critical"] = 1  # 100 % anomaly rate → should fail
-        with pytest.raises(ValueError, match="Anomaly rate"):
+        with pytest.raises(ValueError, match="Taxa de anomalia"):
             axis1_validate(out)
 
     def test_missing_feature_raises(self, gold):
         stripped = gold.drop(columns=["lat", "vol_reclam", "d_down"])
-        with pytest.raises(ValueError, match="No Axis 1 features"):
+        with pytest.raises(ValueError, match="Nenhuma feature do Eixo 1"):
             axis1_run(stripped, enable_mlflow=False)
 
     def test_missing_h3_id_raises(self, gold):
         stripped = gold.drop(columns=["h3_id"])
-        with pytest.raises(ValueError, match="h3_id column"):
+        with pytest.raises(ValueError, match="Coluna h3_id"):
             axis1_run(stripped, enable_mlflow=False)
 
 
@@ -196,7 +196,7 @@ class TestAxis2Pipeline:
         out = axis2_run(
             gold, hdbscan_min_cluster_size=5, skip_umap=True, enable_mlflow=False
         )
-        with pytest.raises(ValueError, match="missing required columns"):
+        with pytest.raises(ValueError, match="Colunas obrigatórias ausentes"):
             axis2_validate(out.drop(columns=["cluster_id"]))
 
     def test_validate_output_rejects_high_noise(self, gold):
@@ -205,12 +205,12 @@ class TestAxis2Pipeline:
         ).copy()
         out["is_noise"] = 1      # 100 % noise → should fail
         out["cluster_id"] = -1
-        with pytest.raises(ValueError, match="Noise rate"):
+        with pytest.raises(ValueError, match="Taxa de ruído"):
             axis2_validate(out)
 
     def test_missing_feature_raises(self, gold):
         stripped = gold.drop(columns=["n_dom", "n_com", "d_down", "n_erb", "HHI"])
-        with pytest.raises(ValueError, match="No Axis 2 features"):
+        with pytest.raises(ValueError, match="Nenhuma feature do Eixo 2"):
             axis2_run(stripped, skip_umap=True, enable_mlflow=False)
 
 
@@ -273,19 +273,19 @@ class TestAxis3Pipeline:
 
     def test_validate_output_rejects_missing_column(self, gold):
         out = axis3_run(gold, enable_mlflow=False)
-        with pytest.raises(ValueError, match="missing required columns"):
+        with pytest.raises(ValueError, match="Colunas obrigatórias ausentes"):
             axis3_validate(out.drop(columns=["segment_name"]))
 
     def test_validate_output_rejects_wrong_k(self, gold):
         out = axis3_run(gold, enable_mlflow=False).copy()
         # Manually corrupt segment_ids to have 4 unique values
         out.iloc[0, out.columns.get_loc("segment_id")] = 99
-        with pytest.raises(ValueError, match="segments"):
+        with pytest.raises(ValueError, match="segmentos"):
             axis3_validate(out, k=3)
 
     def test_missing_feature_raises(self, gold):
         stripped = gold.drop(columns=["ren_med", "n_dom", "vol_reclam", "HHI", "d_up"])
-        with pytest.raises(ValueError, match="No Axis 3 features"):
+        with pytest.raises(ValueError, match="Nenhuma feature do Eixo 3"):
             axis3_run(stripped, enable_mlflow=False)
 
     def test_assign_segment_names_income_ordering(self, gold):

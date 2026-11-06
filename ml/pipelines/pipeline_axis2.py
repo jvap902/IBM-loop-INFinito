@@ -68,25 +68,25 @@ def validate_output(df: pd.DataFrame) -> None:
                 "avg_n_dom", "avg_HHI", "is_noise"}
     missing = required - set(df.columns)
     if missing:
-        raise ValueError(f"[axis2] Output missing required columns: {missing}")
+        raise ValueError(f"[axis2] Colunas obrigatórias ausentes no resultado: {missing}")
 
     null_cols = [c for c in ["h3_id", "cluster_id", "is_noise"] if df[c].isnull().any()]
     if null_cols:
-        raise ValueError(f"[axis2] Null values found in mandatory columns: {null_cols}")
+        raise ValueError(f"[axis2] Valores nulos encontrados em colunas obrigatórias: {null_cols}")
 
     noise_rate = float(df["is_noise"].mean())
     if noise_rate >= NOISE_RATE_MAX:
         raise ValueError(
-            f"[axis2] Noise rate {noise_rate:.2%} exceeds maximum {NOISE_RATE_MAX:.0%}. "
-            "Consider reducing min_cluster_size or reviewing input data quality."
+            f"[axis2] Taxa de ruído {noise_rate:.2%} excede o máximo de {NOISE_RATE_MAX:.0%}. "
+            "Considere reduzir o tamanho mínimo de cluster ou revisar a qualidade dos dados."
         )
 
     # Use explicit boolean mask (is_noise is int 0/1, not bool)
     n_clusters = int(df[df["is_noise"] == 0]["cluster_id"].nunique())
     if not (N_CLUSTERS_MIN <= n_clusters <= N_CLUSTERS_MAX):
         raise ValueError(
-            f"[axis2] {n_clusters} clusters found, expected [{N_CLUSTERS_MIN}, "
-            f"{N_CLUSTERS_MAX}]. Tune HDBSCAN min_cluster_size."
+            f"[axis2] {n_clusters} cluster(s) encontrado(s), esperado entre {N_CLUSTERS_MIN} "
+            f"e {N_CLUSTERS_MAX}. Ajuste o tamanho mínimo de cluster (HDBSCAN)."
         )
 
     logger.info(
@@ -134,11 +134,11 @@ def run(
     cols = [c for c in AXIS2_FEATURES if c in gold_df.columns]
     if not cols:
         raise ValueError(
-            f"[axis2] No Axis 2 features found in DataFrame. "
-            f"Expected at least one of {AXIS2_FEATURES}."
+            f"[axis2] Nenhuma feature do Eixo 2 encontrada no DataFrame. "
+            f"Esperada ao menos uma de {AXIS2_FEATURES}."
         )
     if h3_id_col not in gold_df.columns:
-        raise ValueError(f"[axis2] h3_id column '{h3_id_col}' not found in DataFrame.")
+        raise ValueError(f"[axis2] Coluna h3_id '{h3_id_col}' não encontrada no DataFrame.")
 
     work_df = gold_df[[h3_id_col] + cols].dropna(subset=cols).copy()
     n_rows = len(work_df)
@@ -179,11 +179,20 @@ def run(
     # ── 4. HDBSCAN clustering ──────────────────────────────────────────────
     # sklearn.cluster.HDBSCAN uses exact nearest-neighbour search by default,
     # making it fully deterministic without requiring a random_state seed.
+    #
+    # When UMAP is skipped the algorithm operates on the full 5D scaled feature
+    # space instead of the compact 2D UMAP embedding.  In high-dimensional space
+    # all pairwise distances are more uniform ("curse of dimensionality"), so
+    # HDBSCAN's density estimator struggles to identify core points with the
+    # default min_samples=5.  Reducing min_samples to 1 in this mode makes
+    # every point its own potential core, recovering a noise rate comparable to
+    # the UMAP-assisted run.
     from sklearn.cluster import HDBSCAN  # noqa: PLC0415
 
+    effective_min_samples = 1 if skip_umap else hdbscan_min_samples
     clusterer = HDBSCAN(
         min_cluster_size=hdbscan_min_cluster_size,
-        min_samples=hdbscan_min_samples,
+        min_samples=effective_min_samples,
     )
     labels = clusterer.fit_predict(X_reduced)
 
@@ -255,7 +264,7 @@ def run(
                 "umap_n_neighbors": umap_n_neighbors,
                 "umap_min_dist": umap_min_dist,
                 "hdbscan_min_cluster_size": hdbscan_min_cluster_size,
-                "hdbscan_min_samples": hdbscan_min_samples,
+                "hdbscan_min_samples": effective_min_samples,
                 "skip_umap": skip_umap,
                 "n_features": len(cols),
                 "features": ",".join(cols),
