@@ -649,7 +649,7 @@ async def run_axis2(
     audit = get_audit_logger()
 
     try:
-        gold_df, _ = _load_gold(body.region_filter, body.h3_resolution)
+        gold_df, res_warning = _load_gold(body.region_filter, body.h3_resolution)
     except HTTPException:
         raise
     except Exception as exc:
@@ -750,6 +750,7 @@ async def run_axis2(
         n_clusters=n_real_clusters,
         noise_rate=round(noise_rate, 6),
         clusters=clusters,
+        resolution_warning=res_warning,
     )
 
 
@@ -780,7 +781,7 @@ async def run_axis3(
     audit = get_audit_logger()
 
     try:
-        gold_df, _ = _load_gold(body.region_filter, body.h3_resolution)
+        gold_df, res_warning = _load_gold(body.region_filter, body.h3_resolution)
     except HTTPException:
         raise
     except Exception as exc:
@@ -830,6 +831,10 @@ async def run_axis3(
             if not vals.empty:
                 avg_sil = round(float(vals.mean()), 6)
 
+        seg_lats = seg_df["h3_id"].apply(lambda x: _h3_centroid(x)[0])
+        seg_lons = seg_df["h3_id"].apply(lambda x: _h3_centroid(x)[1])
+        place = _reverse_geocode(float(seg_lats.mean()), float(seg_lons.mean()))
+
         profiles.append(Axis3SegmentProfile(
             segment_id=int(seg_id),
             segment_name=seg_name,
@@ -837,6 +842,7 @@ async def run_axis3(
             hexagon_fraction=round(count / n_total, 6),
             avg_centroid_distance=round(avg_cd, 6),
             avg_silhouette=avg_sil,
+            place_name=place,
         ))
 
     # Build hexagon-level result rows
@@ -909,4 +915,5 @@ async def run_axis3(
         silhouette_score_global=sil_global,
         segment_profiles=profiles,
         results=rows,
+        resolution_warning=res_warning,
     )

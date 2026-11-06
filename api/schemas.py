@@ -213,6 +213,7 @@ class Axis2RunResponse(BaseModel):
     n_clusters: int
     noise_rate: float
     clusters: list[Axis2ClusterSummary]
+    resolution_warning: Optional[str] = None
 
 
 # ── Axis 3 ─────────────────────────────────────────────────────────────────
@@ -239,6 +240,7 @@ class Axis3SegmentProfile(BaseModel):
     hexagon_fraction: Annotated[float, Field(description="Fraction of all hexagons in this segment.")]
     avg_centroid_distance: Annotated[float, Field(description="Mean distance from segment centroid (scaled space).")]
     avg_silhouette: Annotated[Optional[float], Field(description="Mean per-point silhouette score for this segment.")] = None
+    place_name: Optional[str] = None
 
 
 class Axis3HexagonResult(BaseModel):
@@ -264,6 +266,7 @@ class Axis3RunResponse(BaseModel):
     silhouette_score_global: Optional[float]
     segment_profiles: list[Axis3SegmentProfile]
     results: list[Axis3HexagonResult]
+    resolution_warning: Optional[str] = None
 
 
 # ── Tool catalogue ─────────────────────────────────────────────────────────
