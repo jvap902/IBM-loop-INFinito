@@ -83,10 +83,21 @@ export default function Dashboard() {
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
-      <PageHeader
-        title="Dashboard de Resultados"
-        sub={`Região: ${region_scope} · Eixos: ${axes_executed.join(', ')} · Run: ${run_id.slice(0, 8)}…`}
-      />
+      <div className="flex items-center justify-between gap-4">
+        <PageHeader
+          title="Dashboard de Resultados"
+          sub={`Região: ${region_scope} · Eixos: ${axes_executed.join(', ')} · Run: ${run_id.slice(0, 8)}…`}
+        />
+
+        {/* Generate new report */}
+        <button
+          onClick={() => setShowModal(true)}
+          className="flex items-center gap-2 px-4 py-2 rounded border border-ind-border text-ind-muted text-sm hover:text-ind-text hover:border-ind-accent hover:bg-ind-accent/5 transition-colors shrink-0"
+        >
+          <span className="text-base leading-none">🗎</span>
+          Novo Relatório
+        </button>
+      </div>
 
       {/* Executive Summary Interpretation */}
       {interpretations?.executive_summary && (
@@ -211,17 +222,6 @@ export default function Dashboard() {
         <span>Duração: {duration_seconds.toFixed(2)}s</span>
         <span>P1: {summary.p1_clusters} · P2: {summary.p2_clusters}</span>
         <span>CAPEX proxy: {fmtBrl(summary.capex_proxy_brl)}</span>
-      </div>
-
-      {/* Generate new report */}
-      <div className="mt-4 flex justify-end">
-        <button
-          onClick={() => setShowModal(true)}
-          className="flex items-center gap-2 px-4 py-2 rounded border border-ind-border text-ind-muted text-sm hover:text-ind-text hover:border-ind-accent hover:bg-ind-accent/5 transition-colors"
-        >
-          <span className="text-base leading-none">🗎</span>
-          Novo Relatório
-        </button>
       </div>
 
       {/* Modal */}
