@@ -24,7 +24,8 @@ from pathlib import Path
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from api.auth import require_api_key
-from api.schemas import AgentRunRequest, AgentRunResponse, AgentRunSummary, InterpretationsBlock
+from audit.logger import get_audit_logger
+from api.schemas import AgentRunRequest, AgentRunResponse, AgentRunSummary, ExplanationsBlock, InterpretationsBlock
 
 logger = logging.getLogger(__name__)
 
@@ -198,6 +199,45 @@ async def run_agent(
         except Exception:
             interp_block = None
 
+    # Extract SHAP/Z-score explanations from the audit trail.
+    # Each axis tool (axis1_run, axis2_run, axis3_run) generates its own
+    # run_id (independent from the agent run_id) and logs the explanation
+    # under that tool-level run_id.  We recover those run_ids from the
+    # axis results stored in final_state and query per-tool.
+    expl_axis1: dict | None = None
+    expl_axis2: dict | None = None
+    expl_axis3: dict | None = None
+    try:
+        audit = get_audit_logger()
+        _tool_run_ids: dict[str, str | None] = {
+            "axis1_run": (final_state.get("axis1_result") or {}).get("run_id"),
+            "axis2_run": (final_state.get("axis2_result") or {}).get("run_id"),
+            "axis3_run": (final_state.get("axis3_result") or {}).get("run_id"),
+        }
+        for tool_name, tool_run_id in _tool_run_ids.items():
+            if not tool_run_id:
+                continue
+            events = audit.read_events(
+                run_id=tool_run_id,
+                event_type="tool_call",
+                limit=5,
+            )
+            for evt in events:
+                if evt.tool_name == tool_name and evt.explanation is not None:
+                    if tool_name == "axis1_run":
+                        expl_axis1 = evt.explanation
+                    elif tool_name == "axis2_run":
+                        expl_axis2 = evt.explanation
+                    elif tool_name == "axis3_run":
+                        expl_axis3 = evt.explanation
+                    break
+    except Exception:
+        logger.warning('{"event": "explanations_read_error", "run_id": "%s"}', run_id)
+
+    expl_block: ExplanationsBlock | None = None
+    if any(v is not None for v in (expl_axis1, expl_axis2, expl_axis3)):
+        expl_block = ExplanationsBlock(axis1=expl_axis1, axis2=expl_axis2, axis3=expl_axis3)
+
     response = AgentRunResponse(
         run_id=run_id,
         region_scope=str(final_state.get("region_scope", request.region)),
@@ -205,6 +245,7 @@ async def run_agent(
         duration_seconds=duration,
         summary=summary,
         interpretations=interp_block,
+        explanations=expl_block,
         investment_hypotheses=report_json.get("investment_hypotheses", []),
         axis1_summary=report_json.get("axis1_summary"),
         axis2_summary=report_json.get("axis2_summary"),

@@ -14,6 +14,7 @@ import Axis3Page from './pages/Axis3Page'
 import AuditPage from './pages/AuditPage'
 import ReportsPage from './pages/ReportsPage'
 import RunHistoryPage from './pages/RunHistoryPage'
+import RastreabilidadePage from './pages/RastreabilidadePage'
 
 import './index.css'
 
@@ -43,8 +44,9 @@ const router = createBrowserRouter([
       { path: 'axis2', element: <Axis2Page /> },
       { path: 'axis3',   element: <Axis3Page /> },
       { path: 'history', element: <RunHistoryPage /> },
-      { path: 'reports', element: <ReportsPage /> },
-      { path: 'audit',   element: <AuditPage /> },
+      { path: 'reports',        element: <ReportsPage /> },
+      { path: 'rastreabilidade', element: <RastreabilidadePage /> },
+      { path: 'audit',           element: <AuditPage /> },
     ],
   },
 ])

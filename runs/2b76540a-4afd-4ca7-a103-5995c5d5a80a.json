@@ -1,0 +1,910 @@
+{
+  "run_id": "2b76540a-4afd-4ca7-a103-5995c5d5a80a",
+  "region_scope": "all",
+  "axes_executed": [
+    "axis1",
+    "axis2",
+    "axis3"
+  ],
+  "duration_seconds": 66.984,
+  "summary": {
+    "n_critical_hexagons": 95,
+    "n_expansion_clusters": 13,
+    "n_market_segments": 6,
+    "n_investment_hypotheses": 13,
+    "total_tam_brl": 253513703.69,
+    "capex_proxy_brl": 38027055.5535,
+    "p1_clusters": 0,
+    "p2_clusters": 2
+  },
+  "interpretations": null,
+  "explanations": null,
+  "investment_hypotheses": [
+    {
+      "cluster_id": 9,
+      "priority_class": "P3_STANDARD_EXPANSION",
+      "tam_estimate_brl": 59111911.6,
+      "avg_n_dom": 3774.5672,
+      "avg_d_down_mbps": 65.6439,
+      "avg_hhi": 6032.2283,
+      "cluster_size_hexagons": 268,
+      "arpu_assumed_brl": 89.9,
+      "penetration_rate_assumed": 0.35,
+      "rationale": "Cluster 9: oportunidade de expansão padrão sem sinais críticos imediatos.",
+      "place_name": null,
+      "lat_centroid": -15.124421,
+      "lon_centroid": -54.80855
+    },
+    {
+      "cluster_id": 5,
+      "priority_class": "P3_STANDARD_EXPANSION",
+      "tam_estimate_brl": 46417082.45,
+      "avg_n_dom": 3837.3768,
+      "avg_d_down_mbps": 100.3103,
+      "avg_hhi": 3793.1612,
+      "cluster_size_hexagons": 207,
+      "arpu_assumed_brl": 89.9,
+      "penetration_rate_assumed": 0.35,
+      "rationale": "Cluster 5: oportunidade de expansão padrão sem sinais críticos imediatos.",
+      "place_name": null,
+      "lat_centroid": -13.812121,
+      "lon_centroid": -54.046918
+    },
+    {
+      "cluster_id": 8,
+      "priority_class": "P3_STANDARD_EXPANSION",
+      "tam_estimate_brl": 29970552.14,
+      "avg_n_dom": 3799.163,
+      "avg_d_down_mbps": 78.3695,
+      "avg_hhi": 7491.7268,
+      "cluster_size_hexagons": 135,
+      "arpu_assumed_brl": 89.9,
+      "penetration_rate_assumed": 0.35,
+      "rationale": "Cluster 8: oportunidade de expansão padrão sem sinais críticos imediatos.",
+      "place_name": null,
+      "lat_centroid": -12.69682,
+      "lon_centroid": -54.053531
+    },
+    {
+      "cluster_id": 3,
+      "priority_class": "P3_STANDARD_EXPANSION",
+      "tam_estimate_brl": 29459245.69,
+      "avg_n_dom": 1658.3454,
+      "avg_d_down_mbps": 96.1476,
+      "avg_hhi": 4881.4624,
+      "cluster_size_hexagons": 304,
+      "arpu_assumed_brl": 89.9,
+      "penetration_rate_assumed": 0.35,
+      "rationale": "Cluster 3: oportunidade de expansão padrão sem sinais críticos imediatos.",
+      "place_name": null,
+      "lat_centroid": -13.596116,
+      "lon_centroid": -53.189761
+    },
+    {
+      "cluster_id": 12,
+      "priority_class": "P3_STANDARD_EXPANSION",
+      "tam_estimate_brl": 24758851.16,
+      "avg_n_dom": 3652.5776,
+      "avg_d_down_mbps": 64.9099,
+      "avg_hhi": 3158.4139,
+      "cluster_size_hexagons": 116,
+      "arpu_assumed_brl": 89.9,
+      "penetration_rate_assumed": 0.35,
+      "rationale": "Cluster 12: oportunidade de expansão padrão sem sinais críticos imediatos.",
+      "place_name": null,
+      "lat_centroid": -13.531898,
+      "lon_centroid": -53.372818
+    },
+    {
+      "cluster_id": 0,
+      "priority_class": "P3_STANDARD_EXPANSION",
+      "tam_estimate_brl": 12613896.17,
+      "avg_n_dom": 1783.9835,
+      "avg_d_down_mbps": 110.1549,
+      "avg_hhi": 6496.8988,
+      "cluster_size_hexagons": 121,
+      "arpu_assumed_brl": 89.9,
+      "penetration_rate_assumed": 0.35,
+      "rationale": "Cluster 0: oportunidade de expansão padrão sem sinais críticos imediatos.",
+      "place_name": null,
+      "lat_centroid": -13.894403,
+      "lon_centroid": -54.65473
+    },
+    {
+      "cluster_id": 1,
+      "priority_class": "P3_STANDARD_EXPANSION",
+      "tam_estimate_brl": 12507719.48,
+      "avg_n_dom": 1486.4236,
+      "avg_d_down_mbps": 103.1384,
+      "avg_hhi": 5534.1968,
+      "cluster_size_hexagons": 144,
+      "arpu_assumed_brl": 89.9,
+      "penetration_rate_assumed": 0.35,
+      "rationale": "Cluster 1: oportunidade de expansão padrão sem sinais críticos imediatos.",
+      "place_name": null,
+      "lat_centroid": -13.454835,
+      "lon_centroid": -53.546935
+    },
+    {
+      "cluster_id": 7,
+      "priority_class": "P3_STANDARD_EXPANSION",
+      "tam_estimate_brl": 9200240.32,
+      "avg_n_dom": 1896.9157,
+      "avg_d_down_mbps": 47.3675,
+      "avg_hhi": 5202.3886,
+      "cluster_size_hexagons": 83,
+      "arpu_assumed_brl": 89.9,
+      "penetration_rate_assumed": 0.35,
+      "rationale": "Cluster 7: oportunidade de expansão padrão sem sinais críticos imediatos.",
+      "place_name": null,
+      "lat_centroid": -14.329358,
+      "lon_centroid": -52.545089
+    },
+    {
+      "cluster_id": 4,
+      "priority_class": "P2_EXPANSION_CHURN_RISK",
+      "tam_estimate_brl": 7009044.64,
+      "avg_n_dom": 1276.0213,
+      "avg_d_down_mbps": 117.8706,
+      "avg_hhi": 2181.2055,
+      "cluster_size_hexagons": 94,
+      "arpu_assumed_brl": 89.9,
+      "penetration_rate_assumed": 0.35,
+      "rationale": "Cluster 4: mercado competitivo (HHI=2181) com demanda por expansão. Risco de churn identificado pelo Eixo 3.",
+      "place_name": null,
+      "lat_centroid": -14.17808,
+      "lon_centroid": -54.433628
+    },
+    {
+      "cluster_id": 10,
+      "priority_class": "P3_STANDARD_EXPANSION",
+      "tam_estimate_brl": 6764026.56,
+      "avg_n_dom": 1361.8,
+      "avg_d_down_mbps": 71.1215,
+      "avg_hhi": 6589.6962,
+      "cluster_size_hexagons": 85,
+      "arpu_assumed_brl": 89.9,
+      "penetration_rate_assumed": 0.35,
+      "rationale": "Cluster 10: oportunidade de expansão padrão sem sinais críticos imediatos.",
+      "place_name": null,
+      "lat_centroid": -13.48972,
+      "lon_centroid": -55.24442
+    },
+    {
+      "cluster_id": 2,
+      "priority_class": "P3_STANDARD_EXPANSION",
+      "tam_estimate_brl": 5643476.83,
+      "avg_n_dom": 1085.1348,
+      "avg_d_down_mbps": 40.8996,
+      "avg_hhi": 6036.6839,
+      "cluster_size_hexagons": 89,
+      "arpu_assumed_brl": 89.9,
+      "penetration_rate_assumed": 0.35,
+      "rationale": "Cluster 2: oportunidade de expansão padrão sem sinais críticos imediatos.",
+      "place_name": null,
+      "lat_centroid": -11.820081,
+      "lon_centroid": -56.280219
+    },
+    {
+      "cluster_id": 11,
+      "priority_class": "P3_STANDARD_EXPANSION",
+      "tam_estimate_brl": 5247521.31,
+      "avg_n_dom": 1340.3134,
+      "avg_d_down_mbps": 33.7325,
+      "avg_hhi": 3924.5807,
+      "cluster_size_hexagons": 67,
+      "arpu_assumed_brl": 89.9,
+      "penetration_rate_assumed": 0.35,
+      "rationale": "Cluster 11: oportunidade de expansão padrão sem sinais críticos imediatos.",
+      "place_name": null,
+      "lat_centroid": -13.099427,
+      "lon_centroid": -55.173021
+    },
+    {
+      "cluster_id": 6,
+      "priority_class": "P2_EXPANSION_CHURN_RISK",
+      "tam_estimate_brl": 4810135.34,
+      "avg_n_dom": 1371.9333,
+      "avg_d_down_mbps": 29.5044,
+      "avg_hhi": 2432.2593,
+      "cluster_size_hexagons": 60,
+      "arpu_assumed_brl": 89.9,
+      "penetration_rate_assumed": 0.35,
+      "rationale": "Cluster 6: mercado competitivo (HHI=2432) com demanda por expansão. Risco de churn identificado pelo Eixo 3.",
+      "place_name": null,
+      "lat_centroid": -14.442426,
+      "lon_centroid": -54.804814
+    }
+  ],
+  "axis1_summary": {
+    "n_critical": 95,
+    "total_hexagons_scored": 2000,
+    "anomaly_rate": 0.0475,
+    "duration_seconds": 1.82,
+    "top_critical": [
+      {
+        "h3_id": "88a91a64c1fffff",
+        "lat_centroid": -27.788427,
+        "lon_centroid": -47.856578,
+        "anomaly_score": 1.0,
+        "is_critical": 1,
+        "lof_score": 0.718221,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "8880606f53fffff",
+        "lat_centroid": -2.632148,
+        "lon_centroid": -49.9667,
+        "anomaly_score": 0.968653,
+        "is_critical": 1,
+        "lof_score": 1.0,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "888b761621fffff",
+        "lat_centroid": -14.323751,
+        "lon_centroid": -67.046834,
+        "anomaly_score": 0.945393,
+        "is_critical": 1,
+        "lof_score": 0.815845,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "888aa539b9fffff",
+        "lat_centroid": -7.132796,
+        "lon_centroid": -58.253528,
+        "anomaly_score": 0.938912,
+        "is_critical": 1,
+        "lof_score": 0.451297,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "88b30ab8a3fffff",
+        "lat_centroid": -21.868211,
+        "lon_centroid": -69.091307,
+        "anomaly_score": 0.901042,
+        "is_critical": 1,
+        "lof_score": 0.764342,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "88a4b08db5fffff",
+        "lat_centroid": -22.117958,
+        "lon_centroid": -37.010074,
+        "anomaly_score": 0.88617,
+        "is_critical": 1,
+        "lof_score": 0.461755,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "88a8db586bfffff",
+        "lat_centroid": -12.590708,
+        "lon_centroid": -47.788015,
+        "anomaly_score": 0.870982,
+        "is_critical": 1,
+        "lof_score": 0.287153,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "888a10a91dfffff",
+        "lat_centroid": -7.313084,
+        "lon_centroid": -60.252307,
+        "anomaly_score": 0.854179,
+        "is_critical": 1,
+        "lof_score": 0.675734,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "88b30e24e9fffff",
+        "lat_centroid": -21.283685,
+        "lon_centroid": -68.906941,
+        "anomaly_score": 0.844716,
+        "is_critical": 1,
+        "lof_score": 0.411099,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "888b733433fffff",
+        "lat_centroid": -12.162923,
+        "lon_centroid": -68.16198,
+        "anomaly_score": 0.838131,
+        "is_critical": 1,
+        "lof_score": 0.558681,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "88815d4b63fffff",
+        "lat_centroid": -6.021749,
+        "lon_centroid": -48.58087,
+        "anomaly_score": 0.837806,
+        "is_critical": 1,
+        "lof_score": 0.451488,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "88a92a3533fffff",
+        "lat_centroid": -30.525987,
+        "lon_centroid": -52.494551,
+        "anomaly_score": 0.832529,
+        "is_critical": 1,
+        "lof_score": 0.339826,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "88a84dd6e5fffff",
+        "lat_centroid": -18.27075,
+        "lon_centroid": -59.461911,
+        "anomaly_score": 0.828393,
+        "is_critical": 1,
+        "lof_score": 0.304324,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "88c53531b3fffff",
+        "lat_centroid": -29.321389,
+        "lon_centroid": -36.104864,
+        "anomaly_score": 0.825243,
+        "is_critical": 1,
+        "lof_score": 0.571158,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "88a4b36b49fffff",
+        "lat_centroid": -23.716711,
+        "lon_centroid": -37.490948,
+        "anomaly_score": 0.814793,
+        "is_critical": 1,
+        "lof_score": 0.325838,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "888a6a4ea3fffff",
+        "lat_centroid": -2.836732,
+        "lon_centroid": -70.605276,
+        "anomaly_score": 0.799693,
+        "is_critical": 1,
+        "lof_score": 0.315502,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "88a823a323fffff",
+        "lat_centroid": -25.587899,
+        "lon_centroid": -51.259701,
+        "anomaly_score": 0.784057,
+        "is_critical": 1,
+        "lof_score": 0.423264,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "888a863245fffff",
+        "lat_centroid": -4.643384,
+        "lon_centroid": -55.434479,
+        "anomaly_score": 0.780379,
+        "is_critical": 1,
+        "lof_score": 0.359162,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "88a98e0ae9fffff",
+        "lat_centroid": -26.368412,
+        "lon_centroid": -43.435348,
+        "anomaly_score": 0.779674,
+        "is_critical": 1,
+        "lof_score": 0.293986,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "888a4212edfffff",
+        "lat_centroid": -2.970435,
+        "lon_centroid": -68.13719,
+        "anomaly_score": 0.778419,
+        "is_critical": 1,
+        "lof_score": 0.675986,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "88a91674e9fffff",
+        "lat_centroid": -30.938143,
+        "lon_centroid": -45.82165,
+        "anomaly_score": 0.772375,
+        "is_critical": 1,
+        "lof_score": 0.322573,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "888a48a16bfffff",
+        "lat_centroid": -0.843299,
+        "lon_centroid": -71.170397,
+        "anomaly_score": 0.768642,
+        "is_critical": 1,
+        "lof_score": 0.549345,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "8881335b37fffff",
+        "lat_centroid": -13.94958,
+        "lon_centroid": -39.489281,
+        "anomaly_score": 0.762293,
+        "is_critical": 1,
+        "lof_score": 0.259905,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "888a1b702dfffff",
+        "lat_centroid": -3.658585,
+        "lon_centroid": -61.559174,
+        "anomaly_score": 0.761609,
+        "is_critical": 1,
+        "lof_score": 0.395661,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "8881685a01fffff",
+        "lat_centroid": -8.990634,
+        "lon_centroid": -51.7803,
+        "anomaly_score": 0.759663,
+        "is_critical": 1,
+        "lof_score": 0.247788,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "888b726c6dfffff",
+        "lat_centroid": -12.539111,
+        "lon_centroid": -66.635617,
+        "anomaly_score": 0.752936,
+        "is_critical": 1,
+        "lof_score": 0.366772,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "88a86e1b61fffff",
+        "lat_centroid": -20.754608,
+        "lon_centroid": -58.520302,
+        "anomaly_score": 0.748682,
+        "is_critical": 1,
+        "lof_score": 0.351181,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "888b4d993bfffff",
+        "lat_centroid": -9.714422,
+        "lon_centroid": -72.444739,
+        "anomaly_score": 0.747969,
+        "is_critical": 1,
+        "lof_score": 0.289179,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "888a36c697fffff",
+        "lat_centroid": -10.922023,
+        "lon_centroid": -60.126271,
+        "anomaly_score": 0.747873,
+        "is_critical": 1,
+        "lof_score": 0.320169,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "88b3606f51fffff",
+        "lat_centroid": -20.824721,
+        "lon_centroid": -62.658026,
+        "anomaly_score": 0.747736,
+        "is_critical": 1,
+        "lof_score": 0.339265,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "88a98915e1fffff",
+        "lat_centroid": -25.342526,
+        "lon_centroid": -45.735939,
+        "anomaly_score": 0.747553,
+        "is_critical": 1,
+        "lof_score": 0.297483,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "88b21980e9fffff",
+        "lat_centroid": -29.591691,
+        "lon_centroid": -70.902795,
+        "anomaly_score": 0.746957,
+        "is_critical": 1,
+        "lof_score": 0.364678,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "88a89a56a9fffff",
+        "lat_centroid": -17.349335,
+        "lon_centroid": -39.935548,
+        "anomaly_score": 0.745054,
+        "is_critical": 1,
+        "lof_score": 0.29114,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "885f060997fffff",
+        "lat_centroid": 3.428883,
+        "lon_centroid": -54.708473,
+        "anomaly_score": 0.744943,
+        "is_critical": 1,
+        "lof_score": 0.518145,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "888aa14dd3fffff",
+        "lat_centroid": -6.046186,
+        "lon_centroid": -57.686832,
+        "anomaly_score": 0.744544,
+        "is_critical": 1,
+        "lof_score": 0.356419,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "88a8d18ce9fffff",
+        "lat_centroid": -15.661739,
+        "lon_centroid": -47.61611,
+        "anomaly_score": 0.744283,
+        "is_critical": 1,
+        "lof_score": 0.268344,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "88816a4229fffff",
+        "lat_centroid": -8.363241,
+        "lon_centroid": -50.879655,
+        "anomaly_score": 0.743733,
+        "is_critical": 1,
+        "lof_score": 0.388112,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "888f691aa3fffff",
+        "lat_centroid": -6.858935,
+        "lon_centroid": -72.364653,
+        "anomaly_score": 0.7375,
+        "is_critical": 1,
+        "lof_score": 0.419119,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "885f288d5dfffff",
+        "lat_centroid": 3.044751,
+        "lon_centroid": -58.749758,
+        "anomaly_score": 0.736531,
+        "is_critical": 1,
+        "lof_score": 0.384276,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "88a5b1ac83fffff",
+        "lat_centroid": -15.207544,
+        "lon_centroid": -35.513905,
+        "anomaly_score": 0.736118,
+        "is_critical": 1,
+        "lof_score": 0.164536,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "88b32c9137fffff",
+        "lat_centroid": -17.053673,
+        "lon_centroid": -67.004141,
+        "anomaly_score": 0.735251,
+        "is_critical": 1,
+        "lof_score": 0.297832,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "88a593d469fffff",
+        "lat_centroid": -18.046119,
+        "lon_centroid": -38.280336,
+        "anomaly_score": 0.73449,
+        "is_critical": 1,
+        "lof_score": 0.319375,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "888b55a5e1fffff",
+        "lat_centroid": -11.247833,
+        "lon_centroid": -68.195056,
+        "anomaly_score": 0.730579,
+        "is_critical": 1,
+        "lof_score": 0.316624,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "88a8f0b13dfffff",
+        "lat_centroid": -19.001076,
+        "lon_centroid": -47.915638,
+        "anomaly_score": 0.726102,
+        "is_critical": 1,
+        "lof_score": 0.303713,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "88812551c5fffff",
+        "lat_centroid": -16.189025,
+        "lon_centroid": -43.863823,
+        "anomaly_score": 0.724661,
+        "is_critical": 1,
+        "lof_score": 0.541405,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "888b29b8dbfffff",
+        "lat_centroid": -15.442488,
+        "lon_centroid": -67.324789,
+        "anomaly_score": 0.721696,
+        "is_critical": 1,
+        "lof_score": 0.718558,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "88a8962a8bfffff",
+        "lat_centroid": -20.286484,
+        "lon_centroid": -38.369692,
+        "anomaly_score": 0.720068,
+        "is_critical": 1,
+        "lof_score": 0.241746,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "888bab79a7fffff",
+        "lat_centroid": -10.947498,
+        "lon_centroid": -58.931311,
+        "anomaly_score": 0.719748,
+        "is_critical": 1,
+        "lof_score": 0.286073,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "888a60b76dfffff",
+        "lat_centroid": -6.161222,
+        "lon_centroid": -70.740414,
+        "anomaly_score": 0.719146,
+        "is_critical": 1,
+        "lof_score": 0.298317,
+        "cloudflare_outage_overlap": 0
+      },
+      {
+        "h3_id": "88a8f21167fffff",
+        "lat_centroid": -18.456564,
+        "lon_centroid": -46.395812,
+        "anomaly_score": 0.715775,
+        "is_critical": 1,
+        "lof_score": 0.232144,
+        "cloudflare_outage_overlap": 0
+      }
+    ]
+  },
+  "axis2_summary": {
+    "n_clusters": 13,
+    "total_hexagons_processed": 2000,
+    "noise_rate": 0.1135,
+    "duration_seconds": 47.019,
+    "clusters": [
+      {
+        "cluster_id": 1,
+        "cluster_size": 144,
+        "lat_centroid": -13.454835,
+        "lon_centroid": -53.546935,
+        "avg_d_down": 103.1384,
+        "avg_n_dom": 1486.4236,
+        "avg_HHI": 5534.1968,
+        "tam_estimate": 214045.0,
+        "is_noise": 0,
+        "place_name": null
+      },
+      {
+        "cluster_id": 5,
+        "cluster_size": 207,
+        "lat_centroid": -13.812121,
+        "lon_centroid": -54.046918,
+        "avg_d_down": 100.3103,
+        "avg_n_dom": 3837.3768,
+        "avg_HHI": 3793.1612,
+        "tam_estimate": 794337.0,
+        "is_noise": 0,
+        "place_name": null
+      },
+      {
+        "cluster_id": 3,
+        "cluster_size": 304,
+        "lat_centroid": -13.596116,
+        "lon_centroid": -53.189761,
+        "avg_d_down": 96.1476,
+        "avg_n_dom": 1658.3454,
+        "avg_HHI": 4881.4624,
+        "tam_estimate": 504137.0,
+        "is_noise": 0,
+        "place_name": null
+      },
+      {
+        "cluster_id": 0,
+        "cluster_size": 121,
+        "lat_centroid": -13.894403,
+        "lon_centroid": -54.65473,
+        "avg_d_down": 110.1549,
+        "avg_n_dom": 1783.9835,
+        "avg_HHI": 6496.8988,
+        "tam_estimate": 215862.0,
+        "is_noise": 0,
+        "place_name": null
+      },
+      {
+        "cluster_id": -1,
+        "cluster_size": 1,
+        "lat_centroid": 0.0,
+        "lon_centroid": 0.0,
+        "avg_d_down": 57.572,
+        "avg_n_dom": 3193.2291,
+        "avg_HHI": 5203.8005,
+        "tam_estimate": 3193.23,
+        "is_noise": 1,
+        "place_name": null
+      },
+      {
+        "cluster_id": 8,
+        "cluster_size": 135,
+        "lat_centroid": -12.69682,
+        "lon_centroid": -54.053531,
+        "avg_d_down": 78.3695,
+        "avg_n_dom": 3799.163,
+        "avg_HHI": 7491.7268,
+        "tam_estimate": 512887.01,
+        "is_noise": 0,
+        "place_name": null
+      },
+      {
+        "cluster_id": 7,
+        "cluster_size": 83,
+        "lat_centroid": -14.329358,
+        "lon_centroid": -52.545089,
+        "avg_d_down": 47.3675,
+        "avg_n_dom": 1896.9157,
+        "avg_HHI": 5202.3886,
+        "tam_estimate": 157444.0,
+        "is_noise": 0,
+        "place_name": null
+      },
+      {
+        "cluster_id": 6,
+        "cluster_size": 60,
+        "lat_centroid": -14.442426,
+        "lon_centroid": -54.804814,
+        "avg_d_down": 29.5044,
+        "avg_n_dom": 1371.9333,
+        "avg_HHI": 2432.2593,
+        "tam_estimate": 82316.0,
+        "is_noise": 0,
+        "place_name": null
+      },
+      {
+        "cluster_id": 9,
+        "cluster_size": 268,
+        "lat_centroid": -15.124421,
+        "lon_centroid": -54.80855,
+        "avg_d_down": 65.6439,
+        "avg_n_dom": 3774.5672,
+        "avg_HHI": 6032.2283,
+        "tam_estimate": 1011584.01,
+        "is_noise": 0,
+        "place_name": null
+      },
+      {
+        "cluster_id": 10,
+        "cluster_size": 85,
+        "lat_centroid": -13.48972,
+        "lon_centroid": -55.24442,
+        "avg_d_down": 71.1215,
+        "avg_n_dom": 1361.8,
+        "avg_HHI": 6589.6962,
+        "tam_estimate": 115753.0,
+        "is_noise": 0,
+        "place_name": null
+      },
+      {
+        "cluster_id": 4,
+        "cluster_size": 94,
+        "lat_centroid": -14.17808,
+        "lon_centroid": -54.433628,
+        "avg_d_down": 117.8706,
+        "avg_n_dom": 1276.0213,
+        "avg_HHI": 2181.2055,
+        "tam_estimate": 119946.0,
+        "is_noise": 0,
+        "place_name": null
+      },
+      {
+        "cluster_id": 12,
+        "cluster_size": 116,
+        "lat_centroid": -13.531898,
+        "lon_centroid": -53.372818,
+        "avg_d_down": 64.9099,
+        "avg_n_dom": 3652.5776,
+        "avg_HHI": 3158.4139,
+        "tam_estimate": 423699.0,
+        "is_noise": 0,
+        "place_name": null
+      },
+      {
+        "cluster_id": 2,
+        "cluster_size": 89,
+        "lat_centroid": -11.820081,
+        "lon_centroid": -56.280219,
+        "avg_d_down": 40.8996,
+        "avg_n_dom": 1085.1348,
+        "avg_HHI": 6036.6839,
+        "tam_estimate": 96577.0,
+        "is_noise": 0,
+        "place_name": null
+      },
+      {
+        "cluster_id": 11,
+        "cluster_size": 67,
+        "lat_centroid": -13.099427,
+        "lon_centroid": -55.173021,
+        "avg_d_down": 33.7325,
+        "avg_n_dom": 1340.3134,
+        "avg_HHI": 3924.5807,
+        "tam_estimate": 89801.0,
+        "is_noise": 0,
+        "place_name": null
+      }
+    ]
+  },
+  "axis3_summary": {
+    "n_segments": 6,
+    "total_hexagons_segmented": 2000,
+    "silhouette_score_global": 0.162474,
+    "duration_seconds": 2.986,
+    "segment_profiles": [
+      {
+        "segment_id": 3,
+        "segment_name": "Premium",
+        "hexagon_count": 326,
+        "hexagon_fraction": 0.163,
+        "avg_centroid_distance": 1.645697,
+        "avg_silhouette": 0.150927
+      },
+      {
+        "segment_id": 5,
+        "segment_name": "Alta Vulnerabilidade Concorrencia",
+        "hexagon_count": 321,
+        "hexagon_fraction": 0.1605,
+        "avg_centroid_distance": 1.564468,
+        "avg_silhouette": 0.174807
+      },
+      {
+        "segment_id": 0,
+        "segment_name": "Conectividade Essencial",
+        "hexagon_count": 382,
+        "hexagon_fraction": 0.191,
+        "avg_centroid_distance": 1.654501,
+        "avg_silhouette": 0.151259
+      },
+      {
+        "segment_id": 4,
+        "segment_name": "Conectividade Essencial",
+        "hexagon_count": 344,
+        "hexagon_fraction": 0.172,
+        "avg_centroid_distance": 1.642513,
+        "avg_silhouette": 0.151819
+      },
+      {
+        "segment_id": 2,
+        "segment_name": "Conectividade Essencial",
+        "hexagon_count": 295,
+        "hexagon_fraction": 0.1475,
+        "avg_centroid_distance": 1.587856,
+        "avg_silhouette": 0.182368
+      },
+      {
+        "segment_id": 1,
+        "segment_name": "Conectividade Essencial",
+        "hexagon_count": 332,
+        "hexagon_fraction": 0.166,
+        "avg_centroid_distance": 1.629195,
+        "avg_silhouette": 0.168157
+      }
+    ]
+  },
+  "errors": []
+}

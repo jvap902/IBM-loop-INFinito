@@ -744,6 +744,17 @@ def report_writer(state: AgentState) -> dict[str, Any]:
 
     report_markdown = header + "".join(sections)
 
+    # ── Interpretations ────────────────────────────────────────────────────
+    llm_provider = os.getenv("LLM_PROVIDER", "stub")
+    interpretations = generate_interpretations(
+        region=region,
+        a1=a1,
+        a2=a2,
+        a3=a3,
+        hypotheses=hypotheses,
+        llm_provider=llm_provider,
+    )
+
     # ── JSON report ────────────────────────────────────────────────────────
     report_json: dict[str, Any] = {
         "run_id": run_id,
@@ -787,6 +798,7 @@ def report_writer(state: AgentState) -> dict[str, Any]:
             "segment_profiles": a3.get("segment_profiles", []),
         } if a3 else None,
         "errors": errors,
+        "interpretations": interpretations,
     }
 
     event = audit.log_tool_call(
